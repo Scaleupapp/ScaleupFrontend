@@ -1,0 +1,33 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/ComicNeue-Bold.ttf",
+      "sha1": "7909abf21cee16951e045b0a3d24955b3803475a"
+    },
+    {
+      "path": "assets/fonts/ComicNeue-BoldItalic.ttf",
+      "sha1": "f421eabc67421dda5a42be27573496296dd8b0c0"
+    },
+    {
+      "path": "assets/fonts/ComicNeue-Italic.ttf",
+      "sha1": "326025b3568368a9157f314feeedab572f4ecb4e"
+    },
+    {
+      "path": "assets/fonts/ComicNeue-Light.ttf",
+      "sha1": "0cf88fa5c42312cae61ff4430d91911f11e86720"
+    },
+    {
+      "path": "assets/fonts/ComicNeue-LightItalic.ttf",
+      "sha1": "5f3ee564ef6292ef12114225cc182ee774b192c5"
+    },
+    {
+      "path": "assets/fonts/ComicNeue-Regular.ttf",
+      "sha1": "3b8675efbb6b4e6d968e5d1ed8990d0a4d7f0db2"
+    },
+    {
+      "path": "assets/fonts/OFL.txt",
+      "sha1": "f22d262f8bbb6092c436fb7c71e763aee4fcf1de"
+    }
+  ]
+}

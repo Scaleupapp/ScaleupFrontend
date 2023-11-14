@@ -93,7 +93,7 @@ const CheckProfile = () => {
 
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15, marginTop: 30 }}>
                     <TouchableOpacity style={styles.button}
-                    onPress={()=>{navigation.navigate('BlockList')}}
+                        onPress={() => { navigation.navigate('BlockList') }}
                     >
                         <Text style={styles.text}>{"Photography"}</Text>
                     </TouchableOpacity>
@@ -137,21 +137,21 @@ const CheckProfile = () => {
                         <Image style={{ top: -20 }} source={require('../../../assets/images/send-2.png')} />
                     </View>
 
-                    
+
                 </View>
-                <View style={[styles.info,{marginTop:-30,paddingHorizontal:15}]}>
-                <Text style={{ top: 20 }} >Verified :</Text>
-                <Image style={{ top: 20 }} source={require('../../../assets/images/check_24px.png')} />
-                <Image  style={{ top: 20 }} source={require('../../../assets/images/close_24px.png')} />
-                <Text style={{ top: 20 }} >Rating</Text>      
-                      
-                        
-                <AirbnbRating
+                <View style={[styles.info, { marginTop: -30, paddingHorizontal: 15 }]}>
+                    <Text style={{ top: 20 }} >Verified :</Text>
+                    <Image style={{ top: 20 }} source={require('../../../assets/images/check_24px.png')} />
+                    <Image style={{ top: 20 }} source={require('../../../assets/images/close_24px.png')} />
+                    <Text style={{ top: 20 }} >Rating</Text>
+
+
+                    <AirbnbRating
                         count={5}
                         // reviews={["Terrible", "Bad", "Meh", "OK",]}
                         defaultRating={3.5}
                         size={15}
-                        
+
                     />
                 </View>
 

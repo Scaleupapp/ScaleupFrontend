@@ -16,7 +16,7 @@ import { setLoading } from "../../redux/reducer";
 import { loginApi } from "../../utils/apiHelpers";
 import { setLoginUser } from "../../redux/cookiesReducer";
 import Loader from "../../components/loader";
-
+import { checkMultiple, Permission, PERMISSIONS, requestMultiple } from "react-native-permissions";
 const SignIn = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
@@ -24,26 +24,52 @@ const SignIn = () => {
     const [userName, setUserName] = useState("")
     const [password, setPassword] = useState("")
     const [defaults, setDefault] = useState("Username")
-
+    const [terms, setTerms] = useState(false)
     const { loading } = useSelector<any, any>((store) => store.sliceReducer);
 
 
+    useEffect(() => {
+        if (Platform.OS === "ios") {
+            checkMultiple([PERMISSIONS.IOS.CAMERA, PERMISSIONS.IOS.MICROPHONE, PERMISSIONS.IOS.CONTACTS]).then((statuses) => {
+                console.log("check====Camera--1--Ios---->", statuses[PERMISSIONS.IOS.CAMERA]);
+                console.log("check====Microphone-----Ios---->", statuses[PERMISSIONS.IOS.CONTACTS]);
 
+            });
+            requestMultiple([PERMISSIONS.IOS.CAMERA, PERMISSIONS.IOS.MICROPHONE, PERMISSIONS.IOS.CONTACTS]).then((statuses) => {
+                console.log("request===CamCamera--2--Ios---->", statuses[PERMISSIONS.IOS.CAMERA]);
+                console.log("request===MicrophoneIos---->", statuses[PERMISSIONS.IOS.CONTACTS]);
+
+            });
+        } else {
+            checkMultiple([PERMISSIONS.ANDROID.CAMERA, PERMISSIONS.ANDROID.RECORD_AUDIO, PERMISSIONS.ANDROID.READ_CONTACTS,
+            PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE, PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE
+            ]).then((statuses) => {
+                console.log("Camera--3--", statuses[PERMISSIONS.ANDROID.RECORD_AUDIO]);
+                console.log("READ_CONTACTS", statuses[PERMISSIONS.ANDROID.READ_CONTACTS]);
+
+
+            });
+            requestMultiple([PERMISSIONS.ANDROID.CAMERA, PERMISSIONS.ANDROID.RECORD_AUDIO, PERMISSIONS.ANDROID.READ_CONTACTS,
+            PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE, PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE, PERMISSIONS.ANDROID.READ_MEDIA_AUDIO
+            ]).then((statuses) => {
+                console.log("Camera--4--", statuses[PERMISSIONS.ANDROID.CAMERA]);
+                console.log("AUDIO_RECORDING===>", statuses[PERMISSIONS.ANDROID.RECORD_AUDIO]);
+
+            });
+        }
+    }, [])
 
 
     const loginUser = () => {
-        // let emailRegex =
-        //     /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
-        // let testedEmail = emailRegex.test(email);
-
         let passworRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
         let testPassword = passworRegex.test(password)
-
         if (userName == '') {
             Show_Toast("Please Enter UserName")
-        } else if (!testPassword) {
-            Show_Toast("Please valid password")
-        } else {
+        }
+        // else if (!testPassword) {
+        //     Show_Toast("Please valid password")
+        // } 
+        else {
             dispatch(setLoading(true))
             const data = {
                 "loginIdentifier": userName,
@@ -56,10 +82,13 @@ const SignIn = () => {
                 dispatch(setLoginUser(res?.data))
                 setUserName("")
                 setPassword("")
-                navigation.navigate("DrawerNavigator")
+                if (res?.data?.sFirstTimeLogin1) {
+                    navigation.navigate("BasicDetail")
+                } else {
+                    navigation.navigate("DrawerNavigator")
+                }
             })
         }
-
     }
 
     return (
@@ -76,27 +105,27 @@ const SignIn = () => {
                     <Text style={[{ fontWeight: '700' }, styles.txt,]}>{Strings.LginWith}</Text>
                     <View style={{ flexDirection: 'row', marginTop: 20, alignItems: 'center', width: '100%', justifyContent: 'space-between', paddingHorizontal: 20 }}>
                         <TouchableOpacity
-                        onPress={()=>{setDefault('Email')}}
-                            style={[styles.input,defaults == 'Email' &&{borderColor:ColorCode.blue_Button_Color}]}>
-                            <Text style={[{ fontFamily: 'ComicNeue-Bold'},defaults == 'Email' &&{color:ColorCode.blue_Button_Color}]}>{Strings.Email}</Text>
+                            onPress={() => { setDefault('Email') }}
+                            style={[styles.input, defaults == 'Email' && { borderColor: ColorCode.blue_Button_Color }]}>
+                            <Text style={[{ fontFamily: 'ComicNeue-Bold' }, defaults == 'Email' && { color: ColorCode.blue_Button_Color }]}>{Strings.Email}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                        onPress={()=>{setDefault('Phone')}}
-                            style={[styles.input,defaults == 'Phone' &&{borderColor:ColorCode.blue_Button_Color}]}>
-                            <Text style={[{ fontFamily: 'ComicNeue-Bold', },defaults == 'Phone' &&{color:ColorCode.blue_Button_Color}]}>{Strings.PhoneNumber}</Text>
+                            onPress={() => { setDefault('Phone') }}
+                            style={[styles.input, defaults == 'Phone' && { borderColor: ColorCode.blue_Button_Color }]}>
+                            <Text style={[{ fontFamily: 'ComicNeue-Bold', }, defaults == 'Phone' && { color: ColorCode.blue_Button_Color }]}>{Strings.PhoneNumber}</Text>
                         </TouchableOpacity>
                     </View>
-                    <View style={[styles.inputView,{marginTop:30}]}>
+                    <View style={[styles.inputView, { marginTop: 30 }]}>
                         <InputText
                             img={require('../../assets/images/image_user_Light.png')}
                             value={userName}
                             onChange={(t) => { setUserName(t) }}
                             placeholder={defaults}
                             length={15}
-                            keyboardType={defaults == 'Phone'?'number-pad':'default'}
+                            keyboardType={defaults == 'Phone' ? 'number-pad' : 'default'}
 
                         />
-                        
+
                         <InputText
                             secureTextEntry={secureText}
                             show={() => { setSecureText(!secureText) }}
@@ -104,12 +133,20 @@ const SignIn = () => {
                             value={password}
                             onChange={(t) => { setPassword(t) }}
                             length={10}
-                            img={require('../../assets/images/sms.png')} placeholder={"Password"} />
+                            img={require('../../assets/images/lock.png')} 
+                            placeholder={"Password"} />
 
                         <View style={{ justifyContent: 'space-between', flexDirection: 'row', paddingHorizontal: 20 }}>
                             <View style={{ flexDirection: 'row' }}>
-                                <TouchableOpacity>
+                            <TouchableOpacity onPress={() => {
+                                    // navigation.navigate("Terms") 
+                                    setTerms(!terms)
+                                }} >
                                     <Image
+                                        style={{
+                                            borderWidth: !terms ? 1 : 0, borderColor: ColorCode.blue_Button_Color,
+                                            tintColor: !terms ? ColorCode.white_Color : null, borderRadius: 3
+                                        }}
                                         source={require('../../assets/images/image_checkbox_.png')} />
                                 </TouchableOpacity>
                                 <Text style={{ marginLeft: 10, fontFamily: 'ComicNeue-Bold' }}>{Strings.RememnberMe}</Text>
@@ -126,15 +163,24 @@ const SignIn = () => {
                                 loginUser()
                             }}
                             name={Strings.SignIn} btnTextStyle={{ color: ColorCode.yellowText, }} />
-                        <View style={{
+                       <View style={{ flexDirection: 'row', alignSelf: 'center',  justifyContent: 'center' }}>
+                            <Text style={{ color: ColorCode.gray_color, 
+                                fontFamily: 'ComicNeue-Bold', 
+                                fontSize: 14 }}>{"Don't have an account ?"}</Text>
+                            <TouchableOpacity onPress={() => { navigation.navigate("SignUp") }} style={{ alignItems: 'center' }}>
+                                <Text style={{ fontFamily: 'ComicNeue-Bold', fontSize: 18, color: ColorCode.blue_Button_Color, marginLeft: 4, bottom: 3 }}>{Strings.SignUp}</Text>
+                            </TouchableOpacity>
+                        </View>
+                        {/* <View style={{
                             flexDirection: 'row', alignItems: 'center', width: '100%',
                             justifyContent: 'space-between', paddingHorizontal: 20, marginTop: 20
                         }}>
                             <View style={{ height: 1, width: '33%', backgroundColor: '#ddd', }} />
                             <Text style={{ fontFamily: 'ComicNeue-Bold' }}>{Strings.SignInWith}</Text>
                             <View style={{ height: 1, width: '33%', backgroundColor: '#ddd', }} />
-                        </View>
-                        <View style={{ flexDirection: 'row', alignSelf: 'center', marginTop: 10 }}>
+                        </View> */}
+
+                        {/* <View style={{ flexDirection: 'row', alignSelf: 'center', marginTop: 10 }}>
                             <TouchableOpacity>
                                 <Image
                                     style={{ height: 50, width: 50, }}
@@ -145,13 +191,9 @@ const SignIn = () => {
                                     style={{ height: 50, width: 50, }}
                                     source={require('../../assets/images/group_GroupApple.png')} />
                             </TouchableOpacity>
-                        </View>
-                        <View style={{ flexDirection: 'row', alignSelf: 'center', marginTop: 15, justifyContent: 'center' }}>
-                            <Text style={{ color: ColorCode.gray_color, fontFamily: 'ComicNeue-Bold', fontSize: 14 }}>{Strings.AlreadyHaveAccount}</Text>
-                            <TouchableOpacity onPress={() => { navigation.navigate("SignUp") }} style={{ alignItems: 'center' }}>
-                                <Text style={{ fontFamily: 'ComicNeue-Bold', fontSize: 18, color: ColorCode.blue_Button_Color, marginLeft: 4, bottom: 3 }}>{Strings.SignUp}</Text>
-                            </TouchableOpacity>
-                        </View>
+                        </View> */}
+
+                        
                     </View>
                 </ScrollView>
             </View>
@@ -206,7 +248,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     inputView: {
-        height: hp(23),
+        height: hp(18),
         justifyContent: 'space-between',
         marginTop: 20,
         marginBottom: 10

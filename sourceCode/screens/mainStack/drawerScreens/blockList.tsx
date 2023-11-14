@@ -4,49 +4,61 @@ import {
 } from "react-native"
 import React, { useEffect, useState } from "react"
 import { useNavigation } from "@react-navigation/native";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import ColorCode from "../../../constants/Styles";
-import OpacityButton from "../../../components/opacityButton";
 import InputText from "../../../components/textInput";
-import { AuthHeader, TabHeader } from "../../../components";
-import Strings from "../../../constants/strings";
+import { TabHeader } from "../../../components";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import reelsData from "../../../constants/helpers";
 import LinearGradient from 'react-native-linear-gradient';
+import { blockUSerList, getMyProfile, userUnBlock } from "../../../utils/apiHelpers";
 const BlockList = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
+    const [pofileData, setProfileData] = useState([])
+
+    useEffect(() => {
+        blockUSerList().then((res) => {
+            setProfileData((res?.data))
+        })
+    }, [])
+
+
+const unBlockUesrList=(item)=>{
+    userUnBlock(item).then((res)=>{
+        blockUSerList().then((res) => {
+            setProfileData((res?.data))
+        })
+    })
+}
 
 
     const renderItem_didNumber = ({ item, index }: any) => {
         return (
             <View
                 style={[styles.postStyle, { marginTop: 10 }]}>
-                <TouchableOpacity style={styles.info} onPress={() => { navigation.navigate("Connections") }}
-                >
+                <TouchableOpacity style={styles.info}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <View style={styles.profileImg}>
-                        </View>
+                        {item?.profilePicture ?
+                            <Image
+                                resizeMode='cover'
+                                style={styles.profileImg}
+                                source={{ uri: item?.profilePicture }} />
+                            :
+                            <View style={styles.profileImg} />
+                        }
                         <View style={styles.nameType}>
-                            <Text style={styles.boldStyle}>{item?.name}</Text>
+                            <Text style={styles.boldStyle}>{item?.username}</Text>
                             <Text style={styles.smalltxt}>{item?.type}</Text>
                         </View>
                     </View>
-
-                    <LinearGradient
-                        colors={['#043142', '#043142','#6200EA']}
-                        start={{x: 0.1, y: 1.5}} end={{x:0.5, y: 0.5}}
-                        locations={[1.,1.4,0.5]}
-                        style={styles.color}>
-                        <Text style={[styles.smalltxt, { color: ColorCode.yellowText ,marginHorizontal:20}]}>{'Unblock'}</Text>
-                    </LinearGradient>
-
-
-
+                    <TouchableOpacity
+                          onPress={()=>{unBlockUesrList(item?._id)}} 
+                          style={styles.color}>
+                        <Text style={[styles.smalltxt,
+                        { color: ColorCode.yellowText, marginHorizontal: 20 }]}>{'Unblock'}</Text>
+                    </TouchableOpacity>
                 </TouchableOpacity>
-
-
-
             </View>
         )
     }
@@ -56,25 +68,18 @@ const BlockList = () => {
             <StatusBar
                 barStyle={'dark-content'}
                 animated={true}
-                backgroundColor={ColorCode.white_Color}
-            />
+                backgroundColor={ColorCode.white_Color} />
             <TabHeader myHeading={"Block List"}
-                imge={require('../../../assets/images/arrow-left.png')}
-            />
-           <InputText placeholder={"Search"}/>
-
+                imge={require('../../../assets/images/arrow-left.png')} />
+            <InputText placeholder={"Search"} />
             <View style={[styles.reelsStyle,]}>
-
                 <FlatList
                     scrollEnabled
                     showsVerticalScrollIndicator={false}
-                    data={reelsData}
+                    data={pofileData}
                     renderItem={renderItem_didNumber}
                     keyExtractor={(item, index) => index.toString()} />
             </View>
-
-
-
         </SafeAreaView>
 
     )
@@ -181,7 +186,8 @@ const styles = StyleSheet.create({
         height: 25,
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: 15
+        borderRadius: 15,
+        backgroundColor:'#043142'
 
     },
 

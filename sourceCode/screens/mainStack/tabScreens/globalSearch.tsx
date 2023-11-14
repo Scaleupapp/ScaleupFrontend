@@ -1,6 +1,6 @@
 import {
     Image, Platform, ScrollView, StyleSheet, Text,
-    TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView
+    TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView, ImageBackground
 } from "react-native"
 import React, { useEffect, useState } from "react"
 import { useNavigation } from "@react-navigation/native";
@@ -13,68 +13,128 @@ import Strings from "../../../constants/strings";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import LinearGradient from "react-native-linear-gradient";
 import reelsData from "../../../constants/helpers";
+import { followUser, globalSearch, unfollowUser } from "../../../utils/apiHelpers";
+import { setOther } from "../../../redux/reducer";
+import { Show_Toast } from "../../../components/toast";
 
 const GlobalSearch = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
+    const [data, setData] = useState([])
+    const [text, setText] = useState("")
+
+
+    useEffect(() => {
+        if (text.length > 3) {
+            const data = { "query": text }
+            globalSearch(data).then((res) => {
+                setData(res?.data)
+            })
+        }
+    }, [text])
+
+
+
+    const setUserData=(item)=>{
+    dispatch(setOther(item))
+    navigation.navigate("OtherProfile")
+}
+
+
+
+
+
+const foloowThisUser=(item)=>{
+    if(item?.isFollowing){
+        unfollowUser(item?.userId).then((res)=>{
+            console.log("res----->",res?.data)
+            const data = { "query": text }
+            globalSearch(data).then((res) => {
+                setData(res?.data)
+            })
+            Show_Toast(res?.data?.message)
+            })
+    }else{
+        followUser(item?.userId).then((res)=>{
+            console.log("res----->",res?.data)
+            const data = { "query": text }
+            globalSearch(data).then((res) => {
+                setData(res?.data)
+            })
+            Show_Toast(res?.data?.message)
+            })
+    }
+
+
+    
+
+
+}
+
 
     const renderItem_didNumber = ({ item, index }: any) => {
+        // console.log(item, "value---->")
         return (
             <View
                 style={[styles.postStyle, { marginTop: 10 }]}>
-                <TouchableOpacity style={styles.info} onPress={() => { navigation.navigate("Connections") }}
+                <TouchableOpacity style={styles.info} 
+                onPress={() => {setUserData(item?.userId)  }}
                 >
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <View style={styles.profileImg}>
-                        </View>
-                        <View style={styles.nameType}>
-                            <Text style={styles.boldStyle}>{item?.name}</Text>
-                            <Text style={styles.smalltxt}>{item?.type}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center',  width: '55%' }}>
+                        {item?.profilePicture ?
+                            <Image
+                                resizeMode='cover'
+                                style={styles.profileImg}
+                                source={{ uri: item?.profilePicture }}
+                            />
+                            :
+                            <View style={styles.profileImg}>
 
-                            <LinearGradient
-                                colors={['#043142', '#043142', '#6200EA']}
-                                start={{ x: 0.1, y: 1.5 }} end={{ x: 0.5, y: 0.5 }}
+                            </View>
+                        }
+                        <View style={styles.nameType}>
+                            <Text style={styles.boldStyle}>{item?.username}</Text>
+                            <Text numberOfLines={1} style={styles.smalltxt}>{item?.firstname + " " + item?.lastname}</Text>
+
+                            {/* <LinearGradient
+                                colors={['#043142',]}
+                                // start={{ x: 0.1, y: 1.5 }} end={{ x: 0.5, y: 0.5 }}
                                 locations={[1., 1.4, 0.5]}
                                 style={styles.color}>
                                 <Text style={[styles.smalltxt, { color: ColorCode.yellowText, }]}>{'follow'}</Text>
-                            </LinearGradient>
+                            </LinearGradient> */}
+                            <TouchableOpacity
+                            onPress={()=>{foloowThisUser(item)}}>
+                                <ImageBackground
+                                    style={styles.color}
+                                    source={require("../../../assets/images/button_.png")}>
+                                    <Text style={[styles.smalltxt,
+                                         { color: ColorCode.yellowText, }]}>
+                                            { item?.isFollowing ?"Unfollow":'Follow'}</Text>
+                                </ImageBackground>
+                            </TouchableOpacity>
                         </View>
                     </View>
-
-              <View style={{flexDirection:'row',justifyContent:'space-between',width:wp(35)}}>
-                <TouchableOpacity style={{alignItems:'center'}}
-
-                onPress={()=>{navigation.navigate('Setting')}}
-                >
-                    <Image
-                    source={require('../../../assets/images/Posts_.png')}
-                    />
-                    <Text style={styles.smalltxt}>20</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: "35%",  }}>
+                        <TouchableOpacity style={{ alignItems: 'center' }}
+                            onPress={() => { navigation.navigate('Setting') }}>
+                            <Image
+                                source={require('../../../assets/images/folow_group_.png')} />
+                            <Text style={styles.smalltxt}>{item?.followersCount}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{ alignItems: 'center' }}
+                            onPress={() => { navigation.navigate("OtherProfile") }}>
+                            <Image
+                                source={require('../../../assets/images/following_.png')} />
+                            <Text style={styles.smalltxt}>{item?.followingCount}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{ alignItems: 'center' }}>
+                            <Image
+                                source={require('../../../assets/images/followers_.png')} />
+                            <Text style={styles.smalltxt}>{item?.totalPosts}</Text>
+                        </TouchableOpacity>
+                    </View>
                 </TouchableOpacity>
-
-                <TouchableOpacity style={{alignItems:'center'}}
-                onPress={()=>{navigation.navigate("OtherProfile")}}
-                >
-                    <Image
-                    source={require('../../../assets/images/following_.png')}
-                    />
-                    <Text style={styles.smalltxt}>200</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={{alignItems:'center'}}>
-                    <Image
-                    source={require('../../../assets/images/followers_.png')}
-                    />
-                    <Text style={styles.smalltxt}>220</Text>
-                </TouchableOpacity>
-              </View>
-
-
-
-                </TouchableOpacity>
-
-
-
             </View>
         )
     }
@@ -86,45 +146,55 @@ const GlobalSearch = () => {
                 backgroundColor={ColorCode.white_Color}
             />
             <TabHeader myHeading={"Search"} imge={require('../../../assets/images/arrow-left.png')} />
-            <InputText placeholder={"Search"}/>
-
-            <View style={{flexDirection:'row',justifyContent:'space-between',width:'96%',
-                    marginTop:10,borderBottomColor:ColorCode.lightGrey,
-                    borderBottomWidth:2,paddingVertical:5,paddingHorizontal:15,marginHorizontal:5}}>
-                <TouchableOpacity style={{alignItems:'center',
+            <InputText
+                placeholder={"Search"}
+                length={16}
+                onChange={(text) => { setText(text) }}
+                value={text}
+            />
+            {data.length > 0 &&
+                <View style={{
+                    flexDirection: 'row', justifyContent: 'space-between', width: '96%',
+                    marginTop: 10, borderBottomColor: ColorCode.lightGrey,
+                    borderBottomWidth: 2, paddingVertical: 5, paddingHorizontal: 15, marginHorizontal: 5
+                }}>
+                    <TouchableOpacity style={{
+                        alignItems: 'center',
                     }}>
-                    <Image
-                    source={require('../../../assets/images/Group.png')}
-                    />
-                   
-                </TouchableOpacity>
+                        <Image
+                            source={require('../../../assets/images/Group.png')}
+                        />
 
-                <TouchableOpacity style={{alignItems:'center'}}>
-                    <Image
-                    source={require('../../../assets/images/star3.png')}
-                    />
-                    
-                </TouchableOpacity>
+                    </TouchableOpacity>
 
-                <TouchableOpacity style={{alignItems:'center'}}>
-                    <Image
-                    source={require('../../../assets/images/location.png')}
-                    />
-                 
-                </TouchableOpacity>
-                <TouchableOpacity style={{alignItems:'center'}}>
-                    <Image
-                    source={require('../../../assets/images/image_personalcard.png')}
-                    />
-                 
-                </TouchableOpacity>
-              </View>
+                    <TouchableOpacity style={{ alignItems: 'center' }}>
+                        <Image
+                            source={require('../../../assets/images/star3.png')}
+                        />
+
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={{ alignItems: 'center' }}>
+                        <Image
+                            source={require('../../../assets/images/location.png')}
+                        />
+
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{ alignItems: 'center' }}>
+                        <Image
+                            source={require('../../../assets/images/image_personalcard.png')}
+                        />
+
+                    </TouchableOpacity>
+                </View>
+            }
+
             <View style={[styles.reelsStyle,]}>
 
                 <FlatList
                     scrollEnabled
                     showsVerticalScrollIndicator={false}
-                    data={reelsData}
+                    data={data}
                     renderItem={renderItem_didNumber}
                     keyExtractor={(item, index) => index.toString()} />
             </View>
@@ -218,9 +288,10 @@ const styles = StyleSheet.create({
     },
     nameType: {
         paddingLeft: 10,
+        width: '70%'
     },
     boldStyle: {
-       
+
         fontSize: 16,
         fontFamily: 'ComicNeue-Bold',
         color: ColorCode.black_Color
@@ -235,12 +306,12 @@ const styles = StyleSheet.create({
 
     },
     color: {
-        height: 25,
+        height: 18,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 15,
-        width:80,
-        marginTop:10
+        width: 60,
+        marginTop: 10
 
     },
 

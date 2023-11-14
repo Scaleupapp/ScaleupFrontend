@@ -6,3 +6,5 @@ export { default as AddPost } from './addPost';
 export { default as OtherProfile } from './otherProfile';
 export { default as CheckProfile } from './checkProfile';
 export { default as ChatList } from './chatList';
+export { default as NotificationList } from './notification';
+export { default as ValidateContent } from './verifyContent';

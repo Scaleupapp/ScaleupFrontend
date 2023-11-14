@@ -105,6 +105,7 @@ android {
 
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
+    implementation 'com.facebook.fresco:animated-gif:2.6.0'
     implementation project(':react-native-video')
     implementation "androidx.appcompat:appcompat:1.0.0"
     implementation("com.facebook.react:react-android")

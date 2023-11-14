@@ -8,13 +8,16 @@ export const apiClient = axios.create({
     headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
+
+        
     },
 });
 
 apiClient.interceptors.request.use(
     (config) => {
         const state = Store.getState()
-        const token = state?.cookies?.loginUser
+        const token = state?.cookies?.loginUser.token
+        // console.log(token,'token===============>')
         const accessToken = `Bearer ${token}`
         if (accessToken) {
             config.headers["Authorization"] = accessToken;
@@ -28,7 +31,7 @@ apiClient.interceptors.request.use(
 
 apiClient.interceptors.response.use(
     (response) => {
-         console.log(response.data,"response===========>")
+        //  console.log(response.data,"response===========>")
         // Store.dispatch(setLoading(false))
         return response;
     },
@@ -42,3 +45,49 @@ apiClient.interceptors.response.use(
         return Promise.reject(error);
     }
 );
+
+
+
+
+
+export const apiUploadDataClient = axios.create({
+    headers: {
+        "Content-Type": "multipart/form-data",
+    },
+});
+
+
+apiUploadDataClient.interceptors.request.use(
+    (config) => {
+        const state = Store.getState()
+        const token = state?.cookies?.loginUser.token
+        // console.log(token,'token===============>')
+        const accessToken = `Bearer ${token}`
+        if (accessToken) {
+            config.headers["Authorization"] = accessToken;
+        }
+        return config;
+    },
+    (error) => {
+        Promise.reject(error);
+    }
+);
+
+
+apiUploadDataClient.interceptors.response.use(
+    (response) => {
+        //  console.log(response.data,"response===========>")
+        // Store.dispatch(setLoading(false))
+        return response;
+    },
+    async (error) => {
+        Store.dispatch(setLoading(false))
+        const { response } = error
+         console.log("error---->apimain", response)
+        // Store.dispatch(setError(response?.data?.message))
+        Alert.alert(error?.response?.data?.message)
+        // Show_Toast(error?.response)
+        return Promise.reject(error);
+    }
+);
+

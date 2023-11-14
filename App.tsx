@@ -9,7 +9,7 @@ import { StackNavigator } from "./sourceCode/navigation";
 import { Store } from "./sourceCode/redux";
 import { persistor } from "./sourceCode/redux/store";
 import Loader from "./sourceCode/components/loader";
-
+import { MenuProvider } from 'react-native-popup-menu';
 
 function App(): JSX.Element {
   
@@ -17,15 +17,15 @@ function App(): JSX.Element {
   return (
     // <SafeAreaView style={{flex:1}}>
     <Provider store={Store}>
-      
+       <MenuProvider>
     <PersistGate loading={null} persistor={persistor}>
       <RootSiblingParent>
         <NavigationContainer>
-       
           <StackNavigator/>
         </NavigationContainer>
       </RootSiblingParent>
     </PersistGate>
+    </MenuProvider>
  </Provider>
 //  </SafeAreaView>
   );

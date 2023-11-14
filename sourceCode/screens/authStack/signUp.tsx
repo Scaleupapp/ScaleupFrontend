@@ -71,21 +71,17 @@ const SignUp = () => {
             }
             registerApi(data).then((res) => {
                 dispatch(setLoading(false))
+                console.log(res?.data, "dta=======>")
+                Show_Toast(res?.data?.message)
+                navigation.navigate("BasicDetail",{data})
                 setEmail("")
                 setFirstName("")
                 setLastName("")
                 setUserName("")
                 setEmail("")
                 setPassword("")
-                console.log(res?.data, "dta=======>")
-                Show_Toast(res?.data?.message)
-                navigation.navigate("BasicDetail")
-
             })
-
         }
-
-
     }
 
     return (
@@ -144,7 +140,8 @@ const SignUp = () => {
                             show={() => { setSecureText(!secureText) }}
                             img2={require('../../assets/images/eye-slash.png')}
                             length={10}
-                            img={require('../../assets/images/sms.png')} placeholder={"Password"} />
+                            img={require('../../assets/images/lock.png')} 
+                            placeholder={"Password"} />
 
                         <View style={{ justifyContent: 'space-between', flexDirection: 'row', paddingHorizontal: 20 }}>
                             <View style={{ flexDirection: 'row' }}>
@@ -171,12 +168,13 @@ const SignUp = () => {
                             flexDirection: 'row', alignItems: 'center', width: '100%',
                             justifyContent: 'space-between', paddingHorizontal: 20, marginTop: 20
                         }}>
-                            <View style={{ height: 1, width: '33%', backgroundColor: '#ddd', }} />
+                            {/* <View style={{ height: 1, width: '33%', backgroundColor: '#ddd', }} />
                             <Text style={{ fontFamily: 'ComicNeue-Bold', color: ColorCode.gray_color }}>{Strings.SignInWith}</Text>
-                            <View style={{ height: 1, width: '33%', backgroundColor: '#ddd', }} />
+                            <View style={{ height: 1, width: '33%', backgroundColor: '#ddd', }} /> */}
                         </View>
 
-                        <View style={{ flexDirection: 'row', alignSelf: 'center', marginTop: 10, }}>
+
+                        {/* <View style={{ flexDirection: 'row', alignSelf: 'center', marginTop: 10, }}>
                             <TouchableOpacity>
                                 <Image
                                     style={{ height: 50, width: 50, }}
@@ -190,7 +188,8 @@ const SignUp = () => {
                                     source={require('../../assets/images/group_GroupApple.png')}
                                 />
                             </TouchableOpacity>
-                        </View>
+                        </View> */}
+
 
                         <View style={{ flexDirection: 'row', alignSelf: 'center', marginTop: 5 }}>
                             <Text style={{ fontFamily: 'ComicNeue-Bold', color: ColorCode.gray_color, fontSize: 14, }}>{Strings.AlreadyHaveAccount}</Text>
@@ -199,7 +198,11 @@ const SignUp = () => {
                             </TouchableOpacity>
                         </View>
 
+
                     </View>
+
+
+
 
                 </ScrollView>
             </View>
@@ -262,7 +265,7 @@ const styles = StyleSheet.create({
 
     },
     inputView: {
-        height: hp(23),
+        height: hp(13),
         justifyContent: 'space-between',
         marginTop: 20,
         marginBottom: 10

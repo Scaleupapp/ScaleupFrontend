@@ -1,71 +1,171 @@
+//@ts-ignore
 import {
     Image, Platform, ScrollView, StyleSheet, Text,
-    TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView
+    TouchableOpacity, View, StatusBar, FlatList, SafeAreaView, ImageBackground
 } from "react-native"
 import React, { useEffect, useState } from "react"
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import ColorCode from "../../../constants/Styles";
-import OpacityButton from "../../../components/opacityButton";
-import InputText from "../../../components/textInput";
 import { AuthHeader, TabHeader } from "../../../components";
-import Strings from "../../../constants/strings";
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import reelsData from "../../../constants/helpers";
-import * as Progress from 'react-native-progress';
-import ProgressBar from "../../../components/progressBar";
-import { Rating, AirbnbRating } from 'react-native-ratings';
-import LinearGradient from 'react-native-linear-gradient';
+import { addComment, bockUser, followUser, getUserData, sendLikeRequest, sendUnLikeRequest, unfollowUser } from "../../../utils/apiHelpers";
+import moment from "moment";
+import CommentModal from "../../../components/commetModal";
+import { Show_Toast } from "../../../components/toast";
+import ProfileHeader from "../../../components/profileHeader";
+import Video from 'react-native-video';
 const OtherProfile = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
     const [progress, setProgress] = useState(0);
+    const [allData, setAllData] = useState(null)
+    const { other } = useSelector<any, any>((store) => store.sliceReducer);
+    const { pofileData } = useSelector<any, any>((store) => store.sliceReducer);
+    const [showComment, setCommment] = useState(false)
+    const [commentArray, setArray] = useState(null)
+    const [button, setButton] = useState(allData?.isFollowing ? "Unfollow" : 'Follow')
+
+
+    const get = () => {
+        getUserData(other).then((res) => {
+            setAllData(res?.data)
+        })
+    }
+
+    const openCoomentSection = (data) => {
+        setArray(data)
+        setCommment(true)
+    }
+
+    useEffect(() => {
+        get()
+    }, [])
+
+
+
+    const postComment = (data) => {
+        addComment(data).then((res) => {
+            setCommment(false)
+            Show_Toast(res?.data?.message)
+        })
+    }
+
+
     const renderItem_didNumber = ({ item, index }: any) => {
         return (
             <View
                 style={[styles.postStyle, styles.iosShadow]}>
-                <View style={styles.info}>
+                <TouchableOpacity style={styles.info}
+                    onPress={() => { navigation.navigate("Connections") }}
+                >
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <View style={styles.profileImg}>
-                        </View>
-                        <View style={styles.nameType}>
-                            <Text style={styles.boldStyle}>{item?.name}</Text>
-                            <Text style={styles.smalltxt}>{item?.type}</Text>
+                        {allData?.profilePicture ?
+                            <Image
+
+                                resizeMode='cover'
+                                style={styles.profileImg}
+                                source={{ uri: allData?.profilePicture }}
+                            />
+                            :
+                            <View style={styles.profileImg}>
+                            </View>
+                        }
+                        <View style={[styles.nameType, { width: '55%' }]}>
+                            <Text style={styles.boldStyle}>{allData?.username}</Text>
+                            <Text numberOfLines={2}
+                            style={styles.smalltxt}>{item?.captions}</Text>
                         </View>
                     </View>
-                    <View style={{ alignSelf: 'flex-start' }}>
-                        <Text style={[styles.smalltxt, { marginTop: 12 }]}>{item?.time}</Text>
+                    <View style={{ alignSelf: 'flex-start', width: '28%' }}>
+                        <Text numberOfLines={1} style={[styles.smalltxt, { marginTop: 12, }]}>{moment(item?.postdate).fromNow()}</Text>
                     </View>
-                </View>
+                </TouchableOpacity>
                 <View style={styles.info}>
                     <Text style={[styles.smalltxt, { textAlign: 'left', marginTop: 15, width: '90%' }]}>{item?.postText}</Text>
                     <Image style={{ top: -20 }} source={item?.typeImg} />
                 </View>
-
-                <Image
-                    resizeMode='contain'
+                {item?.contentType == "Video" ?
+                    <Video
+                        resizeMode='contain'
+                        source={{ uri: item?.contentURL }}
+                        paused={false}
+                        style={{ width: '100%', height: 250, backgroundColor: ColorCode.lightGrey, borderRadius: 15, marginVertical: 20 }}
+                        repeat={true}   
+                    >
+                    </Video>
+                    :
+                    <Image
+                    resizeMode={Platform.OS === "ios" ? 'cover' : 'contain'}
                     style={{ width: '100%', height: 250, backgroundColor: ColorCode.lightGrey, borderRadius: 15, marginVertical: 20 }}
-                    source={item?.typeImg}
-                />
-
+                    source={{ uri: item?.contentURL }}
+                />}
+               
                 <View style={styles.info}>
                     <View style={{ flexDirection: 'row', width: '40%', justifyContent: 'space-between', marginTop: 15 }}>
-                        <Image style={{ top: -20 }} source={item?.likeImage} />
-                        <Image style={{ top: -20 }} source={item?.commentImage} />
-                        <Image style={{ top: -20 }} source={item?.ShareImage} />
+                        <TouchableOpacity
+                            onPress={() => { likeThisPost(item) }}
+                        >
+                            <Image style={{ top: -20 }}
+                                //tintColor={item?.likes.includes(pofileData?.user?._id) ? ColorCode.blue_Button_Color : 'grey'}
+                                source={require('../../../assets/images/heart.png')} />
+                        </TouchableOpacity>
+                        <Text style={[styles.boldStyle, { top: -20, paddingLeft: 0 }]}>{item?.likes?.count}</Text>
+                        <TouchableOpacity
+                            onPress={() => { openCoomentSection(item) }}
+                        >
+                            <Image style={{ top: -20 }} source={require('../../../assets/images/image_message.png')} />
+                        </TouchableOpacity>
+
+
+                        <Text style={[styles.boldStyle, { top: -20, paddingLeft: 0 }]}>{item?.comments?.length}</Text>
+
                     </View>
 
-                    <Image style={{ top: -20 }} source={item?.SaveImage} />
+
                 </View>
-
-
-
-
             </View>
         )
     }
 
 
+    const foloowThisUser = () => {
+        if (allData?.isFollowing) {
+            unfollowUser(allData?.userId).then((res) => {
+                setButton("Follow")
+            })
+        } else {
+            followUser(allData?.userId).then((res) => {
+                setButton("Unfollow")
+            })
+        }
+    }
+
+    const likeThisPost = (item) => {
+        if (item?.likes.includes(pofileData?.user?._id)) {
+            sendUnLikeRequest(item?._id).then((res) => {
+            })
+        } else {
+            sendLikeRequest(item?._id).then(() => {
+            })
+        }
+    }
+
+
+    const renderItem = ({ item, index }: any) => {
+        return (
+            <TouchableOpacity style={[styles.button, { marginLeft: 5 }]}
+                onPress={() => { navigation.navigate('BlockList') }}>
+                <Text style={styles.text}>{item}</Text>
+            </TouchableOpacity>
+        )
+    }
+
+
+    const wantToBlock=()=>{
+        bockUser(allData?.userId).then((res)=>{
+            console.log(res?.data,"blockuserData=====d>")
+        })
+    }
 
 
     return (
@@ -75,16 +175,30 @@ const OtherProfile = () => {
                 animated={true}
                 backgroundColor={ColorCode.white_Color}
             />
-            <TabHeader myHeading={"Profile"} imge={require('../../../assets/images/arrow-left.png')} />
+            <ProfileHeader
+                myHeading={"Profile"}
+                imge={require('../../../assets/images/arrow-left.png')} 
+                button={()=>{wantToBlock()}}
+                />
             <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true}>
                 <View style={[styles.info, { paddingHorizontal: 15 }]}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <View style={styles.profileImg}>
-                        </View>
+                        {allData?.profilePicture ?
+                            <Image
+                                resizeMode='cover'
+                                style={styles.profileImg}
+                                source={{ uri: allData?.profilePicture }}
+                            />
+                            :
+                            <View style={styles.profileImg}>
+
+                            </View>
+                        }
                         <View style={[styles.nameType, { marginLeft: 30 }]}>
-                            <Text style={styles.boldStyle}>{"John Smith"}</Text>
-                            <Text style={styles.smalltxt}>{"UI/UX Designer / Photographer"}</Text>
-                            <Text style={styles.smalltxt}>{"johnsmith@website.com"}</Text>
+                            <Text style={styles.boldStyle}>{allData?.username}</Text>
+                            <Text
+                                style={styles.smalltxt}>{allData?.workExperience[0]?.description}</Text>
+                            <Text style={styles.smalltxt}>{allData?.email}</Text>
                         </View>
                     </View>
 
@@ -92,33 +206,29 @@ const OtherProfile = () => {
 
 
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15, marginTop: 30 }}>
-                    <TouchableOpacity style={styles.button}
-                        onPress={() => { navigation.navigate('BlockList') }}
-                    >
-                        <Text style={styles.text}>{"Photography"}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.button}>
-                        <Text style={styles.text}>{"Football"}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.button}>
-                        <Text style={styles.text}>{"Dancing"}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.button}>
-                        <Text style={styles.text}>{"Hiking"}</Text>
-                    </TouchableOpacity>
+
+                    <FlatList
+                        scrollEnabled
+                        showsVerticalScrollIndicator={false}
+                        horizontal
+                        contentContainerStyle={{ justifyContent: 'space-between' }}
+                        data={allData?.bioInterests}
+                        renderItem={renderItem}
+                        keyExtractor={(item, index) => index.toString()} />
+
                 </View>
 
                 <View style={{ marginTop: 30, flexDirection: 'row', paddingHorizontal: 20, alignItems: 'center' }}>
-
-                    <LinearGradient
-                        colors={['#043142', '#6200EA', '#6200EA']}
-                        start={{ x: 0.1, y: 1.5 }} end={{ x: 0.5, y: 1.0 }}
-                        locations={[1., 1.4, 0.5]}
-                        style={[styles.color, { marginTop: -30 }]}>
-                        <Text style={[styles.smalltxt,
-                        { color: ColorCode.yellowText, marginHorizontal: 20 }]}>{'Follow'}</Text>
-                    </LinearGradient>
-
+                    <TouchableOpacity
+                        onPress={() => { foloowThisUser() }}
+                    >
+                        <ImageBackground
+                            source={require('../../../assets/images/folow_button_.png')}
+                            style={[{ marginTop: -30, height: 47, width: 144, alignItems: 'center', justifyContent: 'center' }]}>
+                            <Text style={[styles.boldStyle,
+                            { color: ColorCode.yellowText, marginHorizontal: 20 }]}>{button}</Text>
+                        </ImageBackground>
+                    </TouchableOpacity>
 
                     <Image
                         resizeMode='contain'
@@ -132,23 +242,23 @@ const OtherProfile = () => {
                     />
                 </View>
                 <View style={[styles.cards, { flexDirection: 'row', justifyContent: 'space-between' }]}>
-                    <View style={{alignItems:'center',justifyContent:'space-between'}}>
-                        <Text style={[styles.smalltxt,{color:ColorCode.black_Color}]}>118</Text>
+                    <View style={{ alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Text style={[styles.smalltxt, { color: ColorCode.black_Color, fontSize: 18 }]}>{allData?.totalPosts}</Text>
                         <Text style={[styles.smalltxt,]}>Posts</Text>
                     </View>
 
-                    <View style={{alignItems:'center',justifyContent:'space-between'}}>
-                        <Text style={[styles.smalltxt,{color:ColorCode.black_Color}]}>450</Text>
+                    <View style={{ alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Text style={[styles.smalltxt, { color: ColorCode.black_Color, fontSize: 18 }]}>{allData?.following?.length}</Text>
                         <Text style={[styles.smalltxt,]}>Following</Text>
                     </View>
-                    <View style={{alignItems:'center',justifyContent:'space-between'}}>
-                        <Text style={[styles.smalltxt,{color:ColorCode.black_Color}]}>320</Text>
+                    <View style={{ alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Text style={[styles.smalltxt, { color: ColorCode.black_Color, fontSize: 18 }]}>{allData?.followers?.length}</Text>
                         <Text style={[styles.smalltxt,]}>Followers</Text>
                     </View>
 
                     <Image
-                    resizeMode='contain'
-                    source={require('../../../assets/images/group_p.png')}
+                        resizeMode='contain'
+                        source={require('../../../assets/images/group_p.png')}
                     />
 
                 </View>
@@ -157,13 +267,22 @@ const OtherProfile = () => {
                     <FlatList
                         scrollEnabled
                         showsVerticalScrollIndicator={false}
-                        data={reelsData}
+                        data={allData?.content}
                         renderItem={renderItem_didNumber}
                         keyExtractor={(item, index) => index.toString()} />
                 </View>
 
 
             </ScrollView>
+
+            {showComment &&
+                <CommentModal
+                    close={() => { setCommment(false) }}
+                    value={commentArray}
+                    post={(t) => { postComment(t) }}
+
+                />
+            }
         </SafeAreaView>
 
     )

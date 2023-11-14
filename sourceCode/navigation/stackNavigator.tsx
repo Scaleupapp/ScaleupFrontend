@@ -1,13 +1,13 @@
 import React, { useEffect } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { BasicDetail, Certification, EducationDetail, ForgotPassword, SignIn, SignUp, Terms, WorkDetails } from "../screens/authStack";
+import { BasicDetail, Certification, EducationDetail, ForgotPassword, PasswordOtp, SignIn, SignUp, Terms, WorkDetails } from "../screens/authStack";
 import TabNavigator from "./tabNavigator";
 import { useSelector } from "react-redux";
 import DrawerNavigator from "./drawerNavigation";
 import Connections from "../screens/mainStack/drawerScreens/connections";
 import BlockList from "../screens/mainStack/drawerScreens/blockList";
 import Setting from "../screens/mainStack/drawerScreens/settingScreen";
-import { OtherProfile } from "../screens/mainStack/tabScreens";
+import { NotificationList, OtherProfile, ValidateContent } from "../screens/mainStack/tabScreens";
 
 const Stack = createNativeStackNavigator();
 const StackNavigator = () => {
@@ -33,6 +33,9 @@ console.log(loginUser,"login--------->")
       <Stack.Screen name="BlockList" component={BlockList} />
       <Stack.Screen name="Setting" component={Setting} />
       <Stack.Screen name="OtherProfile" component={OtherProfile} />
+      <Stack.Screen name="NotificationList" component={NotificationList} />
+      <Stack.Screen name="ValidateContent" component={ValidateContent} />
+      <Stack.Screen name="PasswordOtp" component={PasswordOtp} />
     </Stack.Navigator>
   );
 };

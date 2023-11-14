@@ -2,14 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSContactsUsageDescription</key>
-	<string>use for contact information</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>use for video record</string>
-	<key>NSAppleMusicUsageDescription</key>
-	<string>use for upload images</string>
-	<key>NSCameraUsageDescription</key>
-	<string>use for image upload</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -37,6 +29,16 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>use for upload images</string>
+	<key>NSCameraUsageDescription</key>
+	<string>use for image upload</string>
+	<key>NSContactsUsageDescription</key>
+	<string>use for contact information</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>use for video record</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>To use phone photo library</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>ComicNeue-Bold.ttf</string>
@@ -55,8 +57,12 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
+		<string>UIInterfaceOrientationPortrait</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>

@@ -88,7 +88,7 @@ const DrawerNavigator = () => {
         component={Home}
       />
 
-      <Drawer.Screen
+      {/* <Drawer.Screen
         options={{
           drawerLabel: 'BlockList',
           drawerActiveTintColor: 'white',
@@ -103,10 +103,10 @@ const DrawerNavigator = () => {
         }}
         name="BlockList"
         component={BlockList}
-      />
+      /> */}
       <Drawer.Screen
         options={{
-          drawerLabel: 'Setting',
+          drawerLabel: 'Settings',
           drawerActiveTintColor: 'white',
           drawerItemStyle: { backgroundColor: ColorCode.white_Color },
           drawerLabelStyle: {
@@ -117,7 +117,7 @@ const DrawerNavigator = () => {
           drawerInactiveTintColor: 'red',
 
         }}
-        name="Setting"
+        name="Settings"
         component={Setting}
       />
 

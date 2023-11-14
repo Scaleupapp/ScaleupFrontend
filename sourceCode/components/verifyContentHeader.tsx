@@ -3,15 +3,11 @@ import { View, Text, StyleSheet, TouchableOpacity ,Image} from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import ColorCode from '../constants/Styles';
 import { useNavigation } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
 
 
 
-const TabHeader = (props: any) => {
+const VarifyContentHeader = (props: any) => {
     const navigation = useNavigation<any>()
-    const { pofileData, loading } = useSelector<any, any>((store) => store.sliceReducer);
-
-    console.log(pofileData?.user?.role,"pofileData=====>")
 
     return (
         <View style={[styles.container,props.contain]}>
@@ -20,43 +16,24 @@ const TabHeader = (props: any) => {
                onPress={()=>{navigation.goBack()}}>
                 <Image
                 style={{tintColor:ColorCode.blue_Button_Color}}
-                source={props?.imge}
-                    
-                    // require('../assets/images/arrow-left.png')
+                source={require('../assets/images/arrow-left.png')}
             /> 
-            <Text style={styles.myText}>{props?.myHeading}</Text>
+             <Image
+                source={require('../assets/images/crown-2.png')}
+            />
+            <Text style={styles.myText}>{"Validate Content"}</Text>
             </TouchableOpacity>
 
             <View style={styles.latView}>
-           
-            {
-            pofileData?.user?.role == "Subject Matter Expert" &&
-                <TouchableOpacity 
-            onPress={()=>{navigation.navigate("ValidateContent")}}
-            style={[styles.btnStyle,props?.relative]}>
+            <TouchableOpacity style={[styles.btnStyle,props?.relative]}>
             <Image
-                 tintColor={ColorCode.yellowText}
+                style={{tintColor:ColorCode.blue_Button_Color}}
                 source={props?.imge1}
             />
             </TouchableOpacity>
-            }
 
-            <TouchableOpacity
-             onPress={()=>{navigation.navigate("NotificationList")}}
-            style={styles.btnStyle}>
-             <Image
-             
-                style={{tintColor:ColorCode.blue_Button_Color}}
-                source={props?.imge2}
-            /> 
-            </TouchableOpacity>
-            {/* <TouchableOpacity style={[styles.btnStyle,{paddingLeft:0}]}>
-             <Image
             
-                style={{tintColor:ColorCode.blue_Button_Color}}
-                source={props?.imge3}
-            /> 
-            </TouchableOpacity> */}
+           
             </View>
             
         </View>
@@ -96,4 +73,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default TabHeader;
+export default VarifyContentHeader;

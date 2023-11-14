@@ -1,46 +1,81 @@
 import {
-    Image, Platform, ScrollView, StyleSheet, Text,
-    TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView
+    Image, StyleSheet, Text,
+    TouchableOpacity, View,
+    StatusBar, FlatList,
+    SafeAreaView, ImageBackground
 } from "react-native"
 import React, { useEffect, useState } from "react"
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import ColorCode from "../../../constants/Styles";
 import OpacityButton from "../../../components/opacityButton";
-import InputText from "../../../components/textInput";
-import { AuthHeader, TabHeader } from "../../../components";
-import Strings from "../../../constants/strings";
+import { TabHeader } from "../../../components";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import reelsData from "../../../constants/helpers";
-import LinearGradient from 'react-native-linear-gradient';
+import { followUnList, unfollowUser } from "../../../utils/apiHelpers";
 const Connections = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
+    const [fllow, setFollow] = useState([])
+    const [unFollow, setUnfollow] = useState([])
+    const [type, setType] = useState(true)
 
+    useEffect(() => {
+        followUnList().then((res) => {
+            setFollow(res?.data?.followerList)
+            setUnfollow(res?.data?.followingList)
+        })
+    }, [])
+
+    const Unfolow=(item)=>{
+        unfollowUser(item).then((res) => {
+            console.log(res?.data,"resdata------->")
+            followUnList().then((res) => {
+                setFollow(res?.data?.followerList)
+                setUnfollow(res?.data?.followingList)
+            })
+        })
+    }
 
     const renderItem_didNumber = ({ item, index }: any) => {
+        console.log(item, "iiiii=====>")
         return (
             <View
                 style={[styles.postStyle, { marginTop: 10 }]}>
-                <TouchableOpacity style={styles.info} onPress={() => { navigation.navigate("Connections") }}
-                >
+                <TouchableOpacity style={styles.info}
+                    onPress={() => { navigation.navigate("Connections") }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <View style={styles.profileImg}>
-                        </View>
+                        {item?.profilePicture ?
+                            <Image
+                                resizeMode='cover'
+                                style={styles.profileImg}
+                                source={{ uri: item?.profilePicture }} />
+                            :
+                            <View style={styles.profileImg} />
+                        }
                         <View style={styles.nameType}>
-                            <Text style={styles.boldStyle}>{item?.name}</Text>
-                            <Text style={styles.smalltxt}>{item?.type}</Text>
+                            <Text style={styles.boldStyle}>{item?.username}</Text>
+                            <Text style={styles.smalltxt}>{item?.firstname + " " + item?.lastname}</Text>
                         </View>
                     </View>
 
-                    <LinearGradient
+                    {/* <LinearGradient
                         colors={['#043142', '#043142','#6200EA']}
                         start={{x: 0.1, y: 1.5}} end={{x:0.5, y: 0.5}}
                         locations={[1.,1.4,0.5]}
                         style={styles.color}>
                         <Text style={[styles.smalltxt, { color: ColorCode.yellowText ,marginHorizontal:20}]}>{'Unfollow'}</Text>
-                    </LinearGradient>
+                    </LinearGradient> */}
 
+                    <TouchableOpacity
+                    onPress={()=>{Unfolow(item?._id)}}
+                    >
+                        <ImageBackground
+                            resizeMode='contain'
+                            style={styles.color}
+                            source={require("../../../assets/images/button_.png")}>
+                            <Text style={[styles.smalltxt, { color: ColorCode.yellowText }]}>{type ? 'Unfollow' : "Remove"}</Text>
+                        </ImageBackground>
+                    </TouchableOpacity>
 
 
                 </TouchableOpacity>
@@ -56,35 +91,29 @@ const Connections = () => {
             <StatusBar
                 barStyle={'dark-content'}
                 animated={true}
-                backgroundColor={ColorCode.white_Color}
-            />
+                backgroundColor={ColorCode.white_Color} />
             <TabHeader myHeading={"Connections"}
-                imge={require('../../../assets/images/arrow-left.png')}
-            />
+                imge={require('../../../assets/images/arrow-left.png')} />
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20 }}>
                 <OpacityButton
-                    pressButton={() => { navigation.navigate("WorkDetails") }}
-                    name={"Followers-123k"} btnTextStyle={{ color: ColorCode.blue_Button_Color, }}
-                    button={{ width: '48%', backgroundColor: ColorCode.white_Color, borderColor: ColorCode.blue_Button_Color, borderWidth: 1 }} />
+                    pressButton={() => { setType(false) }}
+                    name={"Followers-" + unFollow?.length}
+                    btnTextStyle={{ color: type ? ColorCode.blue_Button_Color : ColorCode.yellowText, }}
+                    button={{ width: '48%', backgroundColor: type ? ColorCode.white_Color : ColorCode.blue_Button_Color, borderColor: ColorCode.blue_Button_Color, borderWidth: 1 }} />
                 <OpacityButton
-                    pressButton={() => { navigation.navigate("WorkDetails") }}
-                    name={"Following-600"} btnTextStyle={{ color: ColorCode.yellowText, }}
-                    button={{ width: '48%' }} />
-
+                    pressButton={() => { setType(true) }}
+                    name={"Following-" + fllow?.length}
+                    btnTextStyle={{ color: !type ? ColorCode.blue_Button_Color : ColorCode.yellowText, }}
+                    button={{ width: '48%', backgroundColor: !type ? ColorCode.white_Color : ColorCode.blue_Button_Color, borderColor: ColorCode.blue_Button_Color, borderWidth: 1 }} />
             </View>
-
             <View style={[styles.reelsStyle,]}>
-
                 <FlatList
                     scrollEnabled
                     showsVerticalScrollIndicator={false}
-                    data={reelsData}
+                    data={type ? fllow : unFollow}
                     renderItem={renderItem_didNumber}
                     keyExtractor={(item, index) => index.toString()} />
             </View>
-
-
-
         </SafeAreaView>
 
     )
@@ -188,10 +217,12 @@ const styles = StyleSheet.create({
 
     },
     color: {
-        height: 25,
+        height: 20,
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: 15
+        borderRadius: 15,
+        width: 80,
+        marginTop: 10
 
     },
 

@@ -1,6 +1,6 @@
 import {
-    Image, Platform, ScrollView, StyleSheet, Text,
-    TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView
+    ScrollView, StyleSheet, Text,
+    TouchableOpacity, View, StatusBar, FlatList, SafeAreaView
 } from "react-native"
 import React, { useEffect, useState } from "react"
 import { useNavigation } from "@react-navigation/native";
@@ -11,36 +11,96 @@ import InputText from "../../components/textInput";
 import { AuthHeader } from "../../components";
 import Strings from "../../constants/strings";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { changePassword } from "../../utils/apiHelpers";
+import { Show_Toast } from "../../components/toast";
+import Loader from "../../components/loader";
+import { setLoading } from "../../redux/reducer";
 
 const ForgotPassword = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
+    const [secureText, setSecureText] = useState(true)
+    const [password, setPassword] = useState("")
+    const [oldPassword, setOldPassword]=useState('')
+    const [confirm, setConfirm]=useState("")
+    const { loading } = useSelector<any, any>((store) => store.sliceReducer);
+
+
+    const forgotPassword = () => {
+        const data={
+            "oldPassword":oldPassword,
+            "newPassword": password,
+            "confirmNewPassword": confirm
+          }
+          dispatch(setLoading(true))
+          changePassword(data).then((res) => {
+              Show_Toast(res?.data?.message)
+              dispatch(setLoading(false))
+              setConfirm("")
+              setOldPassword("")
+              setPassword(""),
+              navigation.navigate("SignIn")
+        })
+    }
 
     return (
         <SafeAreaView style={styles.main}>
+            {loading&&<Loader/>}
             <StatusBar
                 animated={true}
-                backgroundColor={ColorCode.blue_Button_Color}/>
+                backgroundColor={ColorCode.blue_Button_Color} />
             <AuthHeader myHeading={Strings.Forgot} imge={require('../../assets/images/arrow-left.png')} />
             <View style={styles.body}>
                 <ScrollView style={{ flex: 1 }}
                     contentContainerStyle={{ justifyContent: 'space-between' }}>
-                    <Text style={styles.txt}>{Strings.Submit}</Text>
+                        <Text style={styles.txt}>{Strings.OnceEmail}</Text>
+                    {/* <Text style={styles.txt}>{Strings.Submit}</Text> */}
                     <View style={{ flexDirection: 'row', marginTop: 20, alignItems: 'center', width: '100%', justifyContent: 'space-between', paddingHorizontal: 20 }}>
-                      <InputText img={require('../../assets/images/sms.png')} placeholder={"Email ID"} style={{width:'60%',fontFamily:'ComicNeue-Bold'}}/>
-                        <TouchableOpacity
+                        
+                        {/* <TouchableOpacity
                             style={styles.input}>
-                            <Text style={{color:ColorCode.yellowText,fontFamily:'ComicNeue-Bold'}}>{Strings.Send}</Text>
-                        </TouchableOpacity>
+                            <Text style={{ color: ColorCode.yellowText, fontFamily: 'ComicNeue-Bold' }}>{Strings.Send}</Text>
+                        </TouchableOpacity> */}
                     </View>
-                    <View style={[styles.inputView,{marginTop:hp(10)}]}>
-                    <Text style={styles.txt}>{Strings.OnceEmail}</Text>
-                        <InputText img={require('../../assets/images/sms.png')} placeholder={"Password"} />
-                        <InputText img={require('../../assets/images/sms.png')} placeholder={"Password"} />
+                    <View style={[styles.inputView,{marginTop:20} ]}>
+                    <InputText
+                            secureTextEntry={secureText}
+                            show={() => { setSecureText(!secureText) }}
+                            img2={require('../../assets/images/eye-slash.png')}
+                            value={oldPassword}
+                            onChange={(t) => { setOldPassword(t) }}
+                            length={10}
+                            img={require('../../assets/images/lock.png')} 
+                            placeholder={"Old Password"} />
+
+                        <InputText
+                            secureTextEntry={secureText}
+                            show={() => { setSecureText(!secureText) }}
+                            img2={require('../../assets/images/eye-slash.png')}
+                            value={password}
+                            onChange={(t) => { setPassword(t) }}
+                            length={10}
+                            img={require('../../assets/images/lock.png')} 
+                            placeholder={"New Password"} />
+
+                        <InputText
+                            secureTextEntry={secureText}
+                            show={() => { setSecureText(!secureText) }}
+                            img2={require('../../assets/images/eye-slash.png')}
+                            value={confirm}
+                            onChange={(t) => { setConfirm(t) }}
+                            length={10}
+                            img={require('../../assets/images/lock.png')} 
+                            placeholder={"Confirm Password"} />
+                           
+                            <OpacityButton name={"Reset"} 
+                              btnTextStyle={{ color: ColorCode.yellowText, }}
+                              pressButton={()=>{forgotPassword()}}
+                            />
                     </View>
                 </ScrollView>
-                <View style={[{bottom:30,}]}>
-                <OpacityButton name={"Reset"} btnTextStyle={{color:ColorCode.yellowText,}}/>
+                <View style={[{ bottom: 30, }]}>
+                    {/* <OpacityButton name={"Reset"} btnTextStyle={{ color: ColorCode.yellowText, }} /> */}
                 </View>
             </View>
         </SafeAreaView>
@@ -71,7 +131,7 @@ const styles = StyleSheet.create({
         width: '88%',
         alignSelf: 'center',
         marginTop: 20,
-        fontFamily:'ComicNeue-Bold'
+        fontFamily: 'ComicNeue-Bold'
 
     },
     input: {
@@ -94,7 +154,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     inputView: {
-        height: hp(23),
+        height: hp(34),
         justifyContent: 'space-between',
         marginTop: 20,
         marginBottom: 10,

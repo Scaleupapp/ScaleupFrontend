@@ -52,7 +52,9 @@ const logout=()=>{
                     />
                 </TouchableOpacity>
 
-                <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+                <TouchableOpacity 
+                onPress={()=>{navigation.navigate("ForgotPassword")}}
+                style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={[styles.smalltxt,]}>Change Password</Text>
                     <Image
                         source={require('../../../assets/images/ArrowRight.png')}
@@ -65,7 +67,7 @@ const logout=()=>{
 
                 <Text style={[styles.smalltxt, { fontSize: 18, color: ColorCode.blue_Button_Color }]}>Notifications</Text>
                 <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
-                    <Text style={[styles.smalltxt,]}>Edit Profile</Text>
+                    <Text style={[styles.smalltxt,]}>Allow all notifications</Text>
                     <Switch
                         trackColor={{ false: "grey", true: ColorCode.blue_Button_Color }}
                         thumbColor={enable ? "white" : "white"}
@@ -74,7 +76,7 @@ const logout=()=>{
                         value={enable} />
                 </TouchableOpacity>
 
-                <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+                {/* <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={[styles.smalltxt,]}>Change Password</Text>
                     <Switch
                         trackColor={{ false: "grey", true: ColorCode.blue_Button_Color }}
@@ -82,9 +84,9 @@ const logout=()=>{
                         ios_backgroundColor="#3e3e3e"
                         onValueChange={toggleSwitch}
                         value={enable} />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
 
-                <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+                {/* <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={[styles.smalltxt,]}>Change Password</Text>
                     <Switch
                         trackColor={{ false: "grey", true: ColorCode.blue_Button_Color }}
@@ -92,7 +94,7 @@ const logout=()=>{
                         ios_backgroundColor="#3e3e3e"
                         onValueChange={toggleSwitch}
                         value={enable} />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
 
                 <View style={[styles.line, { marginTop: 20 }]} />
 
@@ -135,7 +137,8 @@ const logout=()=>{
                 </TouchableOpacity>
 
 
-                <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+                <TouchableOpacity onPress={()=>{navigation.navigate("BlockList")}}
+                style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={[styles.smalltxt,]}>Block People</Text>
                     <Image
                         source={require('../../../assets/images/ArrowRight.png')}
@@ -146,12 +149,14 @@ const logout=()=>{
                 <TouchableOpacity onPress={()=>{logout()}}
                 
                 style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between', marginTop: 20,
+                    marginTop: 20,
                     height:50,alignItems:'center',
-                    width:200,backgroundColor:'red'
+                    backgroundColor:'red',
+                    width:'95%',justifyContent:'center',
+                    alignSelf:'center',
+                    borderRadius:25
                 }}>
-                    <Text style={[styles.smalltxt,{color:'white'}]}>Logout</Text>
+                    <Text style={[styles.smalltxt,{color:'white',fontSize:24}]}>Logout</Text>
 
                 </TouchableOpacity>
             </View>

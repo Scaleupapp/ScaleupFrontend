@@ -1,13 +1,26 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { AddPost, ChatList, GlobalSearch, Home, LearningReels, Profile } from '../screens/mainStack/tabScreens';
 import { Image } from 'react-native';
 import ColorCode from '../constants/Styles';
+import { getMyProfile } from '../utils/apiHelpers';
+import { setProfileDat } from '../redux/reducer';
 
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+
+    getMyProfile().then((res)=>{
+      dispatch(setProfileDat(res?.data))
+        // setProfileDat((res?.data))
+        console.log("res?.data=====>",res?.data,"res?.data=====>")
+    })
+}, [])
+
 
   return (
     <Tab.Navigator

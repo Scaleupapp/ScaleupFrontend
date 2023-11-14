@@ -15,53 +15,32 @@ import reelsData from "../../../constants/helpers";
 import * as Progress from 'react-native-progress';
 import ProgressBar from "../../../components/progressBar";
 import { Rating, AirbnbRating } from 'react-native-ratings';
+import { getMyProfile } from "../../../utils/apiHelpers";
 
 const Profile = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
     const [progress, setProgress] = useState(0);
+    const [pofileData, setProfileData] = useState([])
+
+    useEffect(() => {
+
+        getMyProfile().then((res) => {
+            setProfileData((res?.data))
+            console.log("res?.data=====>", res?.data, "res?.data=====>")
+        })
+    }, [])
+
+    const slicedData = pofileData?.user?.bio?.bioInterests.slice(0, 4);
+
     const renderItem_didNumber = ({ item, index }: any) => {
+       
         return (
-            <View
-                style={[styles.postStyle, styles.iosShadow]}>
-                <View style={styles.info}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <View style={styles.profileImg}>
-                        </View>
-                        <View style={styles.nameType}>
-                            <Text style={styles.boldStyle}>{item?.name}</Text>
-                            <Text style={styles.smalltxt}>{item?.type}</Text>
-                        </View>
-                    </View>
-                    <View style={{ alignSelf: 'flex-start' }}>
-                        <Text style={[styles.smalltxt, { marginTop: 12 }]}>{item?.time}</Text>
-                    </View>
-                </View>
-                <View style={styles.info}>
-                    <Text style={[styles.smalltxt, { textAlign: 'left', marginTop: 15, width: '90%' }]}>{item?.postText}</Text>
-                    <Image style={{ top: -20 }} source={item?.typeImg} />
-                </View>
-
-                <Image
-                    resizeMode='contain'
-                    style={{ width: '100%', height: 250, backgroundColor: ColorCode.lightGrey, borderRadius: 15, marginVertical: 20 }}
-                    source={item?.typeImg}
-                />
-
-                <View style={styles.info}>
-                    <View style={{ flexDirection: 'row', width: '40%', justifyContent: 'space-between', marginTop: 15 }}>
-                        <Image style={{ top: -20 }} source={item?.likeImage} />
-                        <Image style={{ top: -20 }} source={item?.commentImage} />
-                        <Image style={{ top: -20 }} source={item?.ShareImage} />
-                    </View>
-
-                    <Image style={{ top: -20 }} source={item?.SaveImage} />
-                </View>
-
-
-
-
-            </View>
+            
+            <TouchableOpacity style={[styles.button, { marginLeft: 5 }]}
+            onPress={() => { navigation.navigate('BlockList') }}>
+            <Text style={styles.text}>{item}</Text>
+        </TouchableOpacity>
         )
     }
 
@@ -76,21 +55,29 @@ const Profile = () => {
                 backgroundColor={ColorCode.white_Color} />
             <TabHeader myHeading={"Profile"} imge={require('../../../assets/images/arrow-left.png')} />
             <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true}
-            showsVerticalScrollIndicator={false}
+                showsVerticalScrollIndicator={false}
             >
                 <View style={styles.cards}>
                     <View style={[styles.info, { paddingHorizontal: 15 }]}>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <View style={styles.profileImg}>
-                            </View>
+
+                            {pofileData?.user?.profilePicture ? <Image
+                                resizeMode='cover'
+                                style={styles.profileImg}
+                                source={{ uri: pofileData?.user?.profilePicture }}
+                            /> :
+                                <View style={styles.profileImg}>
+                                </View>
+                            }
                             <View style={[styles.nameType, { marginLeft: 30 }]}>
-                                <Text style={styles.boldStyle}>{"John Smith"}</Text>
-                                <Text style={styles.smalltxt}>{"UI/UX Designer / Photographer"}</Text>
-                                <Text style={styles.smalltxt}>{"johnsmith@website.com"}</Text>
+                                <Text style={styles.boldStyle}>{pofileData?.user?.firstname + " " + pofileData?.user?.lastname}</Text>
+                                <Text numberOfLines={1}
+                                style={styles.smalltxt}>{pofileData?.user?.workExperience[0]?.description}</Text>
+                                <Text style={styles.smalltxt}>{pofileData?.user?.email}</Text>
                             </View>
                         </View>
                     </View>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 30 }}>
+                    {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 30 }}>
                         <TouchableOpacity style={styles.button}
                             onPress={() => { navigation.navigate('BlockList') }}>
                             <Text style={styles.text}>{"Photography"}</Text>
@@ -104,6 +91,17 @@ const Profile = () => {
                         <TouchableOpacity style={styles.button}>
                             <Text style={styles.text}>{"Hiking"}</Text>
                         </TouchableOpacity>
+                    </View> */}
+
+                    <View style={[styles.reelsStyle,]}>
+                        <FlatList
+                             scrollEnabled
+                             showsVerticalScrollIndicator={false}
+                             horizontal
+                             contentContainerStyle={{ justifyContent: 'space-between' }}
+                            data={slicedData}
+                            renderItem={renderItem_didNumber}
+                            keyExtractor={(item, index) => index.toString()} />
                     </View>
                     <View style={styles.line} />
                     <Text style={[styles.smalltxt, { marginTop: 10 }]}>I am a UI/UX designer with 6 years of experience. Currently working in ABC Design Studio. Apart from work I enjoy photography, as I am active member of Wildlife Photographers community. See More</Text>
@@ -113,7 +111,7 @@ const Profile = () => {
                                 resizeMode='contain'
                                 style={{ marginLeft: 10 }}
                                 source={require('../../../assets/images/Posts_.png')} />
-                            <Text style={[styles.smalltxt, { color: ColorCode.black_Color }]}>118</Text>
+                            <Text style={[styles.smalltxt, { color: ColorCode.black_Color }]}>{pofileData?.userContent?.length}</Text>
                             <Text style={[styles.smalltxt,]}>Posts</Text>
                         </View>
                         <View style={{ alignItems: 'center', justifyContent: 'space-between' }}>
@@ -121,7 +119,7 @@ const Profile = () => {
                                 resizeMode='contain'
                                 style={{ marginLeft: 10 }}
                                 source={require('../../../assets/images/following_.png')} />
-                            <Text style={[styles.smalltxt, { color: ColorCode.black_Color }]}>450</Text>
+                            <Text style={[styles.smalltxt, { color: ColorCode.black_Color }]}>{pofileData?.user?.followingCount}</Text>
                             <Text style={[styles.smalltxt,]}>Following</Text>
                         </View>
                         <View style={{ alignItems: 'center', justifyContent: 'space-between' }}>
@@ -129,14 +127,14 @@ const Profile = () => {
                                 resizeMode='contain'
                                 style={{ marginLeft: 10 }}
                                 source={require('../../../assets/images/followers_.png')} />
-                            <Text style={[styles.smalltxt, { color: ColorCode.black_Color }]}>320</Text>
+                            <Text style={[styles.smalltxt, { color: ColorCode.black_Color }]}>{pofileData?.user?.followersCount}</Text>
                             <Text style={[styles.smalltxt,]}>Followers</Text>
                         </View>
                     </View>
                 </View>
                 <View style={{ flexDirection: 'row', marginTop: 20, paddingHorizontal: 10 }}>
                     <Text style={[styles.smalltxt, { fontSize: 18, color: ColorCode.black_Color }]}>Badge :</Text>
-                    <Text style={[styles.smalltxt, { fontSize: 16, }]}>Subject Matter Expert</Text>
+                    <Text style={[styles.smalltxt, { fontSize: 16, }]}>{pofileData?.user?.badges}</Text>
                 </View>
                 <View style={{ flexDirection: 'row', marginTop: 20, paddingHorizontal: 10, justifyContent: 'space-between' }}>
                     <Text style={[styles.smalltxt, { fontSize: 16, }]}>My Account</Text>
@@ -146,29 +144,29 @@ const Profile = () => {
                     />
                 </View>
 
-                <View style={[styles.cards,{backgroundColor:ColorCode.lightGrey}]}>
+                <View style={[styles.cards, { backgroundColor: ColorCode.lightGrey }]}>
                     <View style={{ flexDirection: 'row', marginTop: 20, paddingHorizontal: 10, }}>
                         <Image
-                            source={require('../../../assets/images/ArrowRight.png')}/>
+                            source={require('../../../assets/images/ArrowRight.png')} />
                         <Text style={[styles.smalltxt, { fontSize: 16, }]}>Basic Details</Text>
 
                     </View>
 
                     <View style={{ flexDirection: 'row', marginTop: 20, paddingHorizontal: 10, }}>
                         <Image
-                            source={require('../../../assets/images/ArrowRight.png')}/>
+                            source={require('../../../assets/images/ArrowRight.png')} />
                         <Text style={[styles.smalltxt, { fontSize: 16, }]}>Educational Details</Text>
 
                     </View>
                     <View style={{ flexDirection: 'row', marginTop: 20, paddingHorizontal: 10, }}>
                         <Image
-                            source={require('../../../assets/images/ArrowRight.png')}/>
+                            source={require('../../../assets/images/ArrowRight.png')} />
                         <Text style={[styles.smalltxt, { fontSize: 16, }]}>Professional Details</Text>
 
                     </View>
                     <View style={{ flexDirection: 'row', marginTop: 20, paddingHorizontal: 10, }}>
                         <Image
-                            source={require('../../../assets/images/ArrowRight.png')}/>
+                            source={require('../../../assets/images/ArrowRight.png')} />
                         <Text style={[styles.smalltxt, { fontSize: 16, }]}>Course and Certifications</Text>
 
                     </View>
@@ -179,7 +177,13 @@ const Profile = () => {
 
                 <View style={styles.cards}>
                     <View style={{ flexDirection: 'row', marginTop: 20, paddingHorizontal: 10, justifyContent: 'space-between' }}>
-                        <Text style={[styles.smalltxt, { fontSize: 16, }]}>Connections</Text>
+                        <TouchableOpacity
+                            onPress={() => { navigation.navigate("Connections") }}
+                        >
+                            <Text style={[styles.smalltxt, { fontSize: 16, }]}>Connections</Text>
+                        </TouchableOpacity>
+
+
                         <Image
 
                             source={require('../../../assets/images/ArrowRight.png')}
@@ -211,7 +215,7 @@ const Profile = () => {
                     </View>
                 </View>
 
-                <View style={{height:100}}></View>
+                <View style={{ height: 100 }}></View>
 
 
 
@@ -330,6 +334,8 @@ const styles = StyleSheet.create({
         backgroundColor: ColorCode.lightGrey
     },
     nameType: {
+   
+        width:250
 
     },
     boldStyle: {

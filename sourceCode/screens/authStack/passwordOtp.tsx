@@ -13,40 +13,83 @@ import Strings from "../../constants/strings";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Loader from "../../components/loader";
 import OTPTextView from 'react-native-otp-textinput';
+import { getOtp, verifyOtp } from "../../utils/apiHelpers";
+import { setLoading } from "../../redux/reducer";
+import { Show_Toast } from "../../components/toast";
+import { setLoginUser } from "../../redux/cookiesReducer";
 
 
-const PasswordOtp = () => {
+const PasswordOtp = (props) => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
     const [secureText, setSecureText] = useState(true)
     const [code, setCode] = useState('');
     const { loading } = useSelector<any, any>((store) => store.sliceReducer);
     const [countdown, setCountdown] = useState(120);
-    const [show, setShow]=useState(false)
+    const [show, setShow] = useState(false)
     const minutes = Math.floor(countdown / 60);
     const remainingSeconds = countdown % 60;
+    const param = props?.route?.params.phoneNumber
     
- 
+
+    // console.log(param, "param=====>")
+
 
     useEffect(() => {
-        let interval= setInterval(()=>{
-            if(countdown > 0){
-                setCountdown(countdown-1)
-            }else{
-                clearInterval(interval); 
+        let interval = setInterval(() => {
+            if (countdown > 0) {
+                setCountdown(countdown - 1)
+            } else {
+                clearInterval(interval);
                 setShow(true)
             }
-           
-            
-        },1000)
+        }, 1000)
         return () => {
             clearInterval(interval);
-          };
+        };
     }, [countdown])
 
 
-   
 
+    const verfyOtp = () => {
+        dispatch(setLoading(true))
+        const data={
+            "phoneNumber": param,
+            "userOTP": code 
+        }
+        verifyOtp(data).then((res)=>{
+            dispatch(setLoading(true))
+            dispatch(setLoginUser(res?.data))
+            
+            if (res?.data?.sFirstTimeLogin1) {
+                navigation.navigate("BasicDetail", { data })
+              
+            }
+            else {
+                navigation.navigate("TabNavigator")
+              
+            }
+         console.log(res?.data,"chvhdvbhdbvjb=====>")
+        })
+
+
+    }
+
+
+
+
+
+    const resendOtp=()=>{
+        const pay = {
+            "phoneNumber": param
+        }
+        getOtp(pay).then((res) => {
+            if (res?.data?.message === "OTP sent successfully") {
+                Show_Toast(res?.data?.message)
+                dispatch(setLoading(false))
+            }
+        })
+    }
 
 
 
@@ -56,12 +99,13 @@ const PasswordOtp = () => {
             <StatusBar
                 animated={true}
                 backgroundColor={ColorCode.blue_Button_Color} />
-            <AuthHeader myHeading={"Verify Otp"} imge={require('../../assets/images/arrow-left.png')} />
+            <AuthHeader myHeading={"Verify Otp"}
+                imge={require('../../assets/images/arrow-left.png')} />
             <View style={styles.body}>
                 <ScrollView style={{ flex: 1 }}
                     contentContainerStyle={{ justifyContent: 'space-between' }}>
                     <Text style={styles.txt}>{"Please enter the otp "}</Text>
-                    <Text style={styles.txt}>{minutes +":" + remainingSeconds}</Text>
+                    <Text style={[styles.txt,{fontSize:20}]}>{minutes + ":" + remainingSeconds}</Text>
                     <View style={{ flexDirection: 'row', marginTop: 20, alignItems: 'center', width: '100%', justifyContent: 'space-between', paddingHorizontal: 20 }}>
 
                         {/* <TouchableOpacity
@@ -90,11 +134,13 @@ const PasswordOtp = () => {
 
                         <OpacityButton name={"Verify"}
                             btnTextStyle={{ color: ColorCode.yellowText, }}
-                            pressButton={() => { }} />
-                            
-                            {show &&<TouchableOpacity>
+                            pressButton={() => {verfyOtp() }} />
+
+                        {show && <TouchableOpacity
+                                 onPress={()=>{resendOtp()}}
+                        >
                             <Text style={styles.txt}>{"Resend Otp ?"}</Text>
-                            </TouchableOpacity>}
+                        </TouchableOpacity>}
                     </View>
 
                 </ScrollView>

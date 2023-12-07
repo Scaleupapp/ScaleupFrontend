@@ -6,13 +6,7 @@ import React, { useEffect, useState } from "react"
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import ColorCode from "../../../constants/Styles";
-import OpacityButton from "../../../components/opacityButton";
-import InputText from "../../../components/textInput";
 import { AuthHeader, TabHeader } from "../../../components";
-import Strings from "../../../constants/strings";
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import reelsData from "../../../constants/helpers";
-import axios from 'axios';
 import { addComment, allPostData, getHomePageData, sendLikeRequest, sendUnLikeRequest } from "../../../utils/apiHelpers";
 import moment from "moment";
 import CommentModal from "../../../components/commetModal";
@@ -21,16 +15,16 @@ import { setLoading, setOther } from "../../../redux/reducer";
 import Video from 'react-native-video';
 
 const Home = () => {
+  
+  
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
-    const [music, setMusic] = useState([])
-    const [post, setPost] = useState([])
     const [home, setHome] = useState([])
     const [showComment, setCommment] = useState(false)
     const [commentArray, setArray] = useState(null)
     const { pofileData, loading } = useSelector<any, any>((store) => store.sliceReducer);
-
-// console.log("pofileData---->",pofileData,"pofileData---->")
+    const [captionLine, setCaptionLine] = useState(2)
+    // console.log("pofileData---->",pofileData,"pofileData---->")
 
     useEffect(() => {
         homePageData()
@@ -51,7 +45,7 @@ const Home = () => {
         setCommment(true)
     }
 
-   
+
 
     const homePageData = () => {
         dispatch(setLoading(true))
@@ -91,7 +85,7 @@ const Home = () => {
 
 
     const renderItem_didNumber = ({ item, index }: any) => {
-         console.log("done====>", item, "item=======>",)
+        //   console.log("done====>", item, "item=======>",)
         return (
             <View
                 style={[styles.postStyle, styles.iosShadow]}>
@@ -102,71 +96,125 @@ const Home = () => {
                             <Image
                                 resizeMode='cover'
                                 style={styles.profileImg}
-                                source={{ uri: item?.userId?.profilePicture }}/>
+                                source={{ uri: item?.userId?.profilePicture }} />
                             :
-                            <View style={styles.profileImg}/>}
+                            <View style={styles.profileImg} />}
 
                         <View style={[styles.nameType, { width: '55%' }]}>
                             <Text style={styles.boldStyle}>{item?.username}</Text>
                             <Text
-                            numberOfLines={2}
-                            style={styles.smalltxt}>{item?.captions}</Text>
+                                numberOfLines={2}
+                                style={styles.smalltxt}>{item?.heading}</Text>
                         </View>
                     </View>
                     <View style={{ alignSelf: 'flex-start', width: '28%' }}>
-                        <Text numberOfLines={1} style={[styles.smalltxt, { marginTop: 12, }]}>{moment(item?.postdate).fromNow()}</Text>
+                        <Text numberOfLines={1} style={[styles.smalltxt,
+                        { marginTop: 12, }]}>{moment(item?.postdate).fromNow()}</Text>
+
+                        {item?.isVerified &&
+                            <Image
+                                style={{ alignSelf: 'flex-end', marginRight: 10 }}
+                                source={require('../../../assets/images/security-user.png')}
+                            />
+                        }
                     </View>
                 </TouchableOpacity>
                 <View style={styles.info}>
-                    <Text style={[styles.smalltxt, { textAlign: 'left', marginTop: 15, width: '90%' }]}>{item?.postText}</Text>
-                    <Image style={{ top: -20 }} source={item?.typeImg} />
+                    <View style={{ flexDirection: 'row', }}>
+                        {item?.relatedTopics.map((item) => {
+                            // console.log(item,'hastgas=====>')
+                            return (
+                                <Text
+                                    numberOfLines={2}
+                                    style={[styles.smalltxt, {
+                                        textAlign: 'left',
+                                        marginTop: 5,
+
+                                    }]}>{item}</Text>
+                            )
+
+                        })
+
+                        }
+
+
+
+                    </View>
+
+                    <Image style={{}} source={item?.typeImg} />
                 </View>
                 {item?.contentType == "Video" ?
                     <Video
                         resizeMode='cover'
                         source={{ uri: item?.contentURL }}
                         paused={false}
-                        style={{ width: '100%', height: 250, backgroundColor: ColorCode.lightGrey, borderRadius: 15, marginVertical: 20 }}
+                        style={{ width: '100%', height: 250, backgroundColor: ColorCode.lightGrey, borderRadius: 15, marginVertical: 10 }}
                         repeat={true}
                     >
                     </Video>
                     :
                     <Image
                         resizeMode={Platform.OS === "ios" ? 'cover' : 'contain'}
-                        style={{ width: '100%', height: 250, backgroundColor: ColorCode.lightGrey, borderRadius: 15, marginVertical: 20 }}
+                        style={{ width: '100%', height: 250, backgroundColor: ColorCode.lightGrey, borderRadius: 15, marginVertical: 10 }}
                         source={{ uri: item?.contentURL }}
                     />}
+                <View style={{ width: '100%'}}>
+                    <Text
+                        numberOfLines={captionLine}
+                        style={[styles.smalltxt, {
+                            textAlign: 'left', 
+                        }]}
+                    >{item?.captions}</Text>
+
+                    {item?.captions.length > 38 &&
+                        <TouchableOpacity onPress={()=>{ captionLine === 2 ? setCaptionLine(100) : setCaptionLine(2) }}
+                        style={{ }}>
+                            <Text style={[styles.smalltxt,{ color: ColorCode.blue_Button_Color }]}>{captionLine === 2 ?'see more' : 'show less'}</Text>
+                        </TouchableOpacity>
+                    }
 
 
 
+                </View>
+                <View style={styles.line} />
 
-
-                <View style={styles.info}>
+                <View style={{ flexDirection: 'row' }}>
+                    {item?.hashtags.map((item) => {
+                        // console.log(item,'hastgas=====>')
+                        return (
+                            <Text
+                                numberOfLines={2}
+                                style={[styles.smalltxt, {
+                                    textAlign: 'left',
+                                }]}>{item}</Text>
+                        )
+                    })
+                    }
+                    {/* {item?.isVerified &&
+                        <Image
+                            source={require('../../../assets/images/security-user.png')}
+                        />
+                    } */}
+                </View>
+                <View style={[styles.info, { marginTop: 10 }]}>
                     <View style={{ flexDirection: 'row', width: '40%', justifyContent: 'space-between', marginTop: 15 }}>
                         <TouchableOpacity
-                            onPress={() => { likeThisPost(item) }}
-                        >
+                            onPress={() => { likeThisPost(item) }}>
                             <Image style={{ top: -20 }}
                                 tintColor={item?.likes.includes(pofileData?.user?._id) ? ColorCode.blue_Button_Color : 'grey'}
                                 source={require('../../../assets/images/heart.png')} />
                         </TouchableOpacity>
                         <Text style={[styles.boldStyle, { top: -20, paddingLeft: 0 }]}>{item?.likes.length}</Text>
                         <TouchableOpacity
-                            onPress={() => { openCoomentSection(item) }}
-                        >
+                            onPress={() => { openCoomentSection(item) }}>
                             <Image style={{ top: -20 }} source={require('../../../assets/images/image_message.png')} />
                         </TouchableOpacity>
-
-
                         <Text style={[styles.boldStyle, { top: -20, paddingLeft: 0 }]}>{item?.comments?.length}</Text>
                         {/* <Image style={{ top: -20 }} source={item?.ShareImage} /> */}
                     </View>
-
                     {/* <Image style={{ top: -20 }} source={item?.SaveImage} /> */}
                 </View>
             </View>
-
-
         )
     }
 
@@ -183,8 +231,7 @@ const Home = () => {
             <TabHeader myHeading={"ScaleUp"}
                 // imge1={require('../../../assets/images/filter-remove.png')}
                 imge2={require('../../../assets/images/Notification.png')}
-                imge1={require('../../../assets/images/crown-2.png')}
-            />
+                imge1={require('../../../assets/images/crown-2.png')} />
 
             <View style={[styles.reelsStyle,]}>
 
@@ -202,7 +249,6 @@ const Home = () => {
                     close={() => { setCommment(false) }}
                     value={commentArray}
                     post={(t) => { postComment(t) }}
-
                 />
             }
 
@@ -259,6 +305,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: "center",
+        // marginTop: 10
 
     },
     profileImg: {
@@ -283,7 +330,14 @@ const styles = StyleSheet.create({
         fontFamily: 'ComicNeue-Bold',
         color: ColorCode.gray_color,
 
-    }
+    },
+    line: {
+        height: 2,
+        backgroundColor: ColorCode.lightGrey,
+        width: '95%',
+        marginTop: 5,
+        marginHorizontal: 10
+    },
 
 
 

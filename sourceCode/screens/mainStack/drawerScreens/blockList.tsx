@@ -56,7 +56,7 @@ const unBlockUesrList=(item)=>{
                           onPress={()=>{unBlockUesrList(item?._id)}} 
                           style={styles.color}>
                         <Text style={[styles.smalltxt,
-                        { color: ColorCode.yellowText, marginHorizontal: 20 }]}>{'Unblock'}</Text>
+                        { color: ColorCode.yellowText, paddingLeft: 0,}]}>{'Unblock'}</Text>
                     </TouchableOpacity>
                 </TouchableOpacity>
             </View>
@@ -187,7 +187,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 15,
-        backgroundColor:'#043142'
+        backgroundColor:'#043142',
+        width:75
 
     },
 

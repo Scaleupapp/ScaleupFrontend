@@ -4,7 +4,7 @@
 
 import {
     Image, Platform, ScrollView, StyleSheet, Text,
-    TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView, Alert
+    TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView, Alert, Modal
 } from "react-native"
 import React, { useEffect, useState } from "react"
 import { useNavigation } from "@react-navigation/native";
@@ -21,19 +21,28 @@ import { basicDetail } from "../../utils/apiHelpers";
 import { setLoading } from "../../redux/reducer";
 import axios from "axios";
 import { Show_Toast } from "../../components/toast";
+import CalendarPicker from 'react-native-calendar-picker';
+import moment from "moment";
+import Loader from "../../components/loader";
+
 const BasicDetail = (props) => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
     const { loginUser } = useSelector<any, any>((store) => store.cookies);
+    const { name } = useSelector<any, any>((store) => store.sliceReducer);
     const [selectedImage, setSelectedImage] = useState(null)
     const [location, setLocation] = useState("")
     const [date, setDate] = useState("")
     const [about, setAbout] = useState("")
     const [intrust, setIntrust] = useState("")
-    const data= props?.route?.params?.data?.username
-
-    console.log(selectedImage, 'selectedImage======>',data)
-
+    const [showcalenderPicker, setshowcalenderPicker] = useState(false)
+    const data = props?.route?.params?.data?.username
+    const [selectedStartDate, setselectedStartDate] = useState(null)
+    // console.log(selectedImage, 'selectedImage======>', data)
+    const { pofileData } = useSelector<any, any>((store) => store.sliceReducer);
+    const { loading } = useSelector<any, any>((store) => store.sliceReducer);
+   
+    // console.log("pofileData=====>",pofileData,"pofileData=====>")
 
 
     const showAlert = () => {
@@ -118,23 +127,14 @@ const BasicDetail = (props) => {
         });
     };
 
-
-
-
-   
-
-  
-
-
-
     const updateBasicUserDetail = () => {
-
+        
         const formData = new FormData();
         // var filename = generateRandomString(10) + '.jpg';
-         const data = { name: 'file.jpg', uri: selectedImage?.uri?.uri, type: "image/png"}
+        const data = { name: 'file.jpg', uri: selectedImage?.uri?.uri, type: "image/png" }
         formData.append('profilePicture', data);
         formData.append('location', location);
-        formData.append('dateOfBirth', date);
+        formData.append('dateOfBirth', moment(selectedStartDate.toString()).format('YYYY-MM-DD'));
         formData.append('bioAbout', about);
         formData.append('bioInterests', intrust);
         console.log(formData, "formData============>")
@@ -148,73 +148,145 @@ const BasicDetail = (props) => {
     }
 
 
+    const openCalenderPicker = () => {
+        setshowcalenderPicker(true)
 
+    }
+    const onDateChange = (date: any) => {
+        setselectedStartDate(date)
+        setshowcalenderPicker(false)
+    }
 
 
 
     return (
         <SafeAreaView style={styles.main}>
+             {loading && <Loader />}
             <StatusBar
                 barStyle={'dark-content'}
                 animated={true}
-                backgroundColor={ColorCode.white_Color}
-            />
+                backgroundColor={ColorCode.white_Color} />
             <View style={styles.body}>
                 <ScrollView style={{ flex: 1 }}
                     contentContainerStyle={{ justifyContent: 'space-between' }}
                     automaticallyAdjustKeyboardInsets
-                    keyboardShouldPersistTaps
-                >
-                    <Text style={styles.myText}>{"Basic  Details"}</Text>
+                    keyboardShouldPersistTaps>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15, }}>
+
+                        <TouchableOpacity
+                        onPress={()=>{navigation.goBack()}}
+                        >
+                            <Image
+                                tintColor={'black'}
+                                source={require('../../assets/images/arrow-left.png')}
+                            />
+                        </TouchableOpacity>
+
+                        <Text style={[styles.myText, { alignSelf: 'center',marginRight:15}]}>{"Basic  Details"}</Text>
+                        <View></View>
+                    </View>
                     <Text style={styles.txt}>{Strings.FillOut}</Text>
                     <TouchableOpacity onPress={() => { showAlert() }}
                         style={styles.profile}>
 
                         <Image
-                        resizeMode='center'
+                            resizeMode={selectedImage?.uri ? 'contain' : 'center'}
                             style={{ marginBottom: -20, height: 50, width: 50, borderRadius: 25 }}
-                            source={selectedImage?.uri ? selectedImage?.uri : require('../../assets/images/personalcard.png')} />
+                            source={selectedImage?.uri ? selectedImage?.uri :
+                                pofileData?.user?.profilePicture ?  pofileData?.user?.profilePicture:
+                                require('../../assets/images/personalcard.png')} />
                         <Image
                             style={{ marginLeft: 70, bottom: -5 }}
                             source={require('../../assets/images/EditSquare.png')}
                         />
                     </TouchableOpacity>
-                    <Text style={[styles.myText, { fontSize: 16, marginTop: 20 }]}>{data}</Text>
+                    <Text style={[styles.myText, { fontSize: 16, marginTop: 20 }]}>{name != '' ?name : pofileData?.user?.username  }</Text>
                     <View style={[styles.inputView, { height: hp(35) }]}>
                         <InputText
                             length={16}
                             onChange={(text) => { setLocation(text) }}
-                            value={location}
-                            placeholder={"location"} />
+                            value={location != "" ? location : pofileData?.user?.location}
+                            placeholder={"location"}
+                             />
 
-                        <InputText
+                        {/* <InputText
                             length={16}
                             onChange={(text) => { setDate(text) }}
                             value={date}
                             keyboardType={'number-pad'}
-                            placeholder={"Date of Birth"} />
+                            placeholder={"Date of Birth"} /> */}
+                        <TouchableOpacity
+                            onPress={() => { openCalenderPicker() }}
+                            style={[styles.calender, { justifyContent: 'space-between' }]}
+                            activeOpacity={1}>
+                            <Text style={{
+                                fontFamily: 'ComicNeue-Bold',
+                                paddingLeft: 10,
+                                color: 'grey'
+                            }}>{selectedStartDate != null ?
+                                moment(selectedStartDate.toString()).format('YYYY-MM-DD ') :
+                                pofileData?.user?.dateOfBirth ? moment(pofileData?.user?.dateOfBirth.toString()).format('YYYY-MM-DD '):
+                                 "Date of Birth"}</Text>
+                            <Image
+                                style={{ transform: [{ rotate: '90deg' }], marginRight: 10 }}
+                                source={require('../../assets/images/ArrowRight.png')}
+                            />
+                        </TouchableOpacity>
                         <InputText
-                            length={26}
-                            onChange={(text) => { setIntrust(text) }}
-                            value={intrust}
+                            onChange={(text) => {setIntrust(text) }}
+                            value={intrust != '' ? intrust : pofileData?.user?.bio?.bioInterests[0]}
+                            placeholder={"Enter interests comma separated "} />
 
-                            placeholder={"Interest"} />
+                        {intrust.length > 0 &&
+                            <View style={{
+                                flexDirection: 'row',
+                                flexWrap: 'wrap', paddingHorizontal: 15
+                            }}>
+                                {intrust.split(',').map((interest, index) => (
+                                    <TouchableOpacity key={index} style={{
+                                        padding: 5,
+                                        margin: 5, borderWidth: 1, borderRadius: 5
+                                    }}>
+                                        <Text>{interest.trim()}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>}
+
+
                         <InputText
-                            length={26}
+
                             onChange={(text) => { setAbout(text) }}
-                            value={about}
+                            value={about != '' ? about : pofileData?.user?.bio?.bioAbout }
                             placeholder={"About You"} />
                     </View>
                 </ScrollView>
                 <View style={styles.inputView}>
                     <OpacityButton
                         pressButton={() => {
-                             updateBasicUserDetail()
-                           
-
+                            updateBasicUserDetail()
                         }}
-                        name={"Save & Next"} btnTextStyle={{ color: ColorCode.yellowText, fontFamily: 'ComicNeue-Bold' }} button={{ width: '44%' }} />
+                        name={"Save & Next"}
+                        btnTextStyle={{
+                            color: ColorCode.yellowText,
+                            fontFamily: 'ComicNeue-Bold'
+                        }}
+                        button={{ width: '44%' }} />
                 </View>
+
+                {showcalenderPicker &&
+                    <Modal isVisible={showcalenderPicker}
+                        animationIn={'zoomIn'} animationOut={'zoomOut'} backdropOpacity={0.1}
+                        onBackdropPress={() => setshowcalenderPicker(false)} transparent={true}>
+                        <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
+                            <View style={{ height: hp(45), backgroundColor: 'white', justifyContent: 'center', alignItems: 'center', borderRadius: 10, elevation: 10 }}>
+                                <CalendarPicker width={350}
+                                    todayBackgroundColor={ColorCode.blue_Button_Color}
+                                    todayTextStyle={{ color: ColorCode.white_Color }}
+                                    // minDate={new Date()}
+                                    onDateChange={onDateChange} />
+                            </View>
+                        </View>
+                    </Modal>}
             </View>
         </SafeAreaView>
 
@@ -277,6 +349,25 @@ const styles = StyleSheet.create({
         elevation: 10,
         alignItems: 'center',
         justifyContent: 'center'
+    },
+    calender: {
+        height: 50,
+        width: '90%',
+        backgroundColor: ColorCode.white_Color,
+        alignSelf: 'center',
+        borderRadius: hp(8),
+        elevation: 20,
+        shadowColor: ColorCode.white_Color,
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.6,
+        borderColor: '#ddd',
+        borderWidth: 1,
+        paddingLeft: 15,
+        fontWeight: '600',
+        fontSize: 14,
+        color: ColorCode.black_Color,
+        flexDirection: 'row',
+        alignItems: 'center'
     }
 
 })

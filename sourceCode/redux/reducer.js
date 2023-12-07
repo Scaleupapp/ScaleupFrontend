@@ -4,7 +4,9 @@ const initialState = {
   selectedImage:null,
   loading:false,
   pofileData:[],
-  other:''
+  other:'',
+  name:'',
+  terms:false
 }
 
 const sliceReducer = createSlice({
@@ -25,6 +27,12 @@ const sliceReducer = createSlice({
     setOther(state, action) {
       state.other = action.payload
     },
+    setName(state, action) {
+      state.name = action.payload
+    },
+    setTerms(state, action) {
+      state.terms = action.payload
+    },
 
 
   }
@@ -34,6 +42,8 @@ export const {
   setSelectedImage,
   setLoading,
   setProfileDat,
-  setOther
+  setOther,
+  setName,
+  setTerms,
 } = sliceReducer.actions;
 export default sliceReducer.reducer;

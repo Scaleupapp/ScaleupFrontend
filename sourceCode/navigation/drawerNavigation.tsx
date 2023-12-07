@@ -9,6 +9,7 @@ import { Home, Profile } from '../screens/mainStack/tabScreens';
 import BlockList from '../screens/mainStack/drawerScreens/blockList';
 import Setting from '../screens/mainStack/drawerScreens/settingScreen';
 import ColorCode from '../constants/Styles';
+import EditProfile from '../screens/mainStack/drawerScreens/editProfile';
 
 const Drawer = createDrawerNavigator();
 const DrawerNavigator = () => {
@@ -88,9 +89,9 @@ const DrawerNavigator = () => {
         component={Home}
       />
 
-      {/* <Drawer.Screen
+      <Drawer.Screen
         options={{
-          drawerLabel: 'BlockList',
+          drawerLabel: 'EditProfile',
           drawerActiveTintColor: 'white',
           drawerLabelStyle: {
             fontSize: 14,
@@ -101,9 +102,9 @@ const DrawerNavigator = () => {
           drawerInactiveTintColor: 'red',
 
         }}
-        name="BlockList"
-        component={BlockList}
-      /> */}
+        name="EditProfile"
+        component={EditProfile}
+      />
       <Drawer.Screen
         options={{
           drawerLabel: 'Settings',

@@ -5,21 +5,28 @@ import ColorCode from '../constants/Styles';
 
 const InputText = (props:any) => {
 
+console.log(props?.value,"props?.Value=====>")
+
   return (
     <View style={[styles.container,props?.style]}>
     <Image
     source={props.img}
     />
+    <Text style={{fontSize: 14,
+       color: ColorCode.black_Color,
+       fontFamily:'ComicNeue-Bold',marginLeft:5
+       }}>{props?.num}</Text>
      <TextInput 
      placeholder={props.placeholder}
      placeholderTextColor={props?.placeholderTextColor? props?.placeholderTextColor:'grey'}
      maxLength={props?.length}
-     keyboardType={props.keyboardType}
-     onChangeText= {props.onChange}
-     value={props.Value}
-     autoCapitalize={props.autoCapitalize}
-     secureTextEntry={props.secureTextEntry}
+     keyboardType={props?.keyboardType}
+     onChangeText= {props?.onChange}
+     value={props?.value}
+     autoCapitalize={props?.autoCapitalize}
+     secureTextEntry={props?.secureTextEntry}
      style={styles.input}
+     editable
      />
      <TouchableOpacity style={{alignItems:'center',
      justifyContent:'center',right:30}}

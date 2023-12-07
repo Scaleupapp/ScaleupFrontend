@@ -14,25 +14,48 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 import reelsData from "../../../constants/helpers";
 import LinearGradient from 'react-native-linear-gradient';
 import { setLoginUser } from "../../../redux/cookiesReducer";
+import { chageCommentPrivalge } from "../../../utils/apiHelpers";
+import ConfirmDelete from "../../../components/confimDelete";
 const Setting = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
     const [enable, setEnable] = useState(false)
+    const [comment, setComment]=useState("everyone")
+    const [open, setOpen]=useState(false)
 
     const toggleSwitch = () => {
         setEnable(!enable)
     }
 
+const giveCommentPermission=(item)=>{
+    setComment(item)
+    const data ={"commentPrivileges": item
 
-const logout=()=>{
-    dispatch(setLoginUser({}))
-    navigation.reset({
-        index: 0,
-        routes: [{ name: 'SignIn' }] // Replace 'Home' with the screen you want to reset to
-      });
+    }
+    chageCommentPrivalge(data).then((res)=>{
+      console.log(res?.data,"coo=======>")
+    })
 }
+
+
+useEffect(()=>{
+    setTimeout(()=>{
+        setComment("everyone")
+    },2000)
+   
+},[])
+
+
+// console.log(comment,"comment=======>")
+
     return (
         <SafeAreaView style={styles.main}>
+
+            {open&&
+                <ConfirmDelete
+                close={()=>{setOpen(false)}}
+                />
+            }
             <StatusBar
                 barStyle={'dark-content'}
                 animated={true}
@@ -45,27 +68,29 @@ const logout=()=>{
 
             <View style={[styles.reelsStyle,]}>
                 <Text style={[styles.smalltxt, { fontSize: 18, color: ColorCode.blue_Button_Color }]}>Account</Text>
-                <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+
+                <TouchableOpacity
+                    onPress={() => { navigation.navigate("EditProfile") }}
+                    style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={[styles.smalltxt,]}>Edit Profile</Text>
                     <Image
-                        source={require('../../../assets/images/ArrowRight.png')}
-                    />
+                        source={require('../../../assets/images/ArrowRight.png')} />
                 </TouchableOpacity>
 
-                <TouchableOpacity 
-                onPress={()=>{navigation.navigate("ForgotPassword")}}
-                style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+                <TouchableOpacity
+                    onPress={() => { navigation.navigate("ForgotPassword") }}
+                    style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={[styles.smalltxt,]}>Change Password</Text>
                     <Image
                         source={require('../../../assets/images/ArrowRight.png')}
                     />
                 </TouchableOpacity>
 
-                <View style={[styles.line, { marginTop: 20 }]} />
+                {/* <View style={[styles.line, { marginTop: 20 }]} /> */}
 
 
 
-                <Text style={[styles.smalltxt, { fontSize: 18, color: ColorCode.blue_Button_Color }]}>Notifications</Text>
+                {/* <Text style={[styles.smalltxt, { fontSize: 18, color: ColorCode.blue_Button_Color }]}>Notifications</Text>
                 <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={[styles.smalltxt,]}>Allow all notifications</Text>
                     <Switch
@@ -74,16 +99,6 @@ const logout=()=>{
                         ios_backgroundColor="#3e3e3e"
                         onValueChange={toggleSwitch}
                         value={enable} />
-                </TouchableOpacity>
-
-                {/* <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
-                    <Text style={[styles.smalltxt,]}>Change Password</Text>
-                    <Switch
-                        trackColor={{ false: "grey", true: ColorCode.blue_Button_Color }}
-                        thumbColor={enable ? "white" : "white"}
-                        ios_backgroundColor="#3e3e3e"
-                        onValueChange={toggleSwitch}
-                        value={enable} />
                 </TouchableOpacity> */}
 
                 {/* <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
@@ -96,7 +111,17 @@ const logout=()=>{
                         value={enable} />
                 </TouchableOpacity> */}
 
-                <View style={[styles.line, { marginTop: 20 }]} />
+                {/* <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+                    <Text style={[styles.smalltxt,]}>Change Password</Text>
+                    <Switch
+                        trackColor={{ false: "grey", true: ColorCode.blue_Button_Color }}
+                        thumbColor={enable ? "white" : "white"}
+                        ios_backgroundColor="#3e3e3e"
+                        onValueChange={toggleSwitch}
+                        value={enable} />
+                </TouchableOpacity> */}
+
+                {/* <View style={[styles.line, { marginTop: 20 }]} />
 
                 <Text style={[styles.smalltxt, { fontSize: 18, color: ColorCode.blue_Button_Color }]}>Privacy</Text>
                 <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
@@ -107,38 +132,52 @@ const logout=()=>{
                         ios_backgroundColor="#3e3e3e"
                         onValueChange={toggleSwitch}
                         value={enable} />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
 
 
                 <Text style={[styles.smalltxt, { marginTop: 10 }]}>Who can see my posts, photos, life updates</Text>
-                <TouchableOpacity style={{ flexDirection: 'row', marginTop: 20, marginLeft: 20 }}>
+                <TouchableOpacity
+                onPress={()=>{giveCommentPermission("everyone")}}
+
+                    style={{ flexDirection: 'row', marginTop: 20, marginLeft: 20 }}>
                     <Image
                         resizeMode='contain'
-                        source={require('../../../assets/images/image_.png')}
+                        source={comment === "everyone" ?
+                        require('../../../assets/images/image_.png')
+                        :require('../../../assets/images/notimage_.png')
+                    }
                     />
-                    <Text style={[styles.smalltxt,]}>My all Friend-list</Text>
+                    <Text style={[styles.smalltxt,]}>Everyone</Text>
 
                 </TouchableOpacity>
-                <TouchableOpacity style={{ flexDirection: 'row', marginTop: 20, marginLeft: 20 }}>
+                <TouchableOpacity
+                onPress={()=>{giveCommentPermission("followers")}}
+                    style={{ flexDirection: 'row', marginTop: 20, marginLeft: 20 }}>
                     <Image
                         resizeMode='contain'
-                        source={require('../../../assets/images/image_.png')}
+                        source={comment === "followers" ?
+                        require('../../../assets/images/image_.png')
+                        :require('../../../assets/images/notimage_.png')}
                     />
-                    <Text style={[styles.smalltxt,]}>Selected</Text>
+                    <Text style={[styles.smalltxt,]}>My Followers</Text>
 
                 </TouchableOpacity>
-                <TouchableOpacity style={{ flexDirection: 'row', marginTop: 20, marginLeft: 20 }}>
+                <TouchableOpacity
+                 onPress={()=>{giveCommentPermission("none")}}
+                    style={{ flexDirection: 'row', marginTop: 20, marginLeft: 20 }}>
                     <Image
                         resizeMode='contain'
-                        source={require('../../../assets/images/image_.png')}
+                        source={comment ==="none" ?
+                        require('../../../assets/images/image_.png')
+                        :require('../../../assets/images/notimage_.png')}
                     />
                     <Text style={[styles.smalltxt,]}>Nobody</Text>
 
                 </TouchableOpacity>
 
 
-                <TouchableOpacity onPress={()=>{navigation.navigate("BlockList")}}
-                style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+                <TouchableOpacity onPress={() => { navigation.navigate("BlockList") }}
+                    style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={[styles.smalltxt,]}>Block People</Text>
                     <Image
                         source={require('../../../assets/images/ArrowRight.png')}
@@ -146,7 +185,24 @@ const logout=()=>{
                 </TouchableOpacity>
 
 
-                <TouchableOpacity onPress={()=>{logout()}}
+                <TouchableOpacity onPress={() => { }}
+                    style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+                    <Text style={[styles.smalltxt,]}>Help Center</Text>
+                    <Image
+                        source={require('../../../assets/images/ArrowRight.png')}
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => {setOpen(true)  }}
+                    style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+                    <Text style={[styles.smalltxt,]}>Delete Account</Text>
+                    <Image
+                        source={require('../../../assets/images/ArrowRight.png')}
+                    />
+                </TouchableOpacity>
+
+
+                {/* <TouchableOpacity onPress={()=>{logout()}}
                 
                 style={{
                     marginTop: 20,
@@ -158,7 +214,7 @@ const logout=()=>{
                 }}>
                     <Text style={[styles.smalltxt,{color:'white',fontSize:24}]}>Logout</Text>
 
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </View>
 
 

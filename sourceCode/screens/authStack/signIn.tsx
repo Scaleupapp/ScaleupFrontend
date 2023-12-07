@@ -1,3 +1,5 @@
+
+
 import {
     Image, Platform, ScrollView, StyleSheet, Text,
     TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView
@@ -12,8 +14,8 @@ import { AuthHeader } from "../../components";
 import Strings from "../../constants/strings";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { Show_Toast } from "../../components/toast";
-import { setLoading } from "../../redux/reducer";
-import { loginApi } from "../../utils/apiHelpers";
+import { setLoading, setName } from "../../redux/reducer";
+import { getOtp, loginApi } from "../../utils/apiHelpers";
 import { setLoginUser } from "../../redux/cookiesReducer";
 import Loader from "../../components/loader";
 import { checkMultiple, Permission, PERMISSIONS, requestMultiple } from "react-native-permissions";
@@ -26,34 +28,33 @@ const SignIn = () => {
     const [defaults, setDefault] = useState("Username")
     const [terms, setTerms] = useState(false)
     const { loading } = useSelector<any, any>((store) => store.sliceReducer);
-
-
+   
     useEffect(() => {
         if (Platform.OS === "ios") {
             checkMultiple([PERMISSIONS.IOS.CAMERA, PERMISSIONS.IOS.MICROPHONE, PERMISSIONS.IOS.CONTACTS]).then((statuses) => {
-                console.log("check====Camera--1--Ios---->", statuses[PERMISSIONS.IOS.CAMERA]);
-                console.log("check====Microphone-----Ios---->", statuses[PERMISSIONS.IOS.CONTACTS]);
+                // console.log("check====Camera--1--Ios---->", statuses[PERMISSIONS.IOS.CAMERA]);
+                // console.log("check====Microphone-----Ios---->", statuses[PERMISSIONS.IOS.CONTACTS]);
 
             });
             requestMultiple([PERMISSIONS.IOS.CAMERA, PERMISSIONS.IOS.MICROPHONE, PERMISSIONS.IOS.CONTACTS]).then((statuses) => {
-                console.log("request===CamCamera--2--Ios---->", statuses[PERMISSIONS.IOS.CAMERA]);
-                console.log("request===MicrophoneIos---->", statuses[PERMISSIONS.IOS.CONTACTS]);
+                // console.log("request===CamCamera--2--Ios---->", statuses[PERMISSIONS.IOS.CAMERA]);
+                // console.log("request===MicrophoneIos---->", statuses[PERMISSIONS.IOS.CONTACTS]);
 
             });
         } else {
             checkMultiple([PERMISSIONS.ANDROID.CAMERA, PERMISSIONS.ANDROID.RECORD_AUDIO, PERMISSIONS.ANDROID.READ_CONTACTS,
             PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE, PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE
             ]).then((statuses) => {
-                console.log("Camera--3--", statuses[PERMISSIONS.ANDROID.RECORD_AUDIO]);
-                console.log("READ_CONTACTS", statuses[PERMISSIONS.ANDROID.READ_CONTACTS]);
+                // console.log("Camera--3--", statuses[PERMISSIONS.ANDROID.RECORD_AUDIO]);
+                // console.log("READ_CONTACTS", statuses[PERMISSIONS.ANDROID.READ_CONTACTS]);
 
 
             });
             requestMultiple([PERMISSIONS.ANDROID.CAMERA, PERMISSIONS.ANDROID.RECORD_AUDIO, PERMISSIONS.ANDROID.READ_CONTACTS,
             PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE, PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE, PERMISSIONS.ANDROID.READ_MEDIA_AUDIO
             ]).then((statuses) => {
-                console.log("Camera--4--", statuses[PERMISSIONS.ANDROID.CAMERA]);
-                console.log("AUDIO_RECORDING===>", statuses[PERMISSIONS.ANDROID.RECORD_AUDIO]);
+                // console.log("Camera--4--", statuses[PERMISSIONS.ANDROID.CAMERA]);
+                // console.log("AUDIO_RECORDING===>", statuses[PERMISSIONS.ANDROID.RECORD_AUDIO]);
 
             });
         }
@@ -61,31 +62,56 @@ const SignIn = () => {
 
 
     const loginUser = () => {
+        dispatch(setName(userName))
         let passworRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
         let testPassword = passworRegex.test(password)
         if (userName == '') {
             Show_Toast("Please Enter UserName")
+        } 
+        else if (defaults === 'Phone' && userName.length != 10){
+            Show_Toast("Phone number be valid phone number")
         }
         // else if (!testPassword) {
         //     Show_Toast("Please valid password")
         // } 
+        else if (defaults === 'Phone') {
+            dispatch(setLoading(true))
+            const pay = {
+                "phoneNumber": userName
+            }
+            getOtp(pay).then((res) => {
+                if (res?.data?.message === "OTP sent successfully") {
+                    Show_Toast(res?.data?.message)
+                    navigation.navigate("PasswordOtp", { "phoneNumber": userName })
+                    setUserName("")
+                    setDefault("Username")
+                    dispatch(setLoading(false))
+
+                }
+            })
+        }
         else {
             dispatch(setLoading(true))
             const data = {
                 "loginIdentifier": userName,
                 "password": password
             }
+            console.log("login------->")
             loginApi(data).then((res) => {
                 dispatch(setLoading(false))
                 Show_Toast(res?.data?.message)
                 console.log(res?.data, "res?.data=======>")
                 dispatch(setLoginUser(res?.data))
-                setUserName("")
-                setPassword("")
-                if (res?.data?.sFirstTimeLogin1) {
-                    navigation.navigate("BasicDetail")
-                } else {
-                    navigation.navigate("DrawerNavigator")
+
+                if (res?.data?.isFirstTimeLogin1) {
+                    navigation.navigate("BasicDetail", { data })
+                    setUserName("")
+                    setPassword("")
+                }
+                else {
+                    navigation.navigate("TabNavigator")
+                    setUserName("")
+                    setPassword("")
                 }
             })
         }
@@ -101,44 +127,50 @@ const SignIn = () => {
             <View style={styles.body}>
                 <ScrollView style={{ flex: 1 }}
                     contentContainerStyle={{ justifyContent: 'space-between' }}>
-                    <Text style={[styles.txt, { color: ColorCode.gray_color }]}>{Strings.SignInText}</Text>
+                    {/* <Text style={[styles.txt, { color: ColorCode.gray_color }]}>{Strings.SignInText}</Text> */}
                     <Text style={[{ fontWeight: '700' }, styles.txt,]}>{Strings.LginWith}</Text>
                     <View style={{ flexDirection: 'row', marginTop: 20, alignItems: 'center', width: '100%', justifyContent: 'space-between', paddingHorizontal: 20 }}>
+                        
                         <TouchableOpacity
-                            onPress={() => { setDefault('Email') }}
+                            onPress={() => { setDefault('Email'),setUserName('') }}
                             style={[styles.input, defaults == 'Email' && { borderColor: ColorCode.blue_Button_Color }]}>
                             <Text style={[{ fontFamily: 'ComicNeue-Bold' }, defaults == 'Email' && { color: ColorCode.blue_Button_Color }]}>{Strings.Email}</Text>
                         </TouchableOpacity>
+
                         <TouchableOpacity
-                            onPress={() => { setDefault('Phone') }}
+                            onPress={() => { setDefault('Phone'),setUserName('') }}
                             style={[styles.input, defaults == 'Phone' && { borderColor: ColorCode.blue_Button_Color }]}>
                             <Text style={[{ fontFamily: 'ComicNeue-Bold', }, defaults == 'Phone' && { color: ColorCode.blue_Button_Color }]}>{Strings.PhoneNumber}</Text>
                         </TouchableOpacity>
+
                     </View>
                     <View style={[styles.inputView, { marginTop: 30 }]}>
                         <InputText
-                            img={require('../../assets/images/image_user_Light.png')}
+                            img={defaults != 'Phone' ?  require('../../assets/images/sms.png'):  require('../../assets/images/image_user_Light.png')}
+                            num={defaults === 'Phone' &&"+91"}
                             value={userName}
                             onChange={(t) => { setUserName(t) }}
                             placeholder={defaults}
-                            length={15}
+                            length={35}
                             keyboardType={defaults == 'Phone' ? 'number-pad' : 'default'}
 
                         />
 
-                        <InputText
-                            secureTextEntry={secureText}
-                            show={() => { setSecureText(!secureText) }}
-                            img2={require('../../assets/images/eye-slash.png')}
-                            value={password}
-                            onChange={(t) => { setPassword(t) }}
-                            length={10}
-                            img={require('../../assets/images/lock.png')} 
-                            placeholder={"Password"} />
+                        {defaults != 'Phone' &&
+
+                            <InputText
+                                secureTextEntry={secureText}
+                                show={() => { setSecureText(!secureText) }}
+                                img2={secureText?require('../../assets/images/eye-slash.png') :require('../../assets/images/eye.png')}
+                                value={password}
+                                onChange={(t) => { setPassword(t) }}
+                                // length={10}
+                                img={require('../../assets/images/lock.png')}
+                                placeholder={"Password"} />}
 
                         <View style={{ justifyContent: 'space-between', flexDirection: 'row', paddingHorizontal: 20 }}>
                             <View style={{ flexDirection: 'row' }}>
-                            <TouchableOpacity onPress={() => {
+                                <TouchableOpacity onPress={() => {
                                     // navigation.navigate("Terms") 
                                     setTerms(!terms)
                                 }} >
@@ -151,7 +183,7 @@ const SignIn = () => {
                                 </TouchableOpacity>
                                 <Text style={{ marginLeft: 10, fontFamily: 'ComicNeue-Bold' }}>{Strings.RememnberMe}</Text>
                             </View>
-                            <TouchableOpacity onPress={() => { navigation.navigate("ForgotPassword") }}>
+                            <TouchableOpacity onPress={() => { navigation.navigate("ChangePassword") }}>
                                 <Text style={{ fontFamily: 'ComicNeue-Bold' }}>{Strings.ForgotPassword}</Text>
                             </TouchableOpacity>
                         </View>
@@ -162,11 +194,13 @@ const SignIn = () => {
                                 // navigation.navigate("DrawerNavigator")
                                 loginUser()
                             }}
-                            name={Strings.SignIn} btnTextStyle={{ color: ColorCode.yellowText, }} />
-                       <View style={{ flexDirection: 'row', alignSelf: 'center',  justifyContent: 'center' }}>
-                            <Text style={{ color: ColorCode.gray_color, 
-                                fontFamily: 'ComicNeue-Bold', 
-                                fontSize: 14 }}>{"Don't have an account ?"}</Text>
+                            name={defaults === 'Phone' ?"Send OTP" :Strings.SignIn} btnTextStyle={{ color: ColorCode.yellowText, }} />
+                        <View style={{ flexDirection: 'row', alignSelf: 'center', justifyContent: 'center' }}>
+                            <Text style={{
+                                color: ColorCode.gray_color,
+                                fontFamily: 'ComicNeue-Bold',
+                                fontSize: 14
+                            }}>{"Don't have an account ?"}</Text>
                             <TouchableOpacity onPress={() => { navigation.navigate("SignUp") }} style={{ alignItems: 'center' }}>
                                 <Text style={{ fontFamily: 'ComicNeue-Bold', fontSize: 18, color: ColorCode.blue_Button_Color, marginLeft: 4, bottom: 3 }}>{Strings.SignUp}</Text>
                             </TouchableOpacity>
@@ -193,7 +227,7 @@ const SignIn = () => {
                             </TouchableOpacity>
                         </View> */}
 
-                        
+
                     </View>
                 </ScrollView>
             </View>

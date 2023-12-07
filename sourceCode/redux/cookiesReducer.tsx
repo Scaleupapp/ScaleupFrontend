@@ -11,11 +11,11 @@ const cookies = createSlice({
   initialState,
   reducers: {
     setLoginUser: (state, action) =>{
-      console.log("userDetails---->",  state.loginUser)
+      // console.log("userDetails---->",  state.loginUser)
       state.loginUser = action.payload
     },
     setAllUserDetail: (state, action) =>{
-      console.log("userDetails---->",  state.allUsersDetail)
+      // console.log("userDetails---->",  state.allUsersDetail)
       state.allUsersDetail = action.payload
     },
     setLogin: (state, action) =>{

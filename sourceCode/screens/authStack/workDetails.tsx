@@ -16,15 +16,32 @@ import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { addWorkExperience } from "../../utils/apiHelpers";
 import { Show_Toast } from "../../components/toast";
 import { setLoading } from "../../redux/reducer";
+import Loader from "../../components/loader";
+import {
+    Menu,
+    MenuOptions,
+    MenuOption,
+    MenuTrigger,
+} from 'react-native-popup-menu';
+import moment from "moment";
 const WorkDetails = () => {
+
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
-    const[position, setPosition]=useState("")
-    const[company, setCompany]=useState("")
-    const[start,setStart]=useState("")
-    const [end, setEnd]=useState("")
-    const [description,setDescription]=useState("")
+    const [position, setPosition] = useState("")
+    const [company, setCompany] = useState("")
+    const [start, setStart] = useState("")
+    const [end, setEnd] = useState("")
+    const [description, setDescription] = useState("")
     const [selectedImage, setSelectedImage] = useState(null)
+    const { name } = useSelector<any, any>((store) => store.sliceReducer);
+    const { loading } = useSelector<any, any>((store) => store.sliceReducer);
+    const [addMoreList, setAddMoreList] = useState([])
+    const { pofileData } = useSelector<any, any>((store) => store.sliceReducer);
+  
+    
+
+
 
     const showAlert = () => {
         Alert.alert(
@@ -114,27 +131,135 @@ const WorkDetails = () => {
 
         const formData = new FormData();
         // var filename = generateRandomString(10) + '.jpg';
-         const data = { name: 'file.jpg', uri: selectedImage?.uri?.uri, type: "image/png"}
+        const data = { name: 'file.jpg', uri: selectedImage?.uri?.uri, type: "image/png" }
         formData.append('resume', data);
         formData.append('description', description);
         formData.append('company', company);
         formData.append('startDate', start);
         formData.append('endDate', end);
-        formData.append('description', description);
+        formData.append('position', position);
         console.log(formData, "formData============>")
         dispatch(setLoading(true))
         addWorkExperience(formData).then((res) => {
             dispatch(setLoading(false))
             console.log("res======>", res?.data)
             Show_Toast(res?.data?.message)
+
+            setPosition('')
+            setCompany('')
+            setStart('')
+            setEnd('')
+            setDescription('')
+            setSelectedImage(null)
+
             navigation.navigate("Certification")
         })
     }
 
 
+    const addBasicUserDetail = () => {
+
+        const formData = new FormData();
+        // var filename = generateRandomString(10) + '.jpg';
+        const data = { name: 'file.jpg', uri: selectedImage?.uri?.uri, type: "image/png" }
+        formData.append('resume', data);
+        formData.append('description', description);
+        formData.append('startDate', start);
+        formData.append('endDate', end);
+        formData.append('company', company);
+        formData.append('position', position);
+        const datas = {
+            'resume': data,
+            'description': description,
+            'startDate': start,
+            'endDate': end,
+            'company': company,
+            'position': position
+        }
+
+        setAddMoreList(prevData => [...prevData, datas]);
+        console.log(formData, "formData============>")
+        dispatch(setLoading(true))
+        addWorkExperience(formData).then((res) => {
+            dispatch(setLoading(false))
+            console.log("res======>", res?.data)
+            Show_Toast(res?.data?.message)
+            setPosition('')
+            setCompany('')
+            setStart('')
+            setEnd('')
+            setDescription('')
+            setSelectedImage(null)
+
+        })
+    }
+
+
+
+
+
+
+
+    const renderItem_didNumber = ({ item, index }: any) => {
+        // console.log(item, "item------>")
+        return (
+            <Menu>
+                <MenuTrigger
+                    customStyles={{
+                        optionsWrapper: { padding: 2 },
+                        TriggerTouchableComponent: ({ onPress }) => {
+                            return (
+                                <TouchableOpacity onPress={onPress} style={[styles.button, { marginLeft: 5, marginTop: 20, flexDirection: 'row' }]}>
+
+                                    <Text style={styles.text}>{item?.company}</Text>
+                                    <Image
+                                        tintColor={"white"}
+                                        style={{ transform: [{ rotate: '90deg' }], marginRight: 10 }}
+                                        source={require('../../assets/images/ArrowRight.png')} />
+                                </TouchableOpacity>);
+                        },
+                    }} />
+                <MenuOptions
+                    optionsContainerStyle={{}}
+                    customStyles={{
+                        optionsContainer: {
+                            // width: wp('80%'),
+                            backgroundColor: ColorCode.white_Color,
+                            height: 90, width: 100, marginTop: 50, marginLeft: 10
+                        }
+                    }}>
+
+                    <MenuOption
+                        onSelect={() => { }}
+                        style={styles.menuOption}>
+                        <Text numberOfLines={1} style={styles.menuText}>{item.description}</Text>
+                    </MenuOption>
+
+                    <MenuOption
+                        onSelect={() => { }}
+                        style={styles.menuOption}>
+                        <Text numberOfLines={1} style={styles.menuText}>{item?.position}</Text>
+                    </MenuOption>
+
+                    <MenuOption
+                        onSelect={() => { }}
+                        style={styles.menuOption}>
+                        <Text numberOfLines={1} style={styles.menuText}>{item?.company}</Text>
+                    </MenuOption>
+
+                </MenuOptions>
+
+
+
+
+            </Menu>
+        )
+    }
+
 
     return (
         <SafeAreaView style={styles.main}>
+            {loading && <Loader />}
             <StatusBar
                 barStyle={'dark-content'}
                 animated={true}
@@ -143,10 +268,25 @@ const WorkDetails = () => {
             <View style={styles.body}>
                 <ScrollView style={{ flex: 1 }}
                     contentContainerStyle={{ justifyContent: 'space-between' }}>
-                    <Text style={styles.myText}>{"Work Details"}</Text>
+
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15 }}>
+                        <TouchableOpacity
+                            onPress={() => { navigation.goBack() }}
+                        >
+                            <Image
+                                tintColor={'black'}
+                                source={require('../../assets/images/arrow-left.png')}
+                            />
+                        </TouchableOpacity>
+
+                        <Text style={[styles.myText, { alignSelf: 'center' }]}>{"Work Details"}</Text>
+
+                        <View></View>
+                    </View>
+                    {/* <Text style={styles.myText}>{"Work Details"}</Text> */}
                     <Text style={styles.txt}>{Strings.FillOut}</Text>
 
-                    <View style={styles.profile}>
+                    {/* <View style={styles.profile}>
                         <Image
                             resizeMode='center'
                             style={{ marginBottom: -20, height: 50, width: 50, borderRadius: 25 }}
@@ -156,71 +296,102 @@ const WorkDetails = () => {
                             style={{ marginLeft: 70, bottom: -5 }}
                             source={require('../../assets/images/EditSquare.png')}
                         />
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={[styles.myText, { fontSize: 16, marginTop: 20 }]}>John Smith</Text>
+                    </View> */}
+
+                    <FlatList
+                        scrollEnabled
+                        showsVerticalScrollIndicator={false}
+                        horizontal
+                        contentContainerStyle={{ justifyContent: 'space-between' }}
+                        data={addMoreList.length > 0 ?addMoreList: pofileData?.user?.workExperience}
+                        renderItem={renderItem_didNumber}
+                        keyExtractor={(item, index) => index.toString()} />
+
+                    <TouchableOpacity
+                        onPress={() => { navigation.navigate("Certification") }}
+
+                        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={[styles.myText, { fontSize: 16, marginTop: 20 }]}>{name}</Text>
                         <Image
                             style={{ borderWidth: 2, borderColor: ColorCode.blue_Button_Color, padding: 2, right: 20, position: 'absolute' }}
                             source={require('../../assets/images/send.png')}
                         />
 
-                    </View>
+                    </TouchableOpacity>
 
                     <View style={[styles.inputView, { height: hp(54) }]}>
                         <InputText
-                        length={26}
-                        onChange={(text) => { setPosition(text) }}
-                        value={position}
+
+                            onChange={(text) => { setPosition(text) }}
+                            value={position != '' ? position : pofileData?.user?.workExperience[0]?.position}
                             placeholder={"Position"} />
 
                         <InputText
-                        length={26}
-                        onChange={(text) => { setCompany(text) }}
-                        value={company}
+
+                            onChange={(text) => { setCompany(text) }}
+                            value={company != '' ? company : pofileData?.user?.workExperience[0]?.company}
                             placeholder={"Company"} />
-                       
-                        <View style={{flexDirection:'row',justifyContent:'space-evenly'}}>
-                       
-                        <InputText 
-                        length={16}
-                        onChange={(text) => { setStart(text) }}
-                        value={start}
-                        keyboardType={'number-pad'}
-                        placeholder={"Start Date"} style={{width:"40%"}}/> 
-                        
-                        <InputText 
-                        length={16}
-                        keyboardType={'number-pad'}
-                        onChange={(text) => { setEnd(text) }}
-                        value={end}
-                        placeholder={"End Date"} style={{width:"40%"}}/>
+
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}>
+
+                            <InputText
+
+                                onChange={(text) => { setStart(text) }}
+                                value={start != ''? start :  moment(pofileData?.user?.workExperience[0]?.startDate?.toString())?.format('YYYY-MM-DD ')}
+                                keyboardType={'number-pad'}
+                                placeholder={"Start Date"} style={{ width: "40%" }} />
+
+                            <InputText
+
+                                keyboardType={'number-pad'}
+                                onChange={(text) => { setEnd(text) }}
+                                value={end != ''? end :  moment(pofileData?.user?.workExperience[0]?.endDate?.toString())?.format('YYYY-MM-DD ')}
+                                placeholder={"End Date"} style={{ width: "40%" }} />
                         </View>
-                        <InputText 
-                        length={16}
-                        onChange={(text) => { setDescription(text) }}
-                        value={description}
-                        placeholder={"Description"} />
+                        <InputText
+
+                            onChange={(text) => { setDescription(text) }}
+                            value={description != '' ? description : pofileData?.user?.workExperience[0]?.description}
+                            placeholder={"Description"} />
 
                         {/* <InputText placeholder={"Skills"} /> */}
+                        {
+                        selectedImage?.uri?.uri ?
+                            <Image
+                            resizeMode='center'
+                            style={styles.upload}
+                                source={selectedImage?.uri}/>
 
-                        <TouchableOpacity onPress={()=>{showAlert()}}
-                        style={styles.upload}>
+                        :
+                        <TouchableOpacity onPress={() => { showAlert() }}
+                            style={styles.upload}>
                             <Image
                                 tintColor={'grey'}
                                 source={require('../../assets/images/personalcard.png')}
                             />
-                            <Text numberOfLines={3} style={[{ width: 120, textAlign: 'center', fontFamily: 'ComicNeue-Bold' }]}>{`Upload your \nresume \n(Max Size 20 MB)`}</Text>
+                            <Text numberOfLines={3}
+                                style={[{
+                                    width: 120, textAlign: 'center',
+                                    fontFamily: 'ComicNeue-Bold'
+                                }]}>{`Upload your \nresume \n(Max Size 20 MB)`}</Text>
                         </TouchableOpacity>
+}
+
                     </View>
                 </ScrollView>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20 }}>
                     <OpacityButton
-                        pressButton={() => { navigation.navigate("BasicDetail") }}
+                        pressButton={() => { navigation.goBack() }}
                         name={"Back"} btnTextStyle={{ color: ColorCode.blue_Button_Color, }}
-                        button={{ width: '44%', backgroundColor: ColorCode.white_Color, borderColor: ColorCode.blue_Button_Color, borderWidth: 1 }} />
+                        button={{
+                            width: '44%',
+                            backgroundColor: ColorCode.white_Color,
+                            borderColor: ColorCode.blue_Button_Color, borderWidth: 1
+                        }} />
                     <OpacityButton
-                        pressButton={() => { 
-                            updateBasicUserDetail() }}
+                        pressButton={() => {
+                            updateBasicUserDetail()
+                        }}
                         name={"Save & Next"} btnTextStyle={{ color: ColorCode.yellowText, }}
                         button={{ width: '44%' }} />
 
@@ -228,7 +399,7 @@ const WorkDetails = () => {
                 <View style={styles.inputView}>
 
                     <OpacityButton
-                        pressButton={() => { navigation.navigate("Certification") }}
+                        pressButton={() => { addBasicUserDetail() }}
                         name={"Add More"} btnTextStyle={{ color: ColorCode.blue_Button_Color, }}
                         button={{ width: '44%', backgroundColor: ColorCode.white_Color, borderColor: ColorCode.blue_Button_Color, borderWidth: 1 }} />
                 </View>
@@ -306,7 +477,36 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center', justifyContent: 'center'
 
-    }
+    },
+    menuOption: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 30,
+        justifyContent: 'flex-start'
+    },
+    menuText: {
+        color: 'black',
+        fontSize: 12,
+        fontWeight: '400',
+        marginLeft: 5,
+        textAlign: 'left'
+    },
+    button: {
+        height: 30,
+        backgroundColor: ColorCode.blue_Button_Color,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 20
+    },
+    text: {
+
+        fontSize: 12,
+        fontFamily: 'ComicNeue-Bold',
+        color: ColorCode.white_Color,
+        paddingHorizontal: 15,
+        fontWeight: '400'
+
+    },
 
 })
 

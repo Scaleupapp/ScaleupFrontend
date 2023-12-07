@@ -28,7 +28,7 @@ const Connections = () => {
 
     const Unfolow=(item)=>{
         unfollowUser(item).then((res) => {
-            console.log(res?.data,"resdata------->")
+            // console.log(res?.data,"resdata------->")
             followUnList().then((res) => {
                 setFollow(res?.data?.followerList)
                 setUnfollow(res?.data?.followingList)
@@ -37,7 +37,7 @@ const Connections = () => {
     }
 
     const renderItem_didNumber = ({ item, index }: any) => {
-        console.log(item, "iiiii=====>")
+        // console.log(item, "iiiii=====>")
         return (
             <View
                 style={[styles.postStyle, { marginTop: 10 }]}>
@@ -73,7 +73,7 @@ const Connections = () => {
                             resizeMode='contain'
                             style={styles.color}
                             source={require("../../../assets/images/button_.png")}>
-                            <Text style={[styles.smalltxt, { color: ColorCode.yellowText }]}>{type ? 'Unfollow' : "Remove"}</Text>
+                            <Text style={[styles.smalltxt, { color: ColorCode.yellowText, paddingLeft: 0 }]}>{type ? 'Unfollow' : "Remove"}</Text>
                         </ImageBackground>
                     </TouchableOpacity>
 
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     },
 
     smalltxt: {
-        paddingLeft: 10,
+         paddingLeft: 10,
         fontSize: 13,
         fontFamily: 'ComicNeue-Bold',
         color: ColorCode.gray_color,

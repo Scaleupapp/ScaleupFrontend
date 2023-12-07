@@ -16,6 +16,13 @@ const AuthHeader = (props: any) => {
                 <Image
                 source={props?.imge}
             /> 
+            <Image
+            resizeMode='cover'
+            resizeMethod='resize'
+            
+            style={{height:90,width:180,alignSelf:'center'}}
+            source={require('../assets/images/demoImage.png')}
+            />
             </TouchableOpacity>
             <Text style={styles.myText}>{props?.myHeading}</Text>
         </View>

@@ -11,6 +11,7 @@ import InputText from "../../components/textInput";
 import { AuthHeader } from "../../components";
 import Strings from "../../constants/strings";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { setTerms } from "../../redux/reducer";
 
 const Terms = () => {
     const dispatch = useDispatch();
@@ -23,31 +24,46 @@ const Terms = () => {
                 backgroundColor={ColorCode.blue_Button_Color}
             />
 
-            <AuthHeader myHeading={Strings.TermsHeader} imge={require('../../assets/images/arrow-left.png')} />
+            <AuthHeader myHeading={Strings.TermsHeader}
+             imge={require('../../assets/images/arrow-left.png')} />
 
             <View style={styles.body}>
-                <ScrollView style={{ flex: 1 }}
+                <ScrollView style={{ flexGrow: 1 }}
                     contentContainerStyle={{ justifyContent: 'space-between' }}
                 >
                     <Text style={styles.txt}>{"Welcome to ScaleUp!"}</Text>
-                 
 
-                    <View style={{ flexDirection: 'row', marginTop: 20, alignItems: 'center', width: '100%', justifyContent: 'space-between', paddingHorizontal: 20 }}>
-                    <Text style={[styles.txt,{textAlign:'left'}]}>{"ScaleUp is a social media platform that allows you to share photos, videos, and messages with friends, family, and followers. Before you begin using our services, please take some time to read and understand our Terms of Service . By accessing or using Social Sphere, you agree to be bound by these Terms, as well as our Privacy Policy and Community Guidelines. If you do not agree with any part of these Terms, please refrain from using Social Sphere."}</Text>
-                   
+
+                    <View style={{
+                        flexDirection: 'row',
+                        marginTop: 20, alignItems: 'center', width: '100%',
+                        justifyContent: 'space-between', paddingHorizontal: 20, marginBottom: 50
+                    }}>
+                        <Text style={[styles.txt, { textAlign: 'left' }]}>
+                            {Strings.Terms}
+                        </Text>
+
                     </View>
-                   
-                    
-                    
-                        
-                   
+
+
+
+
+
                 </ScrollView>
-                <View style={[{bottom:30,flexDirection:'row',justifyContent:'space-between',paddingHorizontal:15}]}>
-                <OpacityButton name={"Decline"} btnTextStyle={{color:ColorCode.yellowText,}} button={{width:'44%'}}/>
-                <OpacityButton name={"Accept"} btnTextStyle={{color:ColorCode.yellowText,}} button={{width:'44%'}}/>
+                <View style={[{ bottom: 30, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15 }]}>
+                    <OpacityButton
+                        name={"Decline"} btnTextStyle={{ color: ColorCode.yellowText, }}
+                        button={{ width: '44%' }} 
+                        pressButton={() => {dispatch(setTerms(false)),navigation.goBack()  }}
+                        />
+                    <OpacityButton name={"Accept"}
+                        btnTextStyle={{ color: ColorCode.yellowText, }}
+                        button={{ width: '44%' }} 
+                        pressButton={() => {dispatch(setTerms(true)), navigation.goBack() }}
+                        />
                 </View>
             </View>
-           
+
 
 
         </SafeAreaView>
@@ -78,7 +94,7 @@ const styles = StyleSheet.create({
         width: '95%',
         alignSelf: 'center',
         marginTop: 20,
-        fontFamily:'ComicNeue-Bold'
+        fontFamily: 'ComicNeue-Bold'
 
     },
     input: {

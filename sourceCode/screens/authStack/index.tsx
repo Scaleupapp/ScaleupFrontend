@@ -6,4 +6,5 @@ export { default as BasicDetail } from './basicDetail';
 export { default as EducationDetail } from './educationDetail';
 export { default as WorkDetails } from './workDetails';
 export { default as Certification } from './certification';
-export {default as PasswordOtp} from './passwordOtp';
+export { default as PasswordOtp } from './passwordOtp';
+export { default as ChangePassword } from './changePassword'

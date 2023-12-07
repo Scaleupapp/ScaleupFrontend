@@ -2,8 +2,8 @@
 import {
     Image, Platform, ScrollView, StyleSheet, Text,
     TextInput, TouchableOpacity, View, StatusBar,
-     SafeAreaView, Switch, Alert, KeyboardAvoidingView,
-     
+    SafeAreaView, Switch, Alert, KeyboardAvoidingView,
+
 } from "react-native"
 import React, { useEffect, useState } from "react"
 import { useNavigation } from "@react-navigation/native";
@@ -30,17 +30,19 @@ const AddPost = () => {
     const [enable, setEnable] = useState(false)
     const [selectedImage, setSelectedImage] = useState(null)
     const [caption, setCaption] = useState('')
-    const [hashtags, setHashtags] = useState('')
+    const [hashtag, setHashtags] = useState('')
     const [myType, setMyType] = useState('')
+    const [myHeading, setMyHeading] = useState('')
+    const [myTopic, setMyTopic] = useState('')
     const { pofileData, loading } = useSelector<any, any>((store) => store.sliceReducer);
     const toggleSwitch = () => {
         setEnable(!enable)
     }
 
     const setCaptionLength = (t) => {
-        if (caption.length < 140) {
-            setCaption(t)
-        }
+
+        setCaption(t)
+
     }
 
 
@@ -135,16 +137,17 @@ const AddPost = () => {
 
 
     const addPost = () => {
+        console.log(hashtag,"hashtag---->", typeof hashtag)
         var dta = ''
         myType === "image" ? dta = "image/png" : 'video/mp4'
         const formData = new FormData();
         const data = { name: 'file.jpg', uri: selectedImage?.uri?.uri, type: dta }
         formData.append('media', data);
-        formData.append('hashtags', hashtags);
         formData.append('captions', caption);
-        formData.append('heading', "30st octuber");
+        formData.append('hashtags', hashtag);
+        formData.append('heading', myHeading);
         formData.append('verify', enable ? "Yes" : "No");
-        formData.append('relatedTopics', hashtags);
+        formData.append('relatedTopics', myTopic);
         formData.append('contentType', myType);
         dispatch(setLoading(true))
         contentCreate(formData).then((res) => {
@@ -164,6 +167,7 @@ const AddPost = () => {
         setSelectedImage(null)
         setMyType('')
         setCaption('')
+        navigation.navigate("Home")
     }
 
 
@@ -171,72 +175,135 @@ const AddPost = () => {
     return (
         <SafeAreaView style={styles.main}>
             {loading && <Loader />}
-            <KeyboardAvoidingView
+            <TabHeader myHeading={"New Post"}
+                imge={require('../../../assets/images/arrow-left.png')} />
+            {/* <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={{ flex: 1 }}>
-                <StatusBar
-                    barStyle={'dark-content'}
-                    animated={true}
-                    backgroundColor={ColorCode.white_Color} />
+             style={{ flex: 1 }}
+            > */}
+                <ScrollView style={{ flexGrow: 1 }}
+                    showsVerticalScrollIndicator={false}
+                    automaticallyAdjustKeyboardInsets={true}
+                    keyboardShouldPersistTaps="always"
+                    keyboardDismissMode='interactive'
+                >
 
-                <TabHeader myHeading={"New Post"}
-                    imge={require('../../../assets/images/arrow-left.png')} />
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10 }}>
-                    <Text style={styles.smalltxt}>Want to verify it ?</Text>
+                    <StatusBar
+                        barStyle={'dark-content'}
+                        animated={true}
+                        backgroundColor={ColorCode.white_Color} />
 
-                    <Switch
-                        trackColor={{ false: "grey", true: ColorCode.blue_Button_Color }}
-                        thumbColor={enable ? "white" : "white"}
-                        ios_backgroundColor="#3e3e3e"
-                        onValueChange={toggleSwitch}
-                        value={enable}
-                    />
-                </View>
-                <View style={{ justifyContent: 'space-between', paddingHorizontal: 10 }}>
-                    <Text style={[styles.smalltxt]}>Add a caption</Text>
-                    <View style={styles.inputfield}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                            <TextInput
-                                multiline
-                                placeholder="Type here...."
-                                placeholderTextColor={ColorCode.gray_color}
-                                style={styles.textInput}
-                                value={caption}
-                                onChangeText={(t) => { setCaptionLength(t) }}
-                            />
-                            <Text style={[styles.smalltxt]}>{caption.length + "/140"}</Text>
-                        </View>
-                        <View style={styles.line} />
+
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10 }}>
+                        <Text style={styles.smalltxt}>Want to verify it ?</Text>
+
+                        <Switch
+                            trackColor={{ false: "grey", true: ColorCode.blue_Button_Color }}
+                            thumbColor={enable ? "white" : "white"}
+                            ios_backgroundColor="#3e3e3e"
+                            onValueChange={toggleSwitch}
+                            value={enable}
+                        />
                     </View>
+                    <View style={{ justifyContent: 'space-between', paddingHorizontal: 10 }}>
+                       
+                    <Text style={[styles.smalltxt, { marginTop: 10 }]}>Add Heading</Text>
+                        <View style={styles.inputfield}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <TextInput
+                                    multiline
+                                    placeholder="Type here...."
+                                    placeholderTextColor={ColorCode.gray_color}
+                                    style={styles.textInput}
+                                    value={myHeading}
+                                    maxLength={20}
+                                    onChangeText={(t) => { setMyHeading(t) }}
+                                />
+                                {/* <Text style={[styles.smalltxt]}>{caption.length + "/140"}</Text> */}
+                            </View>
+                            <View style={styles.line} />
+                        </View>
 
-                </View>
-                <Text style={[styles.smalltxt, { marginTop: 20 }]}>Select an option</Text>
-               {selectedImage?.uri?.uri ?
-               <Image
-                resizeMode='center'
-               style={{width:'95%',alignSelf:'center',borderRadius:20,height:130}}
-                  source={selectedImage?.uri}
-               />
-                  :
-                <View style={{ flexDirection: 'row', paddingHorizontal: 10, padding: 5, justifyContent: 'space-around' }}>
-                   
-                <TouchableOpacity
-                    onPress={() => { showAlert("image") }}
-                >
-                    <Image source={require('../../../assets/images/imagebutton_.png')}
-                    />
-                    <Text style={[styles.smalltxt, { fontSize: 12 }]}>Photo</Text>
-                </TouchableOpacity>
+                        <Text style={[styles.smalltxt, { marginTop: 10 }]}> Add Topics</Text>
+                        <View style={styles.inputfield}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <TextInput
+                                    multiline
+                                    placeholder="Type here...."
+                                    placeholderTextColor={ColorCode.gray_color}
+                                    style={styles.textInput}
+                                    value={myTopic}
+                                    onChangeText={(t) => {  setMyTopic(t) }}
+                                />
+                                {/* <Text style={[styles.smalltxt]}>{caption.length + "/140"}</Text> */}
+                            </View>
+                            <View style={styles.line} />
+                        </View>
+                        {/* <InputText
+                            style={{ marginTop: 20 }}
+                            value={''}
+                            onChange={(t) => { setMyHeading(t) }}
+                            placeholder={'Heading'}
+                            length={35}
+                            keyboardType={'default'}
 
-                <TouchableOpacity
-                    onPress={() => { showAlert("video") }}
-                >
-                    <Image source={require('../../../assets/images/video_.png')}
-                    />
-                    <Text style={[styles.smalltxt, { fontSize: 12 }]}>Video</Text>
-                </TouchableOpacity>
+                        />
 
-                {/* <TouchableOpacity >
+                        <InputText
+                            style={{ marginTop: 20 }}
+                            value={''}
+                            onChange={(t) => { setMyTopic(t) }}
+                            placeholder={'Topics'}
+                            length={35}
+                            keyboardType={'default'}
+
+                        /> */}
+
+                        <Text style={[styles.smalltxt, { marginTop: 10 }]}>Add a caption</Text>
+                        <View style={styles.inputfield}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <TextInput
+                                    multiline
+                                    placeholder="Type here...."
+                                    placeholderTextColor={ColorCode.gray_color}
+                                    style={styles.textInput}
+                                    value={caption}
+                                    onChangeText={(t) => { setCaptionLength(t) }}
+                                />
+                                {/* <Text style={[styles.smalltxt]}>{caption.length + "/140"}</Text> */}
+                            </View>
+                            <View style={styles.line} />
+                        </View>
+
+                    </View>
+                    <Text style={[styles.smalltxt, { marginTop: 10 }]}>Select an option</Text>
+                    {selectedImage?.uri?.uri ?
+                        <Image
+                            resizeMethod='scale'
+                            resizeMode={Platform.OS === 'ios' ? 'contain' : 'center'}
+                            style={{ width: '95%', alignSelf: 'center', borderRadius: 20, height: 130 }}
+                            source={selectedImage?.uri}
+                        />
+                        :
+                        <View style={{ flexDirection: 'row', paddingHorizontal: 10, padding: 5, justifyContent: 'space-around' }}>
+
+                            <TouchableOpacity
+                                onPress={() => { showAlert("image") }}
+                            >
+                                <Image source={require('../../../assets/images/imagebutton_.png')}
+                                />
+                                <Text style={[styles.smalltxt, { fontSize: 12 }]}>Photo</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                onPress={() => { showAlert("video") }}
+                            >
+                                <Image source={require('../../../assets/images/video_.png')}
+                                />
+                                <Text style={[styles.smalltxt, { fontSize: 12 }]}>Video</Text>
+                            </TouchableOpacity>
+
+                            {/* <TouchableOpacity >
                 <Image source={require('../../../assets/images/group_.png')}
                 />
                 <Text style={[styles.smalltxt, { fontSize: 12 }]}>Event</Text>
@@ -253,25 +320,40 @@ const AddPost = () => {
                 />
                 <Text style={[styles.smalltxt, { fontSize: 12 }]}>QnA</Text>
             </TouchableOpacity> */}
-            </View>
-               }
-                
-
-                <Text style={[styles.smalltxt, { marginTop: 20, fontSize: 18, }]}>Add hashtags</Text>
-                <View style={{ paddingHorizontal: 10 }}>
-                    <View style={[styles.inputfield, { justifyContent: 'flex-start' }]}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                            <TextInput
-                                placeholder="Type here...."
-                                placeholderTextColor={ColorCode.gray_color}
-                                style={styles.textInput}
-                                value={hashtags}
-                                onChange={(t)=>{setHashtags(t)}}
-                            />
-                            {/* <Text style={[styles.smalltxt]}>0/140</Text> */}
                         </View>
-                        <View style={{ flexDirection: 'row' }}>
-                            {/* <TouchableOpacity style={{
+                    }
+
+
+                    <Text style={[styles.smalltxt, { marginTop: 10, fontSize: 18, }]}>Add hashtags</Text>
+                    <View style={{ paddingHorizontal: 10 }}>
+                        <View style={[styles.inputfield, { justifyContent: 'flex-start' }]}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <TextInput
+                                    placeholder="Type here...."
+                                    placeholderTextColor={ColorCode.gray_color}
+                                    style={styles.textInput}
+                                    value={hashtag}
+                                    onChangeText={(t)=>{setHashtags(t)}}
+                                />
+                                
+
+                                
+
+                                
+                            </View>
+
+                            {hashtag.length > 0&&
+                            <View style={{ flexDirection: 'row',
+                             flexWrap: 'wrap',paddingHorizontal:15 }}>
+                            {hashtag.split(',').map((hashtag, index) => (
+                                <TouchableOpacity key={index} style={{ padding: 5,
+                                 margin: 5, borderWidth: 1, borderRadius: 5 }}>
+                                    <Text>{hashtag.trim()}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>}
+                            <View style={{ flexDirection: 'row' }}>
+                                {/* <TouchableOpacity style={{
                                 backgroundColor: ColorCode.blue_Button_Color, width: 100,
                                 alignItems: 'center', justifyContent: 'center', borderRadius: 35, flexDirection: 'row'
                             }}>
@@ -289,30 +371,31 @@ const AddPost = () => {
                                     source={require('../../../assets/images/Vector.png')}
                                 />
                             </TouchableOpacity> */}
+                            </View>
                         </View>
                     </View>
-                </View>
 
-                <View style={[{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between', paddingHorizontal: 15,
-                    marginTop: 30
-                }]}>
-                    <OpacityButton name={"Cancel"}
-                        pressButton={() => { canCel() }}
-                        btnTextStyle={{ color: ColorCode.blue_Button_Color }}
-                        button={{
-                            width: '48%', backgroundColor: ColorCode.white_Color,
-                            borderColor: ColorCode.blue_Button_Color, borderWidth: 1
-                        }} />
-                    <OpacityButton
-                        pressButton={() => { addPost() }}
-                        name={"Post"}
-                        btnTextStyle={{ color: ColorCode.yellowText, }}
-                        button={{ width: '48%' }} />
-                </View>
-            </KeyboardAvoidingView>
+                    <View style={[{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between', paddingHorizontal: 15,
+                        marginTop: 10
+                    }]}>
+                        <OpacityButton name={"Cancel"}
+                            pressButton={() => { canCel() }}
+                            btnTextStyle={{ color: ColorCode.blue_Button_Color }}
+                            button={{
+                                width: '48%', backgroundColor: ColorCode.white_Color,
+                                borderColor: ColorCode.blue_Button_Color, borderWidth: 1
+                            }} />
+                        <OpacityButton
+                            pressButton={() => { addPost() }}
+                            name={"Post"}
+                            btnTextStyle={{ color: ColorCode.yellowText, }}
+                            button={{ width: '48%' }} />
+                    </View>
 
+                </ScrollView>
+            {/* </KeyboardAvoidingView> */}
         </SafeAreaView>
 
     )
@@ -399,7 +482,7 @@ const styles = StyleSheet.create({
     },
 
     inputfield: {
-        height: 130,
+        height: 100,
         backgroundColor: ColorCode.lightGrey,
         width: '100%',
         marginTop: 15,

@@ -35,52 +35,53 @@ const GlobalSearch = () => {
 
 
 
-    const setUserData=(item)=>{
-    dispatch(setOther(item))
-    navigation.navigate("OtherProfile")
-}
-
-
-
-
-
-const foloowThisUser=(item)=>{
-    if(item?.isFollowing){
-        unfollowUser(item?.userId).then((res)=>{
-            console.log("res----->",res?.data)
-            const data = { "query": text }
-            globalSearch(data).then((res) => {
-                setData(res?.data)
-            })
-            Show_Toast(res?.data?.message)
-            })
-    }else{
-        followUser(item?.userId).then((res)=>{
-            console.log("res----->",res?.data)
-            const data = { "query": text }
-            globalSearch(data).then((res) => {
-                setData(res?.data)
-            })
-            Show_Toast(res?.data?.message)
-            })
+    const setUserData = (item) => {
+        dispatch(setOther(item))
+        navigation.navigate("OtherProfile")
     }
 
 
-    
 
 
-}
+
+    const foloowThisUser = (item) => {
+        if (item?.isFollowing) {
+            unfollowUser(item?.userId).then((res) => {
+                console.log("res----->", res?.data)
+                const data = { "query": text }
+                globalSearch(data).then((res) => {
+                    setData(res?.data)
+                })
+                Show_Toast(res?.data?.message)
+            })
+        } else {
+            followUser(item?.userId).then((res) => {
+                console.log("res----->", res?.data)
+                const data = { "query": text }
+                globalSearch(data).then((res) => {
+                    setData(res?.data)
+                })
+                Show_Toast(res?.data?.message)
+            })
+        }
+
+
+
+
+
+    }
 
 
     const renderItem_didNumber = ({ item, index }: any) => {
         // console.log(item, "value---->")
         return (
-            <View
+            <TouchableOpacity
+            onPress={()=>{setUserData(item?.userId)}}
                 style={[styles.postStyle, { marginTop: 10 }]}>
-                <TouchableOpacity style={styles.info} 
-                onPress={() => {setUserData(item?.userId)  }}
+                <TouchableOpacity style={styles.info}
+                    onPress={() => { setUserData(item?.userId) }}
                 >
-                    <View style={{ flexDirection: 'row', alignItems: 'center',  width: '55%' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', width: '55%' }}>
                         {item?.profilePicture ?
                             <Image
                                 resizeMode='cover'
@@ -104,38 +105,40 @@ const foloowThisUser=(item)=>{
                                 <Text style={[styles.smalltxt, { color: ColorCode.yellowText, }]}>{'follow'}</Text>
                             </LinearGradient> */}
                             <TouchableOpacity
-                            onPress={()=>{foloowThisUser(item)}}>
+                                onPress={() => { foloowThisUser(item) }}>
                                 <ImageBackground
                                     style={styles.color}
                                     source={require("../../../assets/images/button_.png")}>
                                     <Text style={[styles.smalltxt,
-                                         { color: ColorCode.yellowText, }]}>
-                                            { item?.isFollowing ?"Unfollow":'Follow'}</Text>
+                                    { color: ColorCode.yellowText, }]}>
+                                        {item?.isFollowing ? "Unfollow" : 'Follow'}</Text>
                                 </ImageBackground>
                             </TouchableOpacity>
                         </View>
                     </View>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: "35%",  }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: "35%", }}>
                         <TouchableOpacity style={{ alignItems: 'center' }}
-                            onPress={() => { navigation.navigate('Setting') }}>
+                            onPress={() => {setUserData(item?.userId) }}>
                             <Image
                                 source={require('../../../assets/images/folow_group_.png')} />
                             <Text style={styles.smalltxt}>{item?.followersCount}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={{ alignItems: 'center' }}
-                            onPress={() => { navigation.navigate("OtherProfile") }}>
+                            onPress={() => { setUserData(item?.userId) }}>
                             <Image
                                 source={require('../../../assets/images/following_.png')} />
                             <Text style={styles.smalltxt}>{item?.followingCount}</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ alignItems: 'center' }}>
+                        <TouchableOpacity
+                        onPress={()=>{setUserData(item?.userId)}}
+                        style={{ alignItems: 'center' }}>
                             <Image
                                 source={require('../../../assets/images/followers_.png')} />
                             <Text style={styles.smalltxt}>{item?.totalPosts}</Text>
                         </TouchableOpacity>
                     </View>
                 </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
         )
     }
     return (
@@ -145,14 +148,15 @@ const foloowThisUser=(item)=>{
                 animated={true}
                 backgroundColor={ColorCode.white_Color}
             />
-            <TabHeader myHeading={"Search"} imge={require('../../../assets/images/arrow-left.png')} />
+            <TabHeader myHeading={"Search"}
+                imge={require('../../../assets/images/arrow-left.png')} />
             <InputText
                 placeholder={"Search"}
                 length={16}
                 onChange={(text) => { setText(text) }}
                 value={text}
             />
-            {data.length > 0 &&
+            {/* {data.length > 0 &&
                 <View style={{
                     flexDirection: 'row', justifyContent: 'space-between', width: '96%',
                     marginTop: 10, borderBottomColor: ColorCode.lightGrey,
@@ -187,7 +191,7 @@ const foloowThisUser=(item)=>{
 
                     </TouchableOpacity>
                 </View>
-            }
+            } */}
 
             <View style={[styles.reelsStyle,]}>
 

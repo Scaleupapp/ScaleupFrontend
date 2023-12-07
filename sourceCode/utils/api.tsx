@@ -17,7 +17,7 @@ apiClient.interceptors.request.use(
     (config) => {
         const state = Store.getState()
         const token = state?.cookies?.loginUser.token
-        // console.log(token,'token===============>')
+        console.log(token,'token===============>')
         const accessToken = `Bearer ${token}`
         if (accessToken) {
             config.headers["Authorization"] = accessToken;
@@ -40,7 +40,13 @@ apiClient.interceptors.response.use(
         const { response } = error
          console.log("error---->apimain", response?.data)
         // Store.dispatch(setError(response?.data?.message))
-        Alert.alert(error?.response?.data?.message)
+        if(response?.data?.message != null || "" ){
+            Alert.alert(response?.data?.message)
+        }
+        if(response?.data?.error!= null || "" ){
+            Alert.alert(response?.data?.error)
+        }
+        
         // Show_Toast(error?.response)
         return Promise.reject(error);
     }
@@ -61,7 +67,7 @@ apiUploadDataClient.interceptors.request.use(
     (config) => {
         const state = Store.getState()
         const token = state?.cookies?.loginUser.token
-        // console.log(token,'token===============>')
+         console.log(token,'token===============>')
         const accessToken = `Bearer ${token}`
         if (accessToken) {
             config.headers["Authorization"] = accessToken;
@@ -83,9 +89,14 @@ apiUploadDataClient.interceptors.response.use(
     async (error) => {
         Store.dispatch(setLoading(false))
         const { response } = error
-         console.log("error---->apimain", response)
+         console.log("error---->apimain1111111", response)
         // Store.dispatch(setError(response?.data?.message))
-        Alert.alert(error?.response?.data?.message)
+        if(response?.data?.message != null || "" ){
+            Alert.alert(response?.data?.message)
+        }
+        if(response?.error != null || "" ){
+            Alert.alert(response?.data.error)
+        }
         // Show_Toast(error?.response)
         return Promise.reject(error);
     }

@@ -22,7 +22,7 @@ import CommentModal from "../../../components/commetModal";
 const LearningReels = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
-    const { pofileData,loading} = useSelector<any, any>((store) => store.sliceReducer);
+    const { pofileData, loading } = useSelector<any, any>((store) => store.sliceReducer);
     const [post, setPost] = useState([])
     const [showComment, setCommment] = useState(false)
     const [commentArray, setArray] = useState(null)
@@ -38,32 +38,23 @@ const LearningReels = () => {
     const SCREEN_WIDTH = Dimensions.get('window').width;
     const SCREEN_HEIGHT = Dimensions.get('window').height;
     const renderItem_didNumber = ({ item, index }: any) => {
-     console.log(item, "itemmmm=======>",item?.contentType == "Video")
+        //  console.log(item?.contentURL , "itemmmm=======>",item?.contentType == "Video")
         return (
             item?.contentType == "Video" &&
-                <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT-70}}>
+            <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT - 70 }}>
 
-                {item?.contentType == "Video" ?
+                {item?.contentType == "Video" &&
                     <Video
                         resizeMode='contain'
                         source={{ uri: item?.contentURL }}
                         paused={false}
                         style={styles.backgroundVideo}
-                        repeat={true}   
+                        repeat={true}
                     >
                     </Video>
-                    :
-                    // <ImageBackground
-                    //    resizeMode='cover'
-                    //     // resizeMode={Platform.OS === "ios" ? 'cover' : 'contain'}
-                    //     style={{ width:SCREEN_WIDTH,height:SCREEN_HEIGHT-70}}
-                    //     source={{ uri: item?.contentURL }}
-                    // >
-                    // </ImageBackground>
 
-                    null
                 }
-                <View style={{ position: 'absolute', bottom:Platform.OS === 'ios' ? 80 : 20, left: 20 }}>
+                <View style={{ position: 'absolute', bottom: Platform.OS === 'ios' ? 80 : 20, left: 20 }}>
                     <View style={{ flexDirection: 'row' }}>
                         {item?.userId?.profilePicture ?
                             <Image
@@ -79,38 +70,77 @@ const LearningReels = () => {
                         }
 
                         <View style={[styles.nameType, { width: '60%' }]}>
-                            <Text style={[styles.boldStyle,{color:ColorCode.white_Color }]}>{item?.username}</Text>
-                            <Text style={[styles.smalltxt,{color:ColorCode.white_Color }]}>{item?.captions}</Text>
+                            <Text style={[styles.boldStyle, { color: ColorCode.white_Color }]}>{item?.username}</Text>
+                            <Text style={[styles.smalltxt, { color: ColorCode.white_Color }]}>{item?.heading}</Text>
                         </View>
+
+
+
+
                         <View style={{ width: '40%', justifyContent: 'space-between', marginTop: 25 }}>
-                        <TouchableOpacity
-                            onPress={() => { likeThisPost(item) }}
-                        >
-                            <Image  style={{ top: -20 }}
-                            tintColor={item?.likes.includes(pofileData?.user?._id) ? ColorCode.blue_Button_Color : 'white'}
-                             source={require('../../../assets/images/heart.png')} 
-                             
-                             />
-                             </TouchableOpacity>
-                            <Text style={[styles.boldStyle, { top: -20, paddingLeft: 10,color:ColorCode.white_Color }]}>{item?.likes.length}</Text>
-                           <TouchableOpacity 
-                           onPress={()=>{openCoomentSection(item)}}
-                           >
-                            <Image  tintColor={'white'}  style={{ top: -20 }} 
-                            source={require('../../../assets/images/image_message.png')} />
+                            <TouchableOpacity
+                                onPress={() => { likeThisPost(item) }}
+                            >
+                                <Image style={{ top: -20 }}
+                                    tintColor={item?.likes.includes(pofileData?.user?._id) ? ColorCode.blue_Button_Color : 'white'}
+                                    source={require('../../../assets/images/heart.png')}
+
+                                />
                             </TouchableOpacity>
-                            
-                            <Text style={[styles.boldStyle, { top: -20, paddingLeft: 10 ,color:ColorCode.white_Color}]}>{item?.comments?.length}</Text>
+                            <Text style={[styles.boldStyle, { top: -20, paddingLeft: 10, color: ColorCode.white_Color }]}>{item?.likes.length}</Text>
+                            <TouchableOpacity
+                                onPress={() => { openCoomentSection(item) }}
+                            >
+                                <Image tintColor={'white'} style={{ top: -20 }}
+                                    source={require('../../../assets/images/image_message.png')} />
+                            </TouchableOpacity>
+
+                            <Text style={[styles.boldStyle, { top: -20, paddingLeft: 10, color: ColorCode.white_Color }]}>{item?.comments?.length}</Text>
 
                         </View>
+
+
+
+
                     </View>
-                   
+                    <View style={{ flexDirection: 'row', width: '70%', marginTop: -50 }}>
+                        {item?.relatedTopics.map((item) => {
+                            //  console.log(item,'hastgas=====>')
+                            return (
+                                <Text
+                                    numberOfLines={2}
+                                    style={[styles.smalltxt, {
+                                        textAlign: 'left',
+                                        marginTop: 5,
+
+                                    }]}>{item}</Text>
+                            )
+
+                        })
+
+                        }
+
+                       
+                    </View>
+                    <View style={{ flexDirection: 'row', width: '70%',  }}>
+                    {item?.hashtags.map((item) => {
+                            // console.log(item,'hastgas=====>')
+                            return (
+                                <Text
+                                    numberOfLines={2}
+                                    style={[styles.smalltxt, {
+                                        textAlign: 'left',
+                                    }]}>{item}</Text>
+                            )
+                        })
+                        }
+                        </View>
                 </View>
 
             </View>
 
-            
-           
+
+
         )
     }
 
@@ -125,7 +155,7 @@ const LearningReels = () => {
             allPostData().then((res) => {
                 dispatch(setLoading(false))
                 setPost(res.data.content)
-                setCommment(false) 
+                setCommment(false)
             })
         })
     }
@@ -137,7 +167,7 @@ const LearningReels = () => {
                 allPostData().then((res) => {
                     dispatch(setLoading(false))
                     setPost(res.data.content)
-                   
+
                 })
             })
         } else {
@@ -145,7 +175,7 @@ const LearningReels = () => {
                 allPostData().then((res) => {
                     dispatch(setLoading(false))
                     setPost(res.data.content)
-                   
+
                 })
             })
 
@@ -167,7 +197,7 @@ const LearningReels = () => {
                 animated={true}
                 backgroundColor={ColorCode.white_Color}
             />
-             {showComment &&
+            {showComment &&
                 <CommentModal
                     close={() => { setCommment(false) }}
                     value={commentArray}
@@ -210,7 +240,7 @@ const styles = StyleSheet.create({
     },
     reelsStyle: {
         flex: 1,
-        backgroundColor:ColorCode.black_Color
+        backgroundColor: ColorCode.black_Color
 
 
     },
@@ -272,7 +302,7 @@ const styles = StyleSheet.create({
         paddingLeft: 10,
         fontSize: 14,
         fontFamily: 'ComicNeue-Bold',
-        color: ColorCode.gray_color,
+        color: ColorCode.white_Color,
 
     },
     backgroundVideo: {

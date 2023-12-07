@@ -14,21 +14,27 @@ import CommentModal from "../../../components/commetModal";
 import { Show_Toast } from "../../../components/toast";
 import ProfileHeader from "../../../components/profileHeader";
 import Video from 'react-native-video';
+import Loader from "../../../components/loader";
+import { setLoading } from "../../../redux/reducer";
 const OtherProfile = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
     const [progress, setProgress] = useState(0);
     const [allData, setAllData] = useState(null)
     const { other } = useSelector<any, any>((store) => store.sliceReducer);
-    const { pofileData } = useSelector<any, any>((store) => store.sliceReducer);
+    const { pofileData,loading } = useSelector<any, any>((store) => store.sliceReducer);
     const [showComment, setCommment] = useState(false)
     const [commentArray, setArray] = useState(null)
     const [button, setButton] = useState(allData?.isFollowing ? "Unfollow" : 'Follow')
 
+    console.log("allData======>", allData, "allData======>")
+
 
     const get = () => {
+        dispatch(setLoading(true))
         getUserData(other).then((res) => {
             setAllData(res?.data)
+            dispatch(setLoading(false))
         })
     }
 
@@ -38,8 +44,9 @@ const OtherProfile = () => {
     }
 
     useEffect(() => {
+        setButton(allData?.isFollowing ? "Unfollow" : 'Follow')
         get()
-    }, [])
+    }, [allData?.isFollowing])
 
 
 
@@ -52,11 +59,12 @@ const OtherProfile = () => {
 
 
     const renderItem_didNumber = ({ item, index }: any) => {
+        
         return (
             <View
                 style={[styles.postStyle, styles.iosShadow]}>
                 <TouchableOpacity style={styles.info}
-                    onPress={() => { navigation.navigate("Connections") }}
+                    onPress={() => { }}
                 >
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         {allData?.profilePicture ?
@@ -73,7 +81,7 @@ const OtherProfile = () => {
                         <View style={[styles.nameType, { width: '55%' }]}>
                             <Text style={styles.boldStyle}>{allData?.username}</Text>
                             <Text numberOfLines={2}
-                            style={styles.smalltxt}>{item?.captions}</Text>
+                                style={styles.smalltxt}>{item?.captions}</Text>
                         </View>
                     </View>
                     <View style={{ alignSelf: 'flex-start', width: '28%' }}>
@@ -90,16 +98,16 @@ const OtherProfile = () => {
                         source={{ uri: item?.contentURL }}
                         paused={false}
                         style={{ width: '100%', height: 250, backgroundColor: ColorCode.lightGrey, borderRadius: 15, marginVertical: 20 }}
-                        repeat={true}   
+                        repeat={true}
                     >
                     </Video>
                     :
                     <Image
-                    resizeMode={Platform.OS === "ios" ? 'cover' : 'contain'}
-                    style={{ width: '100%', height: 250, backgroundColor: ColorCode.lightGrey, borderRadius: 15, marginVertical: 20 }}
-                    source={{ uri: item?.contentURL }}
-                />}
-               
+                        resizeMode={Platform.OS === "ios" ? 'cover' : 'contain'}
+                        style={{ width: '100%', height: 250, backgroundColor: ColorCode.lightGrey, borderRadius: 15, marginVertical: 20 }}
+                        source={{ uri: item?.contentURL }}
+                    />}
+
                 <View style={styles.info}>
                     <View style={{ flexDirection: 'row', width: '40%', justifyContent: 'space-between', marginTop: 15 }}>
                         <TouchableOpacity
@@ -161,15 +169,16 @@ const OtherProfile = () => {
     }
 
 
-    const wantToBlock=()=>{
-        bockUser(allData?.userId).then((res)=>{
-            console.log(res?.data,"blockuserData=====d>")
+    const wantToBlock = () => {
+        bockUser(allData?.userId).then((res) => {
+            console.log(res?.data, "blockuserData=====d>")
         })
     }
 
 
     return (
         <SafeAreaView style={styles.main}>
+            {loading && <Loader />}
             <StatusBar
                 barStyle={'dark-content'}
                 animated={true}
@@ -177,9 +186,9 @@ const OtherProfile = () => {
             />
             <ProfileHeader
                 myHeading={"Profile"}
-                imge={require('../../../assets/images/arrow-left.png')} 
-                button={()=>{wantToBlock()}}
-                />
+                imge={require('../../../assets/images/arrow-left.png')}
+                button={() => { wantToBlock() }}
+            />
             <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true}>
                 <View style={[styles.info, { paddingHorizontal: 15 }]}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -205,7 +214,11 @@ const OtherProfile = () => {
                 </View>
 
 
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15, marginTop: 30 }}>
+                <View style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    paddingHorizontal: 15, marginTop: 30
+                }}>
 
                     <FlatList
                         scrollEnabled
@@ -218,28 +231,31 @@ const OtherProfile = () => {
 
                 </View>
 
-                <View style={{ marginTop: 30, flexDirection: 'row', paddingHorizontal: 20, alignItems: 'center' }}>
+                <View style={{
+                    marginTop: 15, flexDirection: 'row',
+                    paddingHorizontal: 20, alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: 15
+                }}>
                     <TouchableOpacity
                         onPress={() => { foloowThisUser() }}
                     >
                         <ImageBackground
                             source={require('../../../assets/images/folow_button_.png')}
-                            style={[{ marginTop: -30, height: 47, width: 144, alignItems: 'center', justifyContent: 'center' }]}>
+                            style={[{ height: 47, width: 144, alignItems: 'center', justifyContent: 'center' }]}>
                             <Text style={[styles.boldStyle,
                             { color: ColorCode.yellowText, marginHorizontal: 20 }]}>{button}</Text>
                         </ImageBackground>
                     </TouchableOpacity>
 
-                    <Image
-                        resizeMode='contain'
-                        source={require('../../../assets/images/group_MessageButton.png')}
-                    />
 
-                    <Image
-                        resizeMode='cover'
+
+                    {allData?.role === "SME" && <Image
+                        resizeMode='contain'
+                        tintColor={'#F6BE00'}
                         source={require('../../../assets/images/medal-star.png')}
                         style={{ height: 50, width: 50, marginTop: -25 }}
-                    />
+                    />}
                 </View>
                 <View style={[styles.cards, { flexDirection: 'row', justifyContent: 'space-between' }]}>
                     <View style={{ alignItems: 'center', justifyContent: 'space-between' }}>

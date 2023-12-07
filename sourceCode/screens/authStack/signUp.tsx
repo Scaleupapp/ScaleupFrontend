@@ -15,11 +15,11 @@ import Strings from "../../constants/strings";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { Show_Toast } from "../../components/toast";
 import { registerApi } from "../../utils/apiHelpers";
-import { setLoading } from "../../redux/reducer";
+import { setLoading, setTerms } from "../../redux/reducer";
 import Loader from "../../components/loader";
 
 const SignUp = () => {
-    const { loading } = useSelector<any, any>((store) => store.sliceReducer);
+    const { loading, terms } = useSelector<any, any>((store) => store.sliceReducer);
 
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
@@ -29,7 +29,7 @@ const SignUp = () => {
     const [email, setEmail] = useState("")
     const [phone, setPhone] = useState("")
     const [password, setPassword] = useState("")
-    const [terms, setTerms] = useState(false)
+    // const [terms, setTerms] = useState(false)
     const [secureText, setSecureText] = useState(true)
 
 
@@ -53,11 +53,21 @@ const SignUp = () => {
             Show_Toast("Please Enter email.")
         } else if (!testedEmail) {
             Show_Toast("Please Enter valid email adress")
-        } else if (password == "") {
+        } else if (phone === ''){
+            Show_Toast("Phone number can't be empty")
+        }
+        else if (phone.length != 10){
+            Show_Toast("Phone number be valid phone number")
+        }
+        
+        
+        else if (password == "") {
             Show_Toast("Please Enter Password.")
-        } else if (!testPassword) {
-            Show_Toast("Please enter valid password.")
-        } else if (!terms) {
+        }
+        // else if (!testPassword) {
+        //     Show_Toast("Please enter valid password.")
+        // }
+        else if (!terms) {
             Show_Toast('Please select agree terms.')
         } else {
             dispatch(setLoading(true))
@@ -73,7 +83,7 @@ const SignUp = () => {
                 dispatch(setLoading(false))
                 console.log(res?.data, "dta=======>")
                 Show_Toast(res?.data?.message)
-                navigation.navigate("BasicDetail",{data})
+                navigation.navigate("SignIn", { data })
                 setEmail("")
                 setFirstName("")
                 setLastName("")
@@ -93,7 +103,11 @@ const SignUp = () => {
             <AuthHeader myHeading={Strings.LetsCreate} imge={require('../../assets/images/arrow-left.png')} />
             <View style={styles.body}>
                 <ScrollView style={{ flex: 1 }}
-                    contentContainerStyle={{ justifyContent: 'space-between' }}>
+                    contentContainerStyle={{ justifyContent: 'space-between' }}
+                    automaticallyAdjustKeyboardInsets={true}
+                    keyboardShouldPersistTaps="always"
+                    keyboardDismissMode='interactive'
+                >
                     <Text style={styles.txt}>{Strings.PleaseAdd}</Text>
                     <View style={{ flexDirection: 'row', marginTop: 20, alignItems: 'center', width: '100%', justifyContent: 'space-between', paddingHorizontal: 20 }}>
                         <View
@@ -101,7 +115,7 @@ const SignUp = () => {
                             <Image
                                 source={require('../../assets/images/image_user.png')} />
                             <TextInput
-                                maxLength={10}
+                                // maxLength={10}
                                 value={firstName}
                                 onChangeText={(t) => { setFirstName(t) }}
                                 style={styles.inputStyle}
@@ -114,7 +128,7 @@ const SignUp = () => {
                                 source={require('../../assets/images/image_user.png')} />
                             <TextInput
 
-                                maxLength={10}
+                                // maxLength={10}
                                 value={lastName}
                                 onChangeText={(t) => { setLastName(t) }}
                                 style={styles.inputStyle}
@@ -124,30 +138,35 @@ const SignUp = () => {
                     </View>
                     <View style={[styles.inputView, { height: hp(35) }]}>
 
-                        <InputText onChange={(text) => { setUserName(text) }} value={userName} length={15}
+                        <InputText onChange={(text) => { setUserName(text) }} value={userName}
 
                             img={require('../../assets/images/image_user_Light.png')} placeholder={"Username"} />
 
                         <InputText keyboardType={"email-address"} onChange={(text) => { setEmail(text) }} value={email}
-                            img={require('../../assets/images/sms.png')} placeholder={"Email ID"} length={18} />
+                            img={require('../../assets/images/sms.png')} placeholder={"Email ID"} />
 
-                        <InputText keyboardType={'number-pad'} length={14} onChange={(text) => { setPhone(text) }} value={phone}
+                        <InputText
+                            keyboardType={'number-pad'}
+                            onChange={(text) => { setPhone(text) }}
+                            value={phone}
+                            num={"+91"}
+                            length={10}
                             img={require('../../assets/images/image_call.png')} placeholder={"Phone"} />
 
                         <InputText
                             onChange={(text) => { setPassword(text) }} value={password}
                             secureTextEntry={secureText}
                             show={() => { setSecureText(!secureText) }}
-                            img2={require('../../assets/images/eye-slash.png')}
-                            length={10}
-                            img={require('../../assets/images/lock.png')} 
+                            img2={secureText ? require('../../assets/images/eye-slash.png') : require('../../assets/images/eye.png')}
+                            // length={10}
+                            img={require('../../assets/images/lock.png')}
                             placeholder={"Password"} />
 
                         <View style={{ justifyContent: 'space-between', flexDirection: 'row', paddingHorizontal: 20 }}>
                             <View style={{ flexDirection: 'row' }}>
                                 <TouchableOpacity onPress={() => {
-                                    // navigation.navigate("Terms") 
-                                    setTerms(!terms)
+                                    navigation.navigate("Terms")
+                                    // dispatch(setTerms(!terms))
                                 }} >
                                     <Image
                                         style={{

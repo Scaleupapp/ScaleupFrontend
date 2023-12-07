@@ -39,7 +39,7 @@ const ForgotPassword = () => {
               setConfirm("")
               setOldPassword("")
               setPassword(""),
-              navigation.navigate("SignIn")
+              navigation.goBack()
         })
     }
 
@@ -49,7 +49,8 @@ const ForgotPassword = () => {
             <StatusBar
                 animated={true}
                 backgroundColor={ColorCode.blue_Button_Color} />
-            <AuthHeader myHeading={Strings.Forgot} imge={require('../../assets/images/arrow-left.png')} />
+            <AuthHeader myHeading={'Change Password'} 
+            imge={require('../../assets/images/arrow-left.png')} />
             <View style={styles.body}>
                 <ScrollView style={{ flex: 1 }}
                     contentContainerStyle={{ justifyContent: 'space-between' }}>

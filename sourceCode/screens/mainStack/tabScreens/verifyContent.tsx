@@ -17,7 +17,7 @@ import { addComment, allPostData, getHomePageData, getUserData, sendLikeRequest,
 import moment from "moment";
 import CommentModal from "../../../components/commetModal";
 import Loader from "../../../components/loader";
-import { setLoading } from "../../../redux/reducer";
+import { setLoading, setOther } from "../../../redux/reducer";
 import VarifyContentHeader from "../../../components/verifyContentHeader";
 import { AirbnbRating } from "react-native-ratings";
 
@@ -26,11 +26,14 @@ const ValidateContent = () => {
     const navigation = useNavigation<any>()
     const { other, loading } = useSelector<any, any>((store) => store.sliceReducer);
     const [home, setHome] = useState([])
-    const [rating,setrating]=useState(null)
-
+    const [rating, setrating] = useState(null)
+    const [cmt, setCmt] = useState('')
+    const [acp, setacp]=useState(false)
 
     const get = () => {
+        dispatch(setLoading(true))
         getHomePageData().then((res) => {
+            dispatch(setLoading(false))
             setHome(res?.data?.content)
             dispatch(setLoading(false))
         })
@@ -42,25 +45,31 @@ const ValidateContent = () => {
     }, [])
 
 
+    // console.log(cmt,"cmt------>")
+
+    const contentVarification = (payload) => {
+        dispatch(setLoading(true))
+        const data = {
+            "rating": rating,
+            "smeVerify": acp === true ? "Accepted" : "Rejected",
+            "smeComments": cmt
+        }
+        verifyContent(data, payload).then((res) => {
+            setCmt('')
+            console.log(res?.data, "data----->")
+            dispatch(setLoading(false))
+        })
+    }
 
 
-const contentVarification=(payload)=>{
-   const data = {
-    "rating": 1,
-    "smeVerify": "Rejected",
-    "smeComments": "gfghv"}
-
-    verifyContent(data,payload).then((res)=>{
-     console.log(res?.data,"data----->")
-    })
-}
 
 
 
 
-
-
-
+    const setUserData = (item) => {
+        dispatch(setOther(item))
+        navigation.navigate("OtherProfile")
+    }
 
 
 
@@ -72,39 +81,66 @@ const contentVarification=(payload)=>{
 
 
     const renderItem_didNumber = ({ item, index }: any) => {
-        console.log(item,"==item======>")
+        // console.log(item, "==item======>")
         return (
             <View
                 style={[styles.postStyle, styles.iosShadow]}>
-                <TouchableOpacity style={styles.info} onPress={() => { navigation.navigate("Connections") }}
-                >
+                <TouchableOpacity style={styles.info}
+                    onPress={() => { setUserData(item?.userId?._id) }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         {item?.userId?.profilePicture ?
                             <Image
-
                                 resizeMode='cover'
                                 style={styles.profileImg}
-                                source={{ uri: item?.userId?.profilePicture }}
-                            />
+                                source={{ uri: item?.userId?.profilePicture }} />
                             :
-                            <View style={styles.profileImg}>
-
-                            </View>
-                        }
+                            <View style={styles.profileImg} />}
 
                         <View style={[styles.nameType, { width: '55%' }]}>
                             <Text style={styles.boldStyle}>{item?.username}</Text>
-                            <Text style={styles.smalltxt}>{item?.captions}</Text>
+                            <Text
+                                numberOfLines={2}
+                                style={styles.smalltxt}>{item?.heading}</Text>
                         </View>
                     </View>
                     <View style={{ alignSelf: 'flex-start', width: '28%' }}>
-                        <Text numberOfLines={1} style={[styles.smalltxt, { marginTop: 12, }]}>{moment(item?.postdate).fromNow()}</Text>
+                        <Text numberOfLines={1} style={[styles.smalltxt,
+                        { marginTop: 12, }]}>{moment(item?.postdate).fromNow()}</Text>
+
+                        {item?.isVerified &&
+                            <Image
+                                style={{ alignSelf: 'flex-end', marginRight: 10 }}
+                                source={require('../../../assets/images/security-user.png')}
+                            />
+                        }
                     </View>
+
                 </TouchableOpacity>
                 <View style={styles.info}>
-                    <Text style={[styles.smalltxt, { textAlign: 'left', marginTop: 15, width: '90%' }]}>{item?.postText}</Text>
-                    <Image style={{ top: -20 }} source={item?.typeImg} />
+                    <View style={{ flexDirection: 'row', }}>
+                        {item?.relatedTopics.map((item) => {
+                            // console.log(item,'hastgas=====>')
+                            return (
+                                <Text
+                                    numberOfLines={2}
+                                    style={[styles.smalltxt, {
+                                        textAlign: 'left',
+                                        marginTop: 5,
+
+                                    }]}>{item}</Text>
+                            )
+
+                        })
+
+                        }
+
+
+
+                    </View>
+
+                    <Image style={{}} source={item?.typeImg} />
                 </View>
+
                 <Image
                     resizeMode={Platform.OS === "ios" ? 'cover' : 'contain'}
                     style={{ width: '100%', height: 250, backgroundColor: ColorCode.lightGrey, borderRadius: 15, marginVertical: 20 }}
@@ -113,29 +149,43 @@ const contentVarification=(payload)=>{
                 <View style={[styles.info, { paddingHorizontal: 15 }]}>
                     <Text style={{}} >Verified :</Text>
                     <TouchableOpacity
-                      onPress={()=>{contentVarification(item?.userId?._id)}}  
+                        onPress={() => {setacp(true), contentVarification(item?._id) }}
                     >
                         <Image style={{}}
                             source={require('../../../assets/images/check_24px.png')} />
                     </TouchableOpacity>
-                  
+
                     <TouchableOpacity
-                       onPress={()=>{contentVarification(item?.userId?._id)}}   
+                        onPress={() => { setacp(false),contentVarification(item?._id) }}
                     >
                         <Image style={{}}
                             source={require('../../../assets/images/close_24px.png')} />
                     </TouchableOpacity>
-                    
+
                     <Text style={{}}>Rating</Text>
-                    
+
                     <AirbnbRating
                         starContainerStyle={{ marginBottom: 30 }}
                         count={5}
-                        defaultRating={3.5}
-                        onFinishRating={(t)=>{setrating(t)}}
+                        defaultRating={0}
+                    
+                        onFinishRating={(t) => { setrating(t) }}
                         size={15}
                     />
+
                 </View>
+
+                
+                <TextInput
+                 onChangeText={(t) => {setCmt(t)}}
+                 value={cmt}
+                 placeholder={'Provide your Comments'}
+                 keyboardType={'default'}
+                 style={{height:50,width:'90%',
+                 alignSelf:'center',backgroundColor:"#F6F6F6",
+                borderRadius:10,paddingLeft:10,marginTop:-20,marginBottom:10
+                }}
+                />
             </View>
 
         )

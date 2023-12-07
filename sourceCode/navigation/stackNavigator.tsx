@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { BasicDetail, Certification, EducationDetail, ForgotPassword, PasswordOtp, SignIn, SignUp, Terms, WorkDetails } from "../screens/authStack";
+import { BasicDetail, Certification, ChangePassword, EducationDetail, ForgotPassword, PasswordOtp, SignIn, SignUp, Terms, WorkDetails } from "../screens/authStack";
 import TabNavigator from "./tabNavigator";
 import { useSelector } from "react-redux";
 import DrawerNavigator from "./drawerNavigation";
@@ -8,19 +8,21 @@ import Connections from "../screens/mainStack/drawerScreens/connections";
 import BlockList from "../screens/mainStack/drawerScreens/blockList";
 import Setting from "../screens/mainStack/drawerScreens/settingScreen";
 import { NotificationList, OtherProfile, ValidateContent } from "../screens/mainStack/tabScreens";
+import EditProfile from "../screens/mainStack/drawerScreens/editProfile";
 
 const Stack = createNativeStackNavigator();
 const StackNavigator = () => {
   const { loginUser } = useSelector<any, any>((store) => store.cookies);
-console.log(loginUser,"login--------->")
+  // console.log(loginUser,"login--------->")
   return (
     <Stack.Navigator
-    
+
       initialRouteName={
-        loginUser?.token ? "DrawerNavigator" :
-         "SignIn"}
+        loginUser?.token ? "TabNavigator" :
+          "SignIn"
+      }
       screenOptions={{ headerShown: false, gestureEnabled: false, gestureDirection: 'horizontal', }} >
-     <Stack.Screen name="DrawerNavigator" component={DrawerNavigator} />
+      <Stack.Screen name="TabNavigator" component={TabNavigator} />
       <Stack.Screen name="SignIn" component={SignIn} />
       <Stack.Screen name="SignUp" component={SignUp} />
       <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
@@ -36,6 +38,8 @@ console.log(loginUser,"login--------->")
       <Stack.Screen name="NotificationList" component={NotificationList} />
       <Stack.Screen name="ValidateContent" component={ValidateContent} />
       <Stack.Screen name="PasswordOtp" component={PasswordOtp} />
+      <Stack.Screen name="ChangePassword" component={ChangePassword} />
+      <Stack.Screen name="EditProfile" component={EditProfile} />
     </Stack.Navigator>
   );
 };

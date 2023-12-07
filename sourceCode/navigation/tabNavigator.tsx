@@ -17,7 +17,7 @@ const TabNavigator = () => {
     getMyProfile().then((res)=>{
       dispatch(setProfileDat(res?.data))
         // setProfileDat((res?.data))
-        console.log("res?.data=====>",res?.data,"res?.data=====>")
+        // console.log("res?.data=====>",res?.data,"res?.data=====>")
     })
 }, [])
 
@@ -91,7 +91,7 @@ const TabNavigator = () => {
           ),
         }}
         name="GlobalSearch" component={GlobalSearch} />
-      <Tab.Screen
+      {/* <Tab.Screen
         options={{
           tabBarLabel: 'Messages',
           tabBarActiveTintColor: ColorCode.blue_Button_Color,
@@ -103,7 +103,23 @@ const TabNavigator = () => {
             />
           ),
         }}
-        name="ChatList" component={ChatList} />
+        name="ChatList" component={ChatList} /> */}
+
+<Tab.Screen
+        options={{
+          tabBarLabel: 'Profile',
+          tabBarActiveTintColor: ColorCode.blue_Button_Color,
+          tabBarLabelStyle: { fontSize: 12, fontWeight: '500', lineHeight: 16, fontFamily: 'ComicNeue-Bold' },
+          tabBarIcon: ({ color, focused }) => (
+            <Image
+            
+              source={focused?require("../assets/images/image_user.png"): 
+                require("../assets/images/image_user_Light.png")}
+              style={{ tintColor: focused ? ColorCode.blue_Button_Color : 'grey', height: 25, width: 25 }}
+            />
+          ),
+        }}
+        name="Profile" component={Profile} />
     </Tab.Navigator>
   );
 };

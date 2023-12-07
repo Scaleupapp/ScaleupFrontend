@@ -14,36 +14,127 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 import { updateEducationDetail } from "../../utils/apiHelpers";
 import { setLoading } from "../../redux/reducer";
 import { Show_Toast } from "../../components/toast";
-
+import {
+    Menu,
+    MenuOptions,
+    MenuOption,
+    MenuTrigger,
+} from 'react-native-popup-menu';
+import Loader from "../../components/loader";
 const EducationDetail = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
     const [degree, setDegee] = useState("")
     const [school, setSchool] = useState("")
     const [date, setDate] = useState("")
-    const [field, setField]=useState("")
+    const [field, setField] = useState("")
+    const [addMoreList, setAddMoreList] = useState([])
+    const { name } = useSelector<any, any>((store) => store.sliceReducer);
+    const { loading } = useSelector<any, any>((store) => store.sliceReducer);
+    const { pofileData } = useSelector<any, any>((store) => store.sliceReducer);
+  
+   
+    const updateDetail = () => {
+        const data = {
+            "degree": degree,
+            "fieldOfStudy": field,
+            "school": school,
+            "graduationYear": date
+        }
+        dispatch(setLoading(true))
+        updateEducationDetail(data).then((res) => {
+            dispatch(setLoading(false))
+            console.log("res======>", res?.data)
+            Show_Toast(res?.data?.message)
+            navigation.navigate("WorkDetails")
+        })
+    }
 
 
-const updateDetail=()=>{
-    const data ={
-        "degree": degree,
-        "fieldOfStudy": field,
-        "school": school,
-        "graduationYear":date
-      }
-    dispatch(setLoading(true))
-    updateEducationDetail(data).then((res)=>{
-        dispatch(setLoading(false))
-        console.log("res======>", res?.data)
-        Show_Toast(res?.data?.message)
-        navigation.navigate("WorkDetails") 
-    })
-}
+    const AddMore = () => {
+        const data = {
+            "degree": degree,
+            "fieldOfStudy": field,
+            "school": school,
+            "graduationYear": date
+        }
+        dispatch(setLoading(true))
+        setAddMoreList(prevData => [...prevData, data]);
 
+
+
+        updateEducationDetail(data).then((res) => {
+            dispatch(setLoading(false))
+            console.log("res======>", res?.data)
+            Show_Toast(res?.data?.message)
+            setDegee('')
+            setSchool('')
+            setDate('')
+            setField('')
+            console.log(addMoreList, "addMoreList=====>")
+        })
+    }
+
+    const renderItem_didNumber = ({ item, index }: any) => {
+        // console.log(item, "item------>")
+        return (
+            <Menu>
+                <MenuTrigger
+                    customStyles={{
+                        optionsWrapper: { padding: 2 },
+                        TriggerTouchableComponent: ({ onPress }) => {
+                            return (
+                                <TouchableOpacity onPress={onPress} style={[styles.button, { marginLeft: 5, marginTop: 20, flexDirection: 'row' }]}>
+
+                                    <Text style={styles.text}>{item?.degree}</Text>
+                                    <Image
+                                        tintColor={"white"}
+                                        style={{ transform: [{ rotate: '90deg' }], marginRight: 10 }}
+                                        source={require('../../assets/images/ArrowRight.png')} />
+                                </TouchableOpacity>);
+                        },
+                    }} />
+                <MenuOptions
+                    optionsContainerStyle={{}}
+                    customStyles={{
+                        optionsContainer: {
+                            // width: wp('80%'),
+                            backgroundColor: ColorCode.white_Color,
+                            height: 90, width: 100, marginTop: 50, marginLeft: 10
+                        }
+                    }}>
+
+                    <MenuOption
+                        onSelect={() => { }}
+                        style={styles.menuOption}>
+                        <Text numberOfLines={1} style={styles.menuText}>{item.fieldOfStudy}</Text>
+                    </MenuOption>
+
+                    <MenuOption
+                        onSelect={() => { }}
+                        style={styles.menuOption}>
+                        <Text numberOfLines={1} style={styles.menuText}>{item?.graduationYear}</Text>
+                    </MenuOption>
+
+                    <MenuOption
+                        onSelect={() => { }}
+                        style={styles.menuOption}>
+                        <Text numberOfLines={1} style={styles.menuText}>{item?.school}</Text>
+                    </MenuOption>
+
+                </MenuOptions>
+
+
+
+
+            </Menu>
+        )
+    }
 
 
     return (
         <SafeAreaView style={styles.main}>
+            {loading && <Loader />}
             <StatusBar
                 barStyle={'dark-content'}
                 animated={true}
@@ -51,11 +142,28 @@ const updateDetail=()=>{
             />
             <View style={styles.body}>
                 <ScrollView style={{ flex: 1 }}
+                    automaticallyAdjustKeyboardInsets={true}
+                    keyboardShouldPersistTaps="always"
+                    keyboardDismissMode='interactive'
                     contentContainerStyle={{ justifyContent: 'space-between' }}>
-                    <Text style={styles.myText}>{"Education Details"}</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15 }}>
+                        <TouchableOpacity
+                            onPress={() => { navigation.goBack() }}
+                        >
+                            <Image
+                                tintColor={'black'}
+                                source={require('../../assets/images/arrow-left.png')}
+                            />
+                        </TouchableOpacity>
+
+                        <Text style={[styles.myText, { alignSelf: 'center' }]}>{"Education Details"}</Text>
+
+                        <View></View>
+                    </View>
+
                     <Text style={styles.txt}>{Strings.FillOut}</Text>
 
-                    <View style={styles.profile}>
+                    {/* <View style={styles.profile}>
                         <Image
                             resizeMode='center'
                             style={{ marginBottom: -20, height: 50, width: 50, borderRadius: 25 }}
@@ -65,44 +173,56 @@ const updateDetail=()=>{
                             style={{ marginLeft: 70, bottom: -5 }}
                             source={require('../../assets/images/EditSquare.png')}
                         />
-                    </View>
+                    </View> */}
+                    <FlatList
+                        scrollEnabled
+                        showsVerticalScrollIndicator={false}
+                        showsHorizontalScrollIndicator={false}
+                        horizontal
+                        contentContainerStyle={{ justifyContent: 'space-between' }}
+                        data={addMoreList.length > 0 ?addMoreList: pofileData?.user?.education}
+                        renderItem={renderItem_didNumber}
+                        keyExtractor={(item, index) => index.toString()} />
 
-                    <Text style={[styles.myText, { fontSize: 16, marginTop: 20 }]}>John Smith</Text>
+
+
+
+                    <Text style={[styles.myText, { fontSize: 16, marginTop: 20 }]}>{name}</Text>
 
 
                     <View style={[styles.inputView, { height: hp(34) }]}>
                         <InputText
-                            length={26}
+
                             onChange={(text) => { setDegee(text) }}
-                            value={degree}
+                            value={degree != ''? degree : pofileData?.user?.education[0].degree}
                             placeholder={"Degree"} />
-                        <InputText 
-                        length={26}
-                        onChange={(text) => { setSchool(text) }}
-                        value={school}
-                        placeholder={"School Name"} />
                         <InputText
-                         length={16}
-                         onChange={(text) => { setDate(text) }}
-                        value={date}
+
+                            onChange={(text) => { setSchool(text) }}
+                            value={school != '' ? school : pofileData?.user?.education[0].school}
+                            placeholder={"School Name"} />
+                        <InputText
+
+                            onChange={(text) => { setDate(text) }}
+                            value={date != '' ? date : pofileData?.user?.education[0].graduationYear}
                             keyboardType={'number-pad'}
                             placeholder={"Graduation Date"} />
-                        <InputText 
-                        length={26}
-                        onChange={(text) => { setField(text) }}
-                       value={field}
-                        placeholder={"Field of Study"} />
+                        <InputText
+
+                            onChange={(text) => { setField(text) }}
+                            value={field != '' ?field :pofileData?.user?.education[0].fieldOfStudy}
+                            placeholder={"Field of Study"} />
                     </View>
                 </ScrollView>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20 }}>
                     <OpacityButton
-                        pressButton={() => { navigation.navigate("BasicDetail") }}
+                        pressButton={() => { navigation.goBack() }}
                         name={"Back"} btnTextStyle={{ color: ColorCode.blue_Button_Color, }}
                         button={{ width: '44%', backgroundColor: ColorCode.white_Color, borderColor: ColorCode.blue_Button_Color, borderWidth: 1 }} />
                     <OpacityButton
-                        pressButton={() => { 
+                        pressButton={() => {
                             updateDetail()
-                            
+
                         }}
                         name={"Save & Next"} btnTextStyle={{ color: ColorCode.yellowText, }}
                         button={{ width: '44%' }} />
@@ -111,7 +231,7 @@ const updateDetail=()=>{
                 <View style={styles.inputView}>
 
                     <OpacityButton
-                        pressButton={() => { navigation.navigate("WorkDetails") }}
+                        pressButton={() => { AddMore() }}
                         name={"Add More"} btnTextStyle={{ color: ColorCode.blue_Button_Color, }}
                         button={{ width: '44%', backgroundColor: ColorCode.white_Color, borderColor: ColorCode.blue_Button_Color, borderWidth: 1 }} />
                 </View>
@@ -178,7 +298,37 @@ const styles = StyleSheet.create({
         elevation: 10,
         alignItems: 'center',
         justifyContent: 'center'
-    }
+    },
+    button: {
+        height: 30,
+        backgroundColor: ColorCode.blue_Button_Color,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 20
+    },
+    text: {
+
+        fontSize: 12,
+        fontFamily: 'ComicNeue-Bold',
+        color: ColorCode.white_Color,
+        paddingHorizontal: 15,
+        fontWeight: '400'
+
+    },
+
+    menuOption: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 30,
+        justifyContent: 'flex-start'
+    },
+    menuText: {
+        color: 'black',
+        fontSize: 12,
+        fontWeight: '400',
+        marginLeft: 5,
+        textAlign: 'left'
+    },
 
 })
 

@@ -1,6 +1,6 @@
 import { Store } from "../redux";
 import { apiClient, apiUploadDataClient } from "./api";
-import { ADDCOMMENT, ALLCONTENT, BASE_URL, BLOCKUSERLIST, CHAGEPASSWORD, CONTENTCREATE, CONTENTDETAIL, CONTENTVERIFY, DELETE, EDUCATIONDETAIL, FOLLOWUNFOLLOW, FOLLOWUSER, GET_METHOD, HOMEPAGE, LIKEREQUEST, NTIFICATION, POST_METHOD, PROFILE, PUTMETHOD, REGISTER, SEARCHUSER, SIGNIN, UNFOLLOW, UNLIKEREQUEST, USERBLOCK, USERPROFILE, USERUNBLOCK, WORKEXPERIENCE, } from "./apiConstant";
+import { ADDCOMMENT, ALLCONTENT, ATHOTP, AUTHRESET, BASE_URL, BLOCKUSERLIST, CHAGEPASSWORD, COMMENTPRIVLAGE, CONTENTCREATE, CONTENTDETAIL, CONTENTVERIFY, DELETE, DELETEACCOUNT, EDUCATIONDETAIL, FOLLOWUNFOLLOW, FOLLOWUSER, GET_METHOD, HOMEPAGE, LIKEREQUEST, MARKREAD, NTIFICATION, OTPPASSWORD, OTPVERIFY, POST_METHOD, PROFILE, PUTMETHOD, REGISTER, SEARCHUSER, SIGNIN, UNFOLLOW, UNLIKEREQUEST, USERBLOCK, USERCERTIFICATION, USERCOURSES, USERPROFILE, USERUNBLOCK, WORKEXPERIENCE, } from "./apiConstant";
 
 export const registerApi = (payload) => {
     console.log("login_payload--->", payload)
@@ -228,8 +228,8 @@ export const registerApi = (payload) => {
 
 
   export const verifyContent = (data,payload) => {
-    console.log(data,"login_payload--->", payload)
-    return apiUploadDataClient({
+    console.log(data,"login_payload--->",BASE_URL, CONTENTVERIFY+"/"+payload)
+    return apiClient({
       baseURL: BASE_URL,
       method: PUTMETHOD,
       url: CONTENTVERIFY+"/"+payload,
@@ -247,6 +247,114 @@ export const registerApi = (payload) => {
       data: payload,
     });
   };
+
+
+  export const getOtp = (payload) => {
+    console.log(payload,"payload------->")
+    return apiClient({
+      baseURL: BASE_URL,
+      method: POST_METHOD,
+      url:  ATHOTP,
+      data: payload,
+    });
+  };
+
+
+  export const verifyOtp = (payload) => {
+    console.log(payload,"payload------->")
+    return apiClient({
+      baseURL: BASE_URL,
+      method: POST_METHOD,
+      url:   OTPVERIFY,
+      data: payload,
+    });
+  };
+
+  
+
+  export const otpPassword = (payload) => {
+    console.log(payload,"payload------->")
+    return apiClient({
+      baseURL: BASE_URL,
+      method: POST_METHOD,
+      url:   OTPPASSWORD,
+      data: payload,
+    });
+  };
+
+
+  export const resetMyPassword = (payload) => {
+    console.log(payload,"payload------->")
+    return apiClient({
+      baseURL: BASE_URL,
+      method: POST_METHOD,
+      url:   AUTHRESET,
+      data: payload,
+    });
+  };
+
+  export const markAsReact = (payload) => {
+    console.log(payload,"payload------->")
+    return apiClient({
+      baseURL: BASE_URL,
+      method: POST_METHOD,
+      url:   MARKREAD,
+      data: payload,
+    });
+  };
+
+
+  export const chageCommentPrivalge = (payload) => {
+    console.log(payload,"payload------->")
+    return apiClient({
+      baseURL: BASE_URL,
+      method: POST_METHOD,
+      url:   COMMENTPRIVLAGE,
+      data: payload,
+    });
+  };
+
+
+  export const deleteAccont = (payload) => {
+    console.log(payload,"payload------->")
+    return apiClient({
+      baseURL: BASE_URL,
+      method: POST_METHOD,
+      url:   DELETEACCOUNT,
+      data: payload,
+    });
+  };
+
+
+  export const addCertification = (payload) => {
+    console.log(payload,"payload------->")
+    return apiClient({
+      baseURL: BASE_URL,
+      method: POST_METHOD,
+      url:  USERCERTIFICATION ,
+      data: payload,
+    });
+  };
+
+
+  export const addCourse = (payload) => {
+    console.log(payload,"payload------->")
+    return apiClient({
+      baseURL: BASE_URL,
+      method: POST_METHOD,
+      url:  USERCOURSES ,
+      data: payload,
+    });
+  };
+
+  
+  
+  
+
+  
+ 
+
+  
 
   
 

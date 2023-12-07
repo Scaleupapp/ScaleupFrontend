@@ -1,65 +1,290 @@
 import {
     Image, Platform, ScrollView, StyleSheet, Text,
-    TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView
+    TouchableOpacity, View, StatusBar, FlatList, SafeAreaView, TextInput
 } from "react-native"
 import React, { useEffect, useState } from "react"
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import ColorCode from "../../../constants/Styles";
-import OpacityButton from "../../../components/opacityButton";
-import InputText from "../../../components/textInput";
-import { AuthHeader, TabHeader } from "../../../components";
-import Strings from "../../../constants/strings";
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import reelsData from "../../../constants/helpers";
-import * as Progress from 'react-native-progress';
-import ProgressBar from "../../../components/progressBar";
-import { Rating, AirbnbRating } from 'react-native-ratings';
-import { getMyProfile } from "../../../utils/apiHelpers";
+import { TabHeader } from "../../../components";
+import { AirbnbRating, Rating } from 'react-native-ratings';
+import { addComment, getMyProfile, sendLikeRequest, sendUnLikeRequest } from "../../../utils/apiHelpers";
+import moment from "moment";
+import Video from "react-native-video";
+import { setLoginUser } from "../../../redux/cookiesReducer";
+import Loader from "../../../components/loader";
+import { setLoading, setProfileDat } from "../../../redux/reducer";
+import CommentModal from "../../../components/commetModal";
 
 const Profile = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
-    const [progress, setProgress] = useState(0);
     const [pofileData, setProfileData] = useState([])
-
+    const { loading } = useSelector<any, any>((store) => store.sliceReducer);
+    const [showComment, setCommment] = useState(false)
+    const [commentArray, setArray] = useState(null)
+    const [captionLine, setCaptionLine] = useState(2)
     useEffect(() => {
-
+        dispatch(setLoading(true))
         getMyProfile().then((res) => {
+            dispatch(setLoading(false))
             setProfileData((res?.data))
-            console.log("res?.data=====>", res?.data, "res?.data=====>")
+            // console.log("res?.data=====>", res?.data, "res?.data=====>")
         })
     }, [])
 
     const slicedData = pofileData?.user?.bio?.bioInterests.slice(0, 4);
 
+
+    const postComment = (data) => {
+        addComment(data).then((res) => {
+            getMyProfile().then((res) => {
+                dispatch(setLoading(false))
+                setProfileData((res?.data))
+                setCommment(false)
+                // console.log("res?.data=====>", res?.data, "res?.data=====>")
+            })
+        })
+    }
+
+
+    const likeThisPost = (item) => {
+        if (item?.likes.includes(pofileData?.user?._id)) {
+            sendUnLikeRequest(item?._id).then((res) => {
+                getMyProfile().then((res) => {
+                    dispatch(setLoading(false))
+                    setProfileData((res?.data))
+                    // console.log("res?.data=====>", res?.data, "res?.data=====>")
+                })
+            })
+        } else {
+            sendLikeRequest(item?._id).then(() => {
+                getMyProfile().then((res) => {
+                    dispatch(setLoading(false))
+                    setProfileData((res?.data))
+                    // console.log("res?.data=====>", res?.data, "res?.data=====>")
+                })
+            })
+        }
+    }
+
+    const openCoomentSection = (data) => {
+        setArray(data)
+        setCommment(true)
+    }
+
     const renderItem_didNumber = ({ item, index }: any) => {
-       
         return (
-            
             <TouchableOpacity style={[styles.button, { marginLeft: 5 }]}
-            onPress={() => { navigation.navigate('BlockList') }}>
-            <Text style={styles.text}>{item}</Text>
-        </TouchableOpacity>
+                onPress={() => { }}>
+                <Text style={styles.text}>{item}</Text>
+            </TouchableOpacity>
         )
     }
 
 
+    const renderItem = ({ item, index }: any) => {
+        // console.log(item, "done====>", item?.isVerified, "item=======>",)
+        return (
+            <View
+                style={[styles.postStyle, styles.iosShadow]}>
+                <TouchableOpacity style={styles.info}
+                    onPress={() => { }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        {item?.userId?.profilePicture ?
+                            <Image
+                                resizeMode='cover'
+                                style={styles.profileImg}
+                                source={{ uri: item?.userId?.profilePicture }} />
+                            :
+                            <View style={styles.profileImg} />}
 
+                        <View style={[styles.nameType, { width: '55%' }]}>
+                            <Text style={styles.boldStyle}>{item?.username}</Text>
+                            <Text
+                                numberOfLines={2}
+                                style={styles.smalltxt}>{item?.heading}</Text>
+                        </View>
+                    </View>
+                    <View style={{ alignSelf: 'flex-start', width: '28%' }}>
+                        <Text numberOfLines={1} style={[styles.smalltxt,
+                        { marginTop: 12, }]}>{moment(item?.postdate).fromNow()}</Text>
+
+                        {item?.smeVerify === "Accepted"  &&
+                            <Image
+                                style={{ alignSelf: 'flex-end', marginRight: 10 }}
+                                source={require('../../../assets/images/security-user.png')}
+                            />
+                        }
+                    </View>
+
+                </TouchableOpacity>
+                <View style={styles.info}>
+                    <View style={{ flexDirection: 'row', }}>
+                        {item?.relatedTopics.map((item) => {
+                            // console.log(item,'hastgas=====>')
+                            return (
+                                <Text
+                                    numberOfLines={2}
+                                    style={[styles.smalltxt, {
+                                        textAlign: 'left',
+                                        marginTop: 5,
+
+                                    }]}>{item}</Text>)
+                        })
+                        }
+                    </View>
+                    <Image style={{}} source={item?.typeImg} />
+                </View>
+                {item?.contentType == "Video" ?
+                    <Video
+                        resizeMode='cover'
+                        source={{ uri: item?.contentURL }}
+                        paused={false}
+                        style={{ width: '100%', height: 250, backgroundColor: ColorCode.lightGrey, borderRadius: 15, marginVertical: 10 }}
+                        repeat={true}
+                    >
+                    </Video>
+                    :
+                    <Image
+                        resizeMode={Platform.OS === "ios" ? 'cover' : 'contain'}
+                        style={{ width: '100%', height: 250, backgroundColor: ColorCode.lightGrey, borderRadius: 15, marginVertical: 10 }}
+                        source={{ uri: item?.contentURL }}
+                    />}
+
+
+                <View style={{ flexDirection: 'row' }}>
+                    {item?.hashtags.map((item) => {
+                        // console.log(item,'hastgas=====>')
+                        return (
+                            <Text
+                                numberOfLines={2}
+                                style={[styles.smalltxt, {
+                                    textAlign: 'left',
+                                }]}>{item}</Text>
+                        )
+                    })
+                    }
+                </View>
+                <View style={styles.line} />
+                <View style={{ width: '100%' }}>
+                    <Text
+                        numberOfLines={captionLine}
+                        style={[styles.smalltxt, {
+                            textAlign: 'left',
+                        }]}
+                    >{item?.captions}</Text>
+
+                    {item?.captions?.length > 38 &&
+                        <TouchableOpacity onPress={() => { captionLine === 2 ? setCaptionLine(100) : setCaptionLine(2) }}
+                            style={{}}>
+                            <Text
+
+                                style={[styles.smalltxt, { color: ColorCode.blue_Button_Color }]}>{captionLine === 2 ? 'see more' : 'show less'}</Text>
+                        </TouchableOpacity>
+                    }
+                </View>
+                <View style={styles.line} />
+                <View style={[styles.info, { alignItems: 'center', height: 30, }]}>
+                    <View style={{ flexDirection: 'row', width: '40%', justifyContent: 'space-between', }}>
+                        <TouchableOpacity
+                            onPress={() => { likeThisPost(item) }}>
+                            <Image
+                                tintColor={item?.likes.includes(pofileData?.user?._id) ? ColorCode.blue_Button_Color : 'grey'}
+                                source={require('../../../assets/images/heart.png')} />
+                        </TouchableOpacity>
+                        <Text style={[styles.boldStyle, { paddingLeft: 0 }]}>{item?.likes.length}</Text>
+                        <TouchableOpacity
+                            onPress={() => { openCoomentSection(item) }}>
+                            <Image source={require('../../../assets/images/image_message.png')} />
+                        </TouchableOpacity>
+                        <Text style={[styles.boldStyle, { paddingLeft: 0 }]}>{item?.comments?.length}</Text>
+                        {/* <Image style={{ top: -20 }} source={item?.ShareImage} /> */}
+                    </View>
+                    {/* <Image style={{ top: -20 }} source={item?.SaveImage} /> */}
+                </View>
+                <View style={styles.line} />
+                {item?.verify === "Yes" &&
+                    <View style={[styles.info, { height: 30 }]}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Text style={styles.smalltxt} >Verified :</Text>
+
+                            <Image style={{ marginLeft: 10 }}
+                                source={item?.smeVerify === "Accepted" ?
+                                    require('../../../assets/images/check_24px.png')
+                                    : require("../../../assets/images/close_24px.png")
+                                } />
+                        </View>
+
+
+                        <View style={{ flexDirection: 'row' }}>
+                            <Text style={styles.smalltxt}>Rating</Text>
+                            <Rating
+                                style={{ marginLeft: 10 }}
+                                type="star"
+                                ratingCount={5}
+                                startingValue={item?.rating}
+                                imageSize={20}
+                                readonly
+                            />
+                        </View>
+
+                    </View>}
+
+                {item?.smeComments && <View style={styles.line} />}
+                {item?.smeComments &&
+
+                    <TextInput
+                        // onChangeText={(t) => { setCmt(t) }}
+                        value={item?.smeComments}
+                        placeholder={'Provide your Comments'}
+                        editable={false}
+                        style={{
+                            height: 50, width: '95%',
+                            alignSelf: 'center', backgroundColor: "#F6F6F6",
+                            borderRadius: 10, paddingLeft: 10,
+                            fontFamily: 'ComicNeue-Bold',
+                            color: ColorCode.gray_color,
+                        }}
+                    />
+
+                }
+
+            </View>
+        )
+    }
+
+    const logout = () => {
+        dispatch(setLoginUser({}))
+        dispatch(setProfileDat([]))
+        navigation.reset({
+            index: 0,
+            routes: [{ name: 'SignIn' }] // Replace 'Home' with the screen you want to reset to
+        });
+    }
 
     return (
         <SafeAreaView style={styles.main}>
+            {loading && <Loader />}
+            {showComment &&
+                <CommentModal
+                    close={() => { setCommment(false) }}
+                    value={commentArray}
+                    post={(t) => { postComment(t) }}
+
+                />
+            }
             <StatusBar
                 barStyle={'dark-content'}
                 animated={true}
                 backgroundColor={ColorCode.white_Color} />
-            <TabHeader myHeading={"Profile"} imge={require('../../../assets/images/arrow-left.png')} />
+            <TabHeader myHeading={"Profile"}
+                imge={require('../../../assets/images/arrow-left.png')} />
             <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true}
-                showsVerticalScrollIndicator={false}
-            >
+                showsVerticalScrollIndicator={false}>
                 <View style={styles.cards}>
                     <View style={[styles.info, { paddingHorizontal: 15 }]}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-evenly' }}>
 
                             {pofileData?.user?.profilePicture ? <Image
                                 resizeMode='cover'
@@ -72,9 +297,33 @@ const Profile = () => {
                             <View style={[styles.nameType, { marginLeft: 30 }]}>
                                 <Text style={styles.boldStyle}>{pofileData?.user?.firstname + " " + pofileData?.user?.lastname}</Text>
                                 <Text numberOfLines={1}
-                                style={styles.smalltxt}>{pofileData?.user?.workExperience[0]?.description}</Text>
+                                    style={styles.smalltxt}>{pofileData?.user?.workExperience[0]?.description}</Text>
                                 <Text style={styles.smalltxt}>{pofileData?.user?.email}</Text>
+
                             </View>
+
+
+
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 60 }}>
+                                <TouchableOpacity
+                                    style={{ height: 50 }}
+                                    onPress={() => { navigation.navigate("Setting") }}>
+                                    <Image
+                                        tintColor={'black'}
+                                        source={require('../../../assets/images/regular_settings.png')}
+                                    />
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    onPress={() => { logout() }}
+                                    style={{ height: 50, }}>
+                                    <Image
+                                        source={require('../../../assets/images/Logout.png')}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+
+
                         </View>
                     </View>
                     {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 30 }}>
@@ -95,16 +344,16 @@ const Profile = () => {
 
                     <View style={[styles.reelsStyle,]}>
                         <FlatList
-                             scrollEnabled
-                             showsVerticalScrollIndicator={false}
-                             horizontal
-                             contentContainerStyle={{ justifyContent: 'space-between' }}
+                            scrollEnabled
+                            showsVerticalScrollIndicator={false}
+                            horizontal
+                            contentContainerStyle={{ justifyContent: 'space-between' }}
                             data={slicedData}
                             renderItem={renderItem_didNumber}
                             keyExtractor={(item, index) => index.toString()} />
                     </View>
                     <View style={styles.line} />
-                    <Text style={[styles.smalltxt, { marginTop: 10 }]}>I am a UI/UX designer with 6 years of experience. Currently working in ABC Design Studio. Apart from work I enjoy photography, as I am active member of Wildlife Photographers community. See More</Text>
+                    <Text style={[styles.smalltxt, { marginTop: 10 }]}>{pofileData?.user?.bio?.bioAbout}</Text>
                     <View style={[{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 20 }]}>
                         <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                             <Image
@@ -114,163 +363,41 @@ const Profile = () => {
                             <Text style={[styles.smalltxt, { color: ColorCode.black_Color }]}>{pofileData?.userContent?.length}</Text>
                             <Text style={[styles.smalltxt,]}>Posts</Text>
                         </View>
-                        <View style={{ alignItems: 'center', justifyContent: 'space-between' }}>
+                        <TouchableOpacity
+                            onPress={() => { navigation.navigate("Connections") }}
+                            style={{ alignItems: 'center', justifyContent: 'space-between' }}>
                             <Image
                                 resizeMode='contain'
                                 style={{ marginLeft: 10 }}
                                 source={require('../../../assets/images/following_.png')} />
                             <Text style={[styles.smalltxt, { color: ColorCode.black_Color }]}>{pofileData?.user?.followingCount}</Text>
                             <Text style={[styles.smalltxt,]}>Following</Text>
-                        </View>
-                        <View style={{ alignItems: 'center', justifyContent: 'space-between' }}>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => { navigation.navigate("Connections") }}
+                            style={{ alignItems: 'center', justifyContent: 'space-between' }}>
                             <Image
                                 resizeMode='contain'
                                 style={{ marginLeft: 10 }}
                                 source={require('../../../assets/images/followers_.png')} />
                             <Text style={[styles.smalltxt, { color: ColorCode.black_Color }]}>{pofileData?.user?.followersCount}</Text>
                             <Text style={[styles.smalltxt,]}>Followers</Text>
-                        </View>
+                        </TouchableOpacity>
                     </View>
                 </View>
                 <View style={{ flexDirection: 'row', marginTop: 20, paddingHorizontal: 10 }}>
                     <Text style={[styles.smalltxt, { fontSize: 18, color: ColorCode.black_Color }]}>Badge :</Text>
                     <Text style={[styles.smalltxt, { fontSize: 16, }]}>{pofileData?.user?.badges}</Text>
                 </View>
-                <View style={{ flexDirection: 'row', marginTop: 20, paddingHorizontal: 10, justifyContent: 'space-between' }}>
-                    <Text style={[styles.smalltxt, { fontSize: 16, }]}>My Account</Text>
-                    <Image
-                        style={{ transform: [{ rotate: '90deg' }] }}
-                        source={require('../../../assets/images/ArrowRight.png')}
-                    />
-                </View>
-
-                <View style={[styles.cards, { backgroundColor: ColorCode.lightGrey }]}>
-                    <View style={{ flexDirection: 'row', marginTop: 20, paddingHorizontal: 10, }}>
-                        <Image
-                            source={require('../../../assets/images/ArrowRight.png')} />
-                        <Text style={[styles.smalltxt, { fontSize: 16, }]}>Basic Details</Text>
-
-                    </View>
-
-                    <View style={{ flexDirection: 'row', marginTop: 20, paddingHorizontal: 10, }}>
-                        <Image
-                            source={require('../../../assets/images/ArrowRight.png')} />
-                        <Text style={[styles.smalltxt, { fontSize: 16, }]}>Educational Details</Text>
-
-                    </View>
-                    <View style={{ flexDirection: 'row', marginTop: 20, paddingHorizontal: 10, }}>
-                        <Image
-                            source={require('../../../assets/images/ArrowRight.png')} />
-                        <Text style={[styles.smalltxt, { fontSize: 16, }]}>Professional Details</Text>
-
-                    </View>
-                    <View style={{ flexDirection: 'row', marginTop: 20, paddingHorizontal: 10, }}>
-                        <Image
-                            source={require('../../../assets/images/ArrowRight.png')} />
-                        <Text style={[styles.smalltxt, { fontSize: 16, }]}>Course and Certifications</Text>
-
-                    </View>
-                </View>
-
-
-
-
-                <View style={styles.cards}>
-                    <View style={{ flexDirection: 'row', marginTop: 20, paddingHorizontal: 10, justifyContent: 'space-between' }}>
-                        <TouchableOpacity
-                            onPress={() => { navigation.navigate("Connections") }}
-                        >
-                            <Text style={[styles.smalltxt, { fontSize: 16, }]}>Connections</Text>
-                        </TouchableOpacity>
-
-
-                        <Image
-
-                            source={require('../../../assets/images/ArrowRight.png')}
-                        />
-                    </View>
-
-                    <View style={{ flexDirection: 'row', marginTop: 20, paddingHorizontal: 10, justifyContent: 'space-between' }}>
-                        <Text style={[styles.smalltxt, { fontSize: 16, }]}>Educational Details</Text>
-                        <Image
-
-                            source={require('../../../assets/images/ArrowRight.png')}
-                        />
-                    </View>
-
-                    <View style={{ flexDirection: 'row', marginTop: 20, paddingHorizontal: 10, justifyContent: 'space-between' }}>
-                        <Text style={[styles.smalltxt, { fontSize: 16, }]}>Professional Details</Text>
-                        <Image
-
-                            source={require('../../../assets/images/ArrowRight.png')}
-                        />
-                    </View>
-
-                    <View style={{ flexDirection: 'row', marginTop: 20, paddingHorizontal: 10, justifyContent: 'space-between' }}>
-                        <Text style={[styles.smalltxt, { fontSize: 16, }]}>Course and Certifications</Text>
-                        <Image
-
-                            source={require('../../../assets/images/ArrowRight.png')}
-                        />
-                    </View>
-                </View>
-
-                <View style={{ height: 100 }}></View>
-
-
-
-
-
-
-
-
-
-
-
-                {/* <View style={styles.line} />
-                <View style={[styles.nameType, { marginTop: 20 }]}>
-                    <Text style={styles.smalltxt}>{"Dear all, \nThis is one of the difficult poll to answer. Und...  see more"}</Text>
-                </View>
-                <View style={styles.line} />
-                <Text style={[styles.smalltxt, { marginTop: 20, marginHorizontal: 10, color: ColorCode.black_Color }]}>{"Reliability check process in UX is carried out for the..."}</Text>
-                <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 10 }}>
-                    <ProgressBar progress={progress} duration={1000} />
-                    <ProgressBar progress={progress} duration={1000} />
-                    <ProgressBar progress={progress} duration={1000} />
-                    <ProgressBar progress={progress} duration={1000} />
-                </View>
-                <View style={styles.line} />
-                <Text style={[styles.smalltxt, { marginTop: 10, fontSize: 16 }]}>{"160 Votes .Poll Closed"}</Text>
-                <View style={[styles.line, { marginTop: 10 }]} />
-                <View style={styles.info}>
-                    <View style={{ flexDirection: 'row', width: '40%', justifyContent: 'space-between', marginTop: 30, paddingHorizontal: 10 }}>
-                        <Image style={{ top: -20 }} source={require('../../../assets/images/heart.png')} />
-                        <Text style={{ top: -20 }}>223</Text>
-                        <Image style={{ top: -20 }} source={require('../../../assets/images/image_message.png')} />
-                        <Text style={{ top: -20 }}>34</Text>
-                        <Image style={{ top: -20 }} source={require('../../../assets/images/send-2.png')} />
-                    </View>
-                </View>
-                <View style={[styles.info, { marginTop: -30, paddingHorizontal: 15 }]}>
-                    <Text style={{ top: 20 }} >Verified :</Text>
-                    <Image style={{ top: 20 }} source={require('../../../assets/images/check_24px.png')} />
-                    <Image style={{ top: 20 }} source={require('../../../assets/images/close_24px.png')} />
-                    <Text style={{ top: 20 }} >Rating</Text>
-                    <AirbnbRating
-                        count={5}
-                        // reviews={["Terrible", "Bad", "Meh", "OK",]}
-                        defaultRating={3.5}
-                        size={15}
-                    />
-                </View>
                 <View style={[styles.reelsStyle,]}>
                     <FlatList
                         scrollEnabled
                         showsVerticalScrollIndicator={false}
-                        data={reelsData}
-                        renderItem={renderItem_didNumber}
+                        data={pofileData?.userContent}
+                        renderItem={renderItem}
+                        inverted
                         keyExtractor={(item, index) => index.toString()} />
-                </View> */}
+                </View>
             </ScrollView>
         </SafeAreaView>
 
@@ -334,8 +461,8 @@ const styles = StyleSheet.create({
         backgroundColor: ColorCode.lightGrey
     },
     nameType: {
-   
-        width:250
+        width: 180,
+
 
     },
     boldStyle: {
@@ -372,7 +499,7 @@ const styles = StyleSheet.create({
         height: 2,
         backgroundColor: ColorCode.lightGrey,
         width: '95%',
-        marginTop: 30,
+        marginTop: 5,
         marginHorizontal: 10
     },
     cards: {

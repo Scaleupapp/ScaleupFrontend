@@ -33,7 +33,7 @@ const giveCommentPermission=(item)=>{
 
     }
     chageCommentPrivalge(data).then((res)=>{
-      console.log(res?.data,"coo=======>")
+    //   console.log(res?.data,"coo=======>")
     })
 }
 
@@ -51,17 +51,14 @@ useEffect(()=>{
     return (
         <SafeAreaView style={styles.main}>
 
-            {open&&
-                <ConfirmDelete
-                close={()=>{setOpen(false)}}
-                />
-            }
+            
             <StatusBar
                 barStyle={'dark-content'}
                 animated={true}
                 backgroundColor={ColorCode.white_Color}
             />
             <TabHeader myHeading={"Settings"}
+            go={()=>navigation.goBack()}
                 imge={require('../../../assets/images/arrow-left.png')}
             />
 
@@ -74,6 +71,7 @@ useEffect(()=>{
                     style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={[styles.smalltxt,]}>Edit Profile</Text>
                     <Image
+                     tintColor={'grey'}
                         source={require('../../../assets/images/ArrowRight.png')} />
                 </TouchableOpacity>
 
@@ -82,57 +80,12 @@ useEffect(()=>{
                     style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={[styles.smalltxt,]}>Change Password</Text>
                     <Image
+                     tintColor={'grey'}
                         source={require('../../../assets/images/ArrowRight.png')}
                     />
                 </TouchableOpacity>
 
-                {/* <View style={[styles.line, { marginTop: 20 }]} /> */}
-
-
-
-                {/* <Text style={[styles.smalltxt, { fontSize: 18, color: ColorCode.blue_Button_Color }]}>Notifications</Text>
-                <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
-                    <Text style={[styles.smalltxt,]}>Allow all notifications</Text>
-                    <Switch
-                        trackColor={{ false: "grey", true: ColorCode.blue_Button_Color }}
-                        thumbColor={enable ? "white" : "white"}
-                        ios_backgroundColor="#3e3e3e"
-                        onValueChange={toggleSwitch}
-                        value={enable} />
-                </TouchableOpacity> */}
-
-                {/* <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
-                    <Text style={[styles.smalltxt,]}>Change Password</Text>
-                    <Switch
-                        trackColor={{ false: "grey", true: ColorCode.blue_Button_Color }}
-                        thumbColor={enable ? "white" : "white"}
-                        ios_backgroundColor="#3e3e3e"
-                        onValueChange={toggleSwitch}
-                        value={enable} />
-                </TouchableOpacity> */}
-
-                {/* <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
-                    <Text style={[styles.smalltxt,]}>Change Password</Text>
-                    <Switch
-                        trackColor={{ false: "grey", true: ColorCode.blue_Button_Color }}
-                        thumbColor={enable ? "white" : "white"}
-                        ios_backgroundColor="#3e3e3e"
-                        onValueChange={toggleSwitch}
-                        value={enable} />
-                </TouchableOpacity> */}
-
-                {/* <View style={[styles.line, { marginTop: 20 }]} />
-
-                <Text style={[styles.smalltxt, { fontSize: 18, color: ColorCode.blue_Button_Color }]}>Privacy</Text>
-                <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
-                    <Text style={[styles.smalltxt,]}>Make my account Private</Text>
-                    <Switch
-                        trackColor={{ false: "grey", true: ColorCode.blue_Button_Color }}
-                        thumbColor={enable ? "white" : "white"}
-                        ios_backgroundColor="#3e3e3e"
-                        onValueChange={toggleSwitch}
-                        value={enable} />
-                </TouchableOpacity> */}
+                
 
 
                 <Text style={[styles.smalltxt, { marginTop: 10 }]}>Who can see my posts, photos, life updates</Text>
@@ -178,28 +131,31 @@ useEffect(()=>{
 
                 <TouchableOpacity onPress={() => { navigation.navigate("BlockList") }}
                     style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
-                    <Text style={[styles.smalltxt,]}>Block People</Text>
+                    <Text style={[styles.smalltxt,]}>Blocked User</Text>
                     <Image
+                     tintColor={'grey'}
                         source={require('../../../assets/images/ArrowRight.png')}
                     />
                 </TouchableOpacity>
 
 
-                <TouchableOpacity onPress={() => { }}
+                <TouchableOpacity onPress={() => {navigation.navigate("HelpCenter") }}
                     style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={[styles.smalltxt,]}>Help Center</Text>
                     <Image
+                     tintColor={'grey'}
                         source={require('../../../assets/images/ArrowRight.png')}
                     />
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => {setOpen(true)  }}
+                {/* <TouchableOpacity onPress={() => {setOpen(true)  }}
                     style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={[styles.smalltxt,]}>Delete Account</Text>
                     <Image
+                    tintColor={'grey'}
                         source={require('../../../assets/images/ArrowRight.png')}
                     />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
 
 
                 {/* <TouchableOpacity onPress={()=>{logout()}}

@@ -10,19 +10,14 @@ import { useSelector } from 'react-redux';
 const TabHeader = (props: any) => {
     const navigation = useNavigation<any>()
     const { pofileData, loading } = useSelector<any, any>((store) => store.sliceReducer);
-
-    console.log(pofileData?.user?.role, "pofileData=====>")
-
     return (
         <View style={[styles.container, props.contain]}>
             <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }}
                 activeOpacity={1}
-                onPress={() => { navigation.goBack() }}>
+                onPress={() => {props?.go() ? props?.go() : null}}>
                 <Image
                     style={{ tintColor: ColorCode.blue_Button_Color }}
                     source={props?.imge}
-
-                // require('../assets/images/arrow-left.png')
                 />
                 <Text style={styles.myText}>{props?.myHeading}</Text>
             </TouchableOpacity>
@@ -57,13 +52,6 @@ const TabHeader = (props: any) => {
     );
 };
 
-{/* <TouchableOpacity style={[styles.btnStyle,{paddingLeft:0}]}>
-             <Image
-            
-                style={{tintColor:ColorCode.blue_Button_Color}}
-                source={props?.imge3}
-            /> 
-            </TouchableOpacity> */}
 const styles = StyleSheet.create({
     container: {
         height: '8%',

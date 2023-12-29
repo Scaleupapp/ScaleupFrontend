@@ -31,7 +31,7 @@ const BasicDetail = (props) => {
     const { loginUser } = useSelector<any, any>((store) => store.cookies);
     const { name } = useSelector<any, any>((store) => store.sliceReducer);
     const [selectedImage, setSelectedImage] = useState(null)
-    const [location, setLocation] = useState("")
+    const [location, setLocation] = useState(pofileData?.user?.location)
     const [date, setDate] = useState("")
     const [about, setAbout] = useState("")
     const [intrust, setIntrust] = useState("")
@@ -42,7 +42,16 @@ const BasicDetail = (props) => {
     const { pofileData } = useSelector<any, any>((store) => store.sliceReducer);
     const { loading } = useSelector<any, any>((store) => store.sliceReducer);
    
-    // console.log("pofileData=====>",pofileData,"pofileData=====>")
+    //  console.log("pofileData=====>",pofileData?.user?.dateOfBirth,"pofileData=====>",intrust)
+
+
+useEffect(()=>{
+    setSelectedImage(pofileData?.user?.profilePicture)
+    setLocation(pofileData?.user?.location ? pofileData?.user?.location : "")
+    setIntrust(pofileData?.user?.bio?.bioInterests?.join(', '))
+    setAbout(pofileData?.user?.bio?.bioAbout)
+    setselectedStartDate(moment(pofileData?.user?.dateOfBirth?.toString()).format('YYYY-MM-DD'))
+},[])
 
 
     const showAlert = () => {
@@ -63,16 +72,16 @@ const BasicDetail = (props) => {
         check(Platform.select({ ios: PERMISSIONS.IOS.CAMERA, android: PERMISSIONS.ANDROID.CAMERA })).then((result) => {
             if (result === 'denied') {
                 request(Platform.select({ ios: PERMISSIONS.IOS.CAMERA, android: PERMISSIONS.ANDROID.CAMERA })).then((result) => {
-                    console.log('permisson ---------------__---------->', result)
+                    // console.log('permisson ---------------__---------->', result)
                 }).catch((err) => {
-                    console.log('onRequestPermissionCatchError ->', err)
+                    // console.log('onRequestPermissionCatchError ->', err)
                 })
             } else {
-                console.log('updateImage ----------->')
+                // console.log('updateImage ----------->')
                 pickImageByCamera()
             }
         }).catch((err) => {
-            console.log('onCheckPermissionCatchError ->', err)
+            // console.log('onCheckPermissionCatchError ->', err)
         })
     };
 
@@ -85,16 +94,16 @@ const BasicDetail = (props) => {
             },
         };
         launchCamera(options, (response) => {
-            console.log(response, "response======>")
+            // console.log(response, "response======>")
             if (response?.didCancel) {
                 // props.close()
-                console.log('User cancelled image picker');
+                // console.log('User cancelled image picker');
             } else if (response?.error) {
-                console.log('ImagePicker Error: ', response?.error);
+                // console.log('ImagePicker Error: ', response?.error);
             } else if (response?.customButton) {
-                console.log('User tapped custom button: ', response?.customButton);
+                // console.log('User tapped custom button: ', response?.customButton);
             } else {
-                console.log('else ------>', response?.assets[0])
+                // console.log('else ------>', response?.assets[0])
                 const source = { uri: response?.assets[0] };
                 setSelectedImage(source);
                 // props.close()
@@ -111,14 +120,14 @@ const BasicDetail = (props) => {
             },
         };
         launchImageLibrary(options, (response) => {
-            console.log(response.assets, "response======>")
+            // console.log(response.assets, "response======>")
             if (response?.didCancel) {
                 // props.close()
-                console.log('User cancelled image picker');
+                // console.log('User cancelled image picker');
             } else if (response?.error) {
-                console.log('ImagePicker Error: ', response?.error);
+                // console.log('ImagePicker Error: ', response?.error);
             } else if (response?.customButton) {
-                console.log('User tapped custom button: ', response.customButton);
+                // console.log('User tapped custom button: ', response.customButton);
             } else {
                 const source = { uri: response?.assets[0] };
                 setSelectedImage(source);
@@ -137,11 +146,11 @@ const BasicDetail = (props) => {
         formData.append('dateOfBirth', moment(selectedStartDate.toString()).format('YYYY-MM-DD'));
         formData.append('bioAbout', about);
         formData.append('bioInterests', intrust);
-        console.log(formData, "formData============>")
+        // console.log(formData, "formData============>")
         dispatch(setLoading(true))
         basicDetail(formData).then((res) => {
             dispatch(setLoading(false))
-            console.log("res======>", res?.data)
+            // console.log("res======>", res?.data)
             Show_Toast(res?.data?.message)
             navigation.navigate("EducationDetail")
         })
@@ -190,10 +199,10 @@ const BasicDetail = (props) => {
                         style={styles.profile}>
 
                         <Image
-                            resizeMode={selectedImage?.uri ? 'contain' : 'center'}
-                            style={{ marginBottom: -20, height: 50, width: 50, borderRadius: 25 }}
+                            resizeMode='cover'
+                            style={{ marginBottom: -20, height: '100%', width:'100%', borderRadius: 30 }}
                             source={selectedImage?.uri ? selectedImage?.uri :
-                                pofileData?.user?.profilePicture ?  pofileData?.user?.profilePicture:
+                                selectedImage ? {uri:selectedImage} :
                                 require('../../assets/images/personalcard.png')} />
                         <Image
                             style={{ marginLeft: 70, bottom: -5 }}
@@ -205,7 +214,7 @@ const BasicDetail = (props) => {
                         <InputText
                             length={16}
                             onChange={(text) => { setLocation(text) }}
-                            value={location != "" ? location : pofileData?.user?.location}
+                            value={location}
                             placeholder={"location"}
                              />
 
@@ -225,7 +234,7 @@ const BasicDetail = (props) => {
                                 color: 'grey'
                             }}>{selectedStartDate != null ?
                                 moment(selectedStartDate.toString()).format('YYYY-MM-DD ') :
-                                pofileData?.user?.dateOfBirth ? moment(pofileData?.user?.dateOfBirth.toString()).format('YYYY-MM-DD '):
+                                
                                  "Date of Birth"}</Text>
                             <Image
                                 style={{ transform: [{ rotate: '90deg' }], marginRight: 10 }}
@@ -234,13 +243,13 @@ const BasicDetail = (props) => {
                         </TouchableOpacity>
                         <InputText
                             onChange={(text) => {setIntrust(text) }}
-                            value={intrust != '' ? intrust : pofileData?.user?.bio?.bioInterests[0]}
+                            value={intrust}
                             placeholder={"Enter interests comma separated "} />
 
                         {intrust.length > 0 &&
                             <View style={{
                                 flexDirection: 'row',
-                                flexWrap: 'wrap', paddingHorizontal: 15
+                                 paddingHorizontal: 15
                             }}>
                                 {intrust.split(',').map((interest, index) => (
                                     <TouchableOpacity key={index} style={{
@@ -256,7 +265,7 @@ const BasicDetail = (props) => {
                         <InputText
 
                             onChange={(text) => { setAbout(text) }}
-                            value={about != '' ? about : pofileData?.user?.bio?.bioAbout }
+                            value={about}
                             placeholder={"About You"} />
                     </View>
                 </ScrollView>

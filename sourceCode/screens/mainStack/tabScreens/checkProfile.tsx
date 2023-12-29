@@ -75,7 +75,9 @@ const CheckProfile = () => {
                 animated={true}
                 backgroundColor={ColorCode.white_Color}
             />
-            <TabHeader myHeading={"Profile"} />
+            <TabHeader 
+            go={()=>navigation.goBack()}
+            myHeading={"Profile"} />
             <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true}>
                 <View style={[styles.info, { paddingHorizontal: 15 }]}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>

@@ -1,6 +1,6 @@
 import {
     Image, Platform, ScrollView, StyleSheet, Text,
-    TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView, Alert
+    TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView, Alert, BackHandler, RefreshControl
 } from "react-native"
 import React, { useEffect, useState } from "react"
 import { useNavigation } from "@react-navigation/native";
@@ -13,10 +13,12 @@ import CommentModal from "../../../components/commetModal";
 import Loader from "../../../components/loader";
 import { setLoading, setOther } from "../../../redux/reducer";
 import Video from 'react-native-video';
-
+import HomeHeader from "../../../components/homeHeader";
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import FullImageModal from "../../../components/fullImageModal";
 const Home = () => {
-  
-  
+
+
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
     const [home, setHome] = useState([])
@@ -24,11 +26,40 @@ const Home = () => {
     const [commentArray, setArray] = useState(null)
     const { pofileData, loading } = useSelector<any, any>((store) => store.sliceReducer);
     const [captionLine, setCaptionLine] = useState(2)
+    const [refreshing, setRefreshing] = useState(false);
+    const [imageUlr, setImageUrl]=useState(null)
+    const [showImage, setShowImage]=useState(false)
     // console.log("pofileData---->",pofileData,"pofileData---->")
 
     useEffect(() => {
         homePageData()
     }, [])
+
+
+    useEffect(() => {
+        // getPhoneConatcts()
+        const backAction = () => {
+            Alert.alert('Exit App', 'Do you want to exit the app?', [
+                {
+                    text: 'Cancel',
+                    onPress: () => null,
+                    style: 'cancel',
+                },
+                {
+                    text: 'Exit',
+                    onPress: () => BackHandler.exitApp(),
+                },
+            ]);
+            return true; // Prevent default behavior (exit the app)
+        };
+
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress',
+            backAction
+        );
+
+        return () => backHandler.remove(); // Cleanup the event listener when the component unmounts
+    }, []);
 
     const postComment = (data) => {
         addComment(data).then((res) => {
@@ -45,16 +76,15 @@ const Home = () => {
         setCommment(true)
     }
 
-
-
     const homePageData = () => {
+        setRefreshing(true)
         dispatch(setLoading(true))
         getHomePageData().then((res) => {
             setHome(res?.data?.content)
             dispatch(setLoading(false))
+            setRefreshing(false)
         })
     }
-
 
     const likeThisPost = (item) => {
         if (item?.likes.includes(pofileData?.user?._id)) {
@@ -75,30 +105,35 @@ const Home = () => {
     }
 
 
-
-
     const setUserData = (item) => {
         dispatch(setOther(item))
         navigation.navigate("OtherProfile")
     }
 
+    const showFullImage = (item) => {
+        setImageUrl(item)
+        setShowImage(!showImage)
+    }
 
 
     const renderItem_didNumber = ({ item, index }: any) => {
-        //   console.log("done====>", item, "item=======>",)
+        //  console.log("done====>", item?.userId?.profilePicture, "item=======>",)
         return (
             <View
                 style={[styles.postStyle, styles.iosShadow]}>
                 <TouchableOpacity style={styles.info}
                     onPress={() => { setUserData(item?.userId?._id) }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        {item?.userId?.profilePicture ?
+                        {item?.userId?.profilePicture != null ?
                             <Image
                                 resizeMode='cover'
                                 style={styles.profileImg}
                                 source={{ uri: item?.userId?.profilePicture }} />
                             :
-                            <View style={styles.profileImg} />}
+                            <View style={styles.profileImg} >
+                                <Text style={[styles.boldStyle, { paddingLeft: 0 }]}>{item?.username?.substring(0, 2).toUpperCase()}</Text>
+                            </View>
+                        }
 
                         <View style={[styles.nameType, { width: '55%' }]}>
                             <Text style={styles.boldStyle}>{item?.username}</Text>
@@ -129,47 +164,58 @@ const Home = () => {
                                     style={[styles.smalltxt, {
                                         textAlign: 'left',
                                         marginTop: 5,
-
                                     }]}>{item}</Text>
                             )
-
                         })
-
                         }
-
-
-
                     </View>
 
                     <Image style={{}} source={item?.typeImg} />
                 </View>
                 {item?.contentType == "Video" ?
+                <TouchableOpacity
+                activeOpacity={1}
+                onPress={() => {showFullImage(item) }}>
                     <Video
                         resizeMode='cover'
                         source={{ uri: item?.contentURL }}
-                        paused={false}
-                        style={{ width: '100%', height: 250, backgroundColor: ColorCode.lightGrey, borderRadius: 15, marginVertical: 10 }}
-                        repeat={true}
-                    >
+                        paused={true}
+                        style={{
+                            width: '100%', height: 250,
+                            backgroundColor: ColorCode.lightGrey,
+                            borderRadius: 15, marginVertical: 10
+                        }}
+                        repeat={true}>
                     </Video>
+                    </TouchableOpacity>
                     :
-                    <Image
-                        resizeMode={Platform.OS === "ios" ? 'cover' : 'contain'}
-                        style={{ width: '100%', height: 250, backgroundColor: ColorCode.lightGrey, borderRadius: 15, marginVertical: 10 }}
-                        source={{ uri: item?.contentURL }}
-                    />}
-                <View style={{ width: '100%'}}>
+                    <TouchableOpacity
+                        activeOpacity={1}
+                        onPress={() => {showFullImage(item) }}
+                        style={{
+                            width: '100%',
+                            height: 250,
+                            backgroundColor: ColorCode.lightGrey,
+                            borderRadius: 15, marginVertical: 10
+                        }}>
+                        <Image
+                            style={{ height: '100%', width: '100%' }}
+                            resizeMode='contain'
+                            source={{ uri: item?.contentURL }} />
+                    </TouchableOpacity>
+                }
+                <View style={{ width: '100%' }}>
                     <Text
                         numberOfLines={captionLine}
                         style={[styles.smalltxt, {
-                            textAlign: 'left', 
+                            textAlign: 'left',
                         }]}
                     >{item?.captions}</Text>
 
                     {item?.captions.length > 38 &&
-                        <TouchableOpacity onPress={()=>{ captionLine === 2 ? setCaptionLine(100) : setCaptionLine(2) }}
-                        style={{ }}>
-                            <Text style={[styles.smalltxt,{ color: ColorCode.blue_Button_Color }]}>{captionLine === 2 ?'see more' : 'show less'}</Text>
+                        <TouchableOpacity onPress={() => { captionLine === 2 ? setCaptionLine(100) : setCaptionLine(2) }}
+                            style={{}}>
+                            <Text style={[styles.smalltxt, { color: ColorCode.blue_Button_Color }]}>{captionLine === 2 ? 'see more' : 'show less'}</Text>
                         </TouchableOpacity>
                     }
 
@@ -228,8 +274,8 @@ const Home = () => {
                 animated={true}
                 backgroundColor={ColorCode.white_Color}
             />
-            <TabHeader myHeading={"ScaleUp"}
-                // imge1={require('../../../assets/images/filter-remove.png')}
+            <HomeHeader
+                myHeading={"ScaleUp"}
                 imge2={require('../../../assets/images/Notification.png')}
                 imge1={require('../../../assets/images/crown-2.png')} />
 
@@ -240,7 +286,25 @@ const Home = () => {
                     showsVerticalScrollIndicator={false}
                     data={home}
                     renderItem={renderItem_didNumber}
-                    keyExtractor={(item, index) => index.toString()} />
+                    keyExtractor={(item, index) => index.toString()}
+                    refreshControl={<RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={homePageData}
+                    />}
+                    ListEmptyComponent={
+                       
+                    
+                    <View style={styles.emptyList}>
+                       {!loading&&
+                        <Text style={{
+                            color: ColorCode.gray_color, width: '100%',
+                            textAlign: 'center', fontSize: 20, fontWeight: '500'
+                        }}>{'Your Home Feed is empty right now. Start exploring and following users  from the search page to see their content here!'}</Text>
+                       } 
+                    </View>
+                    
+                }
+                />
             </View>
 
 
@@ -249,6 +313,13 @@ const Home = () => {
                     close={() => { setCommment(false) }}
                     value={commentArray}
                     post={(t) => { postComment(t) }}
+                />
+            }
+            {showImage&&
+                <FullImageModal
+                
+                    imageUrl={imageUlr}
+                    close={()=>{setShowImage(false)}}
                 />
             }
 
@@ -312,7 +383,9 @@ const styles = StyleSheet.create({
         height: 60,
         width: 60,
         borderRadius: 30,
-        backgroundColor: ColorCode.lightGrey
+        backgroundColor: ColorCode.lightGrey,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     nameType: {
 
@@ -337,6 +410,12 @@ const styles = StyleSheet.create({
         width: '95%',
         marginTop: 5,
         marginHorizontal: 10
+    },
+    emptyList: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: hp(28)
     },
 
 

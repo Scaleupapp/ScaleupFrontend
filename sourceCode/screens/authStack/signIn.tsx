@@ -2,7 +2,7 @@
 
 import {
     Image, Platform, ScrollView, StyleSheet, Text,
-    TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView
+    TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView, KeyboardAvoidingView
 } from "react-native"
 import React, { useEffect, useState } from "react"
 import { useNavigation } from "@react-navigation/native";
@@ -96,11 +96,11 @@ const SignIn = () => {
                 "loginIdentifier": userName,
                 "password": password
             }
-            console.log("login------->")
+            // console.log("login------->")
             loginApi(data).then((res) => {
                 dispatch(setLoading(false))
                 Show_Toast(res?.data?.message)
-                console.log(res?.data, "res?.data=======>")
+                // console.log(res?.data, "res?.data=======>")
                 dispatch(setLoginUser(res?.data))
 
                 if (res?.data?.isFirstTimeLogin1) {
@@ -123,26 +123,30 @@ const SignIn = () => {
             <StatusBar
                 animated={true}
                 backgroundColor={ColorCode.blue_Button_Color} />
+        
             <AuthHeader myHeading={Strings.SigninHeaderText} />
+           
+            
+
             <View style={styles.body}>
-                <ScrollView style={{ flex: 1 }}
-                    contentContainerStyle={{ justifyContent: 'space-between' }}>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 50}
+                   style={{ height:'80%'}}
+                    >
                     {/* <Text style={[styles.txt, { color: ColorCode.gray_color }]}>{Strings.SignInText}</Text> */}
                     <Text style={[{ fontWeight: '700' }, styles.txt,]}>{Strings.LginWith}</Text>
                     <View style={{ flexDirection: 'row', marginTop: 20, alignItems: 'center', width: '100%', justifyContent: 'space-between', paddingHorizontal: 20 }}>
-                        
                         <TouchableOpacity
                             onPress={() => { setDefault('Email'),setUserName('') }}
                             style={[styles.input, defaults == 'Email' && { borderColor: ColorCode.blue_Button_Color }]}>
                             <Text style={[{ fontFamily: 'ComicNeue-Bold' }, defaults == 'Email' && { color: ColorCode.blue_Button_Color }]}>{Strings.Email}</Text>
                         </TouchableOpacity>
-
                         <TouchableOpacity
                             onPress={() => { setDefault('Phone'),setUserName('') }}
                             style={[styles.input, defaults == 'Phone' && { borderColor: ColorCode.blue_Button_Color }]}>
                             <Text style={[{ fontFamily: 'ComicNeue-Bold', }, defaults == 'Phone' && { color: ColorCode.blue_Button_Color }]}>{Strings.PhoneNumber}</Text>
                         </TouchableOpacity>
-
                     </View>
                     <View style={[styles.inputView, { marginTop: 30 }]}>
                         <InputText
@@ -152,12 +156,8 @@ const SignIn = () => {
                             onChange={(t) => { setUserName(t) }}
                             placeholder={defaults}
                             length={35}
-                            keyboardType={defaults == 'Phone' ? 'number-pad' : 'default'}
-
-                        />
-
+                            keyboardType={defaults == 'Phone' ? 'number-pad' : 'default'}/>
                         {defaults != 'Phone' &&
-
                             <InputText
                                 secureTextEntry={secureText}
                                 show={() => { setSecureText(!secureText) }}
@@ -170,10 +170,7 @@ const SignIn = () => {
 
                         <View style={{ justifyContent: 'space-between', flexDirection: 'row', paddingHorizontal: 20 }}>
                             <View style={{ flexDirection: 'row' }}>
-                                <TouchableOpacity onPress={() => {
-                                    // navigation.navigate("Terms") 
-                                    setTerms(!terms)
-                                }} >
+                                <TouchableOpacity onPress={() => {setTerms(!terms)}}>
                                     <Image
                                         style={{
                                             borderWidth: !terms ? 1 : 0, borderColor: ColorCode.blue_Button_Color,
@@ -191,7 +188,6 @@ const SignIn = () => {
                     <View style={styles.inputView}>
                         <OpacityButton
                             pressButton={() => {
-                                // navigation.navigate("DrawerNavigator")
                                 loginUser()
                             }}
                             name={defaults === 'Phone' ?"Send OTP" :Strings.SignIn} btnTextStyle={{ color: ColorCode.yellowText, }} />
@@ -229,7 +225,7 @@ const SignIn = () => {
 
 
                     </View>
-                </ScrollView>
+                </KeyboardAvoidingView>
             </View>
         </SafeAreaView>
 
@@ -245,7 +241,7 @@ const styles = StyleSheet.create({
         backgroundColor: ColorCode.blue_Button_Color
     },
     body: {
-        flex: 1,
+        height:'80%',
         backgroundColor: ColorCode.white_Color,
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25

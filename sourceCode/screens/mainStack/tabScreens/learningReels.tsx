@@ -2,8 +2,8 @@ import {
     Image, Platform, ScrollView, StyleSheet, Text,
     TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView, ImageBackground, Dimensions
 } from "react-native"
-import React, { useEffect, useState } from "react"
-import { useNavigation } from "@react-navigation/native";
+import React, { useEffect, useRef, useState } from "react"
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import ColorCode from "../../../constants/Styles";
 import OpacityButton from "../../../components/opacityButton";
@@ -26,6 +26,46 @@ const LearningReels = () => {
     const [post, setPost] = useState([])
     const [showComment, setCommment] = useState(false)
     const [commentArray, setArray] = useState(null)
+    const [paly, setPlay]=useState(false)
+    const videoRef = useRef(null);
+
+    
+    const onViewableItemsChanged = ({ viewableItems }) => {
+        if (viewableItems.length > 0) {
+          // If at least one item is in view, play the video
+          videoRef.current.play();
+        } else {
+          // If no items are in view, pause the video
+          videoRef.current.pause();
+        }
+      };
+    
+      useEffect(() => {
+       
+        // Pause the video when the component unmounts
+        return () => {
+            // console.log("naveen====>")
+          
+          if (videoRef.current) {
+            videoRef.current.pause();
+          }
+        };
+      }, []);
+
+      useFocusEffect(
+        React.useCallback(() => {
+        //   console.log('TabScreen1 focused');
+          // Add any logic you want to run when the screen is focused
+          setPlay(false)
+          // The cleanup function runs when the screen is unfocused
+          return () => {
+            setPlay(true)
+            // console.log('TabScreen1 unfocused');
+            // Add any cleanup logic here
+          };
+        }, [])
+      );
+   
     useEffect(() => {
         dispatch(setLoading(true))
         allPostData().then((res) => {
@@ -34,7 +74,10 @@ const LearningReels = () => {
         })
     }, [])
 
-
+    const onViewableItemsChangedRef = useRef(({ viewableItems }) => {
+        // Your logic when viewable items change
+        // console.log('Viewable items changed:', viewableItems);
+      });
     const SCREEN_WIDTH = Dimensions.get('window').width;
     const SCREEN_HEIGHT = Dimensions.get('window').height;
     const renderItem_didNumber = ({ item, index }: any) => {
@@ -45,9 +88,10 @@ const LearningReels = () => {
 
                 {item?.contentType == "Video" &&
                     <Video
+                        ref={videoRef}
                         resizeMode='contain'
                         source={{ uri: item?.contentURL }}
-                        paused={false}
+                        paused={paly}
                         style={styles.backgroundVideo}
                         repeat={true}
                     >
@@ -205,20 +249,28 @@ const LearningReels = () => {
 
                 />
             }
-            {/* <TabHeader
 
-                myHeading={"Learning Reels"}
-                imge={require('../../../assets/images/arrow-left.png')}
-            /> */}
 
             <View style={[styles.reelsStyle,]}>
-
                 <FlatList
                     scrollEnabled={true}
                     showsVerticalScrollIndicator={false}
                     data={post}
                     renderItem={renderItem_didNumber}
-                    keyExtractor={(item, index) => index.toString()} />
+                    keyExtractor={(item, index) => index.toString()}
+                    onViewableItemsChanged={onViewableItemsChanged}
+                    onViewableItemsChanged={onViewableItemsChangedRef.current}
+                    viewabilityConfig={{
+                      itemVisiblePercentThreshold: 50, // Adjust as needed
+                    }}
+                    ListEmptyComponent={<View style={styles.emptyList}>
+                   {!loading&& <Text style={{
+                        color: ColorCode.gray_color, width: '100%',
+                        textAlign: 'center', fontSize: 20, fontWeight: '500'
+                    }}>{'Sorry , no Content Available that matches your interests. Try adding more areas of interests in the profile page to see relevant content.'}</Text>}
+                </View>} 
+                    
+                    />
 
             </View>
 
@@ -310,6 +362,13 @@ const styles = StyleSheet.create({
         width: '100%',
 
     },
+    emptyList: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: hp(28)
+    },
+
 
 
 

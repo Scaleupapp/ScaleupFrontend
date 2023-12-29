@@ -48,7 +48,19 @@ const AddPost = () => {
 
 
     const showAlert = (type) => {
-        console.log("type--->", type)
+        check(Platform.select({ ios: PERMISSIONS.IOS.CAMERA, android: PERMISSIONS.ANDROID.CAMERA })).then((result) => {
+            if (result === 'denied') {
+                request(Platform.select({ ios: PERMISSIONS.IOS.CAMERA, android: PERMISSIONS.ANDROID.CAMERA })).then((result) => {
+                    // console.log('permisson ---------------__---------->', result)
+                }).catch((err) => {
+                    // console.log('onRequestPermissionCatchError ->', err)
+                })
+
+            }
+        }).catch((err) => {
+            // console.log('onCheckPermissionCatchError ->', err)
+        })
+        // console.log("type--->", type)
         setMyType(type)
         Alert.alert(
             'Alert',
@@ -68,16 +80,16 @@ const AddPost = () => {
         check(Platform.select({ ios: PERMISSIONS.IOS.CAMERA, android: PERMISSIONS.ANDROID.CAMERA })).then((result) => {
             if (result === 'denied') {
                 request(Platform.select({ ios: PERMISSIONS.IOS.CAMERA, android: PERMISSIONS.ANDROID.CAMERA })).then((result) => {
-                    console.log('permisson ---------------__---------->', result)
+                    // console.log('permisson ---------------__---------->', result)
                 }).catch((err) => {
-                    console.log('onRequestPermissionCatchError ->', err)
+                    // console.log('onRequestPermissionCatchError ->', err)
                 })
             } else {
-                console.log('updateImage ----------->')
+                // console.log('updateImage ----------->')
                 pickImageByCamera(type)
             }
         }).catch((err) => {
-            console.log('onCheckPermissionCatchError ->', err)
+            // console.log('onCheckPermissionCatchError ->', err)
         })
     };
 
@@ -91,16 +103,16 @@ const AddPost = () => {
             },
         };
         launchCamera(options, (response) => {
-            console.log(response, "response======>")
+            // console.log(response, "response======>")
             if (response?.didCancel) {
                 // props.close()
-                console.log('User cancelled image picker');
+                // console.log('User cancelled image picker');
             } else if (response?.error) {
-                console.log('ImagePicker Error: ', response?.error);
+                // console.log('ImagePicker Error: ', response?.error);
             } else if (response?.customButton) {
-                console.log('User tapped custom button: ', response?.customButton);
+                // console.log('User tapped custom button: ', response?.customButton);
             } else {
-                console.log('else ------>', response?.assets[0])
+                // console.log('else ------>', response?.assets[0])
                 const source = { uri: response?.assets[0] };
                 setSelectedImage(source);
                 // props.close()
@@ -118,30 +130,32 @@ const AddPost = () => {
             },
         };
         launchImageLibrary(options, (response) => {
-            console.log(response.assets, "response======>")
+            // console.log(response.assets, "response======>")
             if (response?.didCancel) {
                 // props.close()
-                console.log('User cancelled image picker');
+                // console.log('User cancelled image picker');
             } else if (response?.error) {
-                console.log('ImagePicker Error: ', response?.error);
+                // console.log('ImagePicker Error: ', response?.error);
             } else if (response?.customButton) {
-                console.log('User tapped custom button: ', response.customButton);
+                // console.log('User tapped custom button: ', response.customButton);
             } else {
                 const source = { uri: response?.assets[0] };
-                console.log(source, "source----->")
+                // console.log(source, "source----->")
                 setSelectedImage(source);
                 // props.close()
             }
         });
     };
 
+    // console.log(selectedImage?.uri,"11111selectedImage?.uri?.uri===>")
 
     const addPost = () => {
-        console.log(hashtag,"hashtag---->", typeof hashtag)
+
+        // console.log(hashtag, "hashtag---->", typeof hashtag)
         var dta = ''
         myType === "image" ? dta = "image/png" : 'video/mp4'
         const formData = new FormData();
-        const data = { name: 'file.jpg', uri: selectedImage?.uri?.uri, type: dta }
+        const data = { name:  myType === "image"?'file.jpg' : "video.mp4", uri: selectedImage?.uri?.uri, type: "multipart/form-data"}
         formData.append('media', data);
         formData.append('captions', caption);
         formData.append('hashtags', hashtag);
@@ -151,13 +165,15 @@ const AddPost = () => {
         formData.append('contentType', myType);
         dispatch(setLoading(true))
         contentCreate(formData).then((res) => {
-            console.log(res.data, "res=====>")
+            // console.log(res.data, "res=====>")
             Show_Toast(res.data.message)
             setEnable(false)
             setSelectedImage(null)
             setMyType('')
             setCaption('')
+            setHashtags('')
             dispatch(setLoading(false))
+            navigation.navigate("Home")
         })
     }
 
@@ -167,6 +183,7 @@ const AddPost = () => {
         setSelectedImage(null)
         setMyType('')
         setCaption('')
+        setHashtags('')
         navigation.navigate("Home")
     }
 
@@ -176,70 +193,71 @@ const AddPost = () => {
         <SafeAreaView style={styles.main}>
             {loading && <Loader />}
             <TabHeader myHeading={"New Post"}
+                go={() => navigation.goBack()}
                 imge={require('../../../assets/images/arrow-left.png')} />
             {/* <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
              style={{ flex: 1 }}
             > */}
-                <ScrollView style={{ flexGrow: 1 }}
-                    showsVerticalScrollIndicator={false}
-                    automaticallyAdjustKeyboardInsets={true}
-                    keyboardShouldPersistTaps="always"
-                    keyboardDismissMode='interactive'
-                >
+            <ScrollView style={{ flexGrow: 1 }}
+                showsVerticalScrollIndicator={false}
+                automaticallyAdjustKeyboardInsets={true}
+                keyboardShouldPersistTaps="always"
+                keyboardDismissMode='interactive'
+            >
 
-                    <StatusBar
-                        barStyle={'dark-content'}
-                        animated={true}
-                        backgroundColor={ColorCode.white_Color} />
+                <StatusBar
+                    barStyle={'dark-content'}
+                    animated={true}
+                    backgroundColor={ColorCode.white_Color} />
 
 
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10 }}>
-                        <Text style={styles.smalltxt}>Want to verify it ?</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10 }}>
+                    <Text style={styles.smalltxt}>Want to verify it ?</Text>
 
-                        <Switch
-                            trackColor={{ false: "grey", true: ColorCode.blue_Button_Color }}
-                            thumbColor={enable ? "white" : "white"}
-                            ios_backgroundColor="#3e3e3e"
-                            onValueChange={toggleSwitch}
-                            value={enable}
-                        />
+                    <Switch
+                        trackColor={{ false: "grey", true: ColorCode.blue_Button_Color }}
+                        thumbColor={enable ? "white" : "white"}
+                        ios_backgroundColor="#3e3e3e"
+                        onValueChange={toggleSwitch}
+                        value={enable}
+                    />
+                </View>
+                <View style={{ justifyContent: 'space-between', paddingHorizontal: 10 }}>
+
+                    <Text style={[styles.smalltxt, { marginTop: 10 }]}>Heading</Text>
+                    <View style={styles.inputfield}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <TextInput
+                                multiline
+                                // placeholder="Type here...."
+                                placeholderTextColor={ColorCode.gray_color}
+                                style={styles.textInput}
+                                value={myHeading}
+                                maxLength={20}
+                                onChangeText={(t) => { setMyHeading(t) }}
+                            />
+                            <Text style={[styles.smalltxt]}>{myHeading.length + "/20"}</Text>
+                        </View>
+                        <View style={styles.line} />
                     </View>
-                    <View style={{ justifyContent: 'space-between', paddingHorizontal: 10 }}>
-                       
-                    <Text style={[styles.smalltxt, { marginTop: 10 }]}>Add Heading</Text>
-                        <View style={styles.inputfield}>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <TextInput
-                                    multiline
-                                    placeholder="Type here...."
-                                    placeholderTextColor={ColorCode.gray_color}
-                                    style={styles.textInput}
-                                    value={myHeading}
-                                    maxLength={20}
-                                    onChangeText={(t) => { setMyHeading(t) }}
-                                />
-                                {/* <Text style={[styles.smalltxt]}>{caption.length + "/140"}</Text> */}
-                            </View>
-                            <View style={styles.line} />
-                        </View>
 
-                        <Text style={[styles.smalltxt, { marginTop: 10 }]}> Add Topics</Text>
-                        <View style={styles.inputfield}>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <TextInput
-                                    multiline
-                                    placeholder="Type here...."
-                                    placeholderTextColor={ColorCode.gray_color}
-                                    style={styles.textInput}
-                                    value={myTopic}
-                                    onChangeText={(t) => {  setMyTopic(t) }}
-                                />
-                                {/* <Text style={[styles.smalltxt]}>{caption.length + "/140"}</Text> */}
-                            </View>
-                            <View style={styles.line} />
+                    <Text style={[styles.smalltxt, { marginTop: 10 }]}>Topics</Text>
+                    <View style={styles.inputfield}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <TextInput
+                                multiline
+                                // placeholder="Type here...."
+                                placeholderTextColor={ColorCode.gray_color}
+                                style={styles.textInput}
+                                value={myTopic}
+                                onChangeText={(t) => { setMyTopic(t) }}
+                            />
+                            {/* <Text style={[styles.smalltxt]}>{caption.length + "/140"}</Text> */}
                         </View>
-                        {/* <InputText
+                        <View style={styles.line} />
+                    </View>
+                    {/* <InputText
                             style={{ marginTop: 20 }}
                             value={''}
                             onChange={(t) => { setMyHeading(t) }}
@@ -259,51 +277,66 @@ const AddPost = () => {
 
                         /> */}
 
-                        <Text style={[styles.smalltxt, { marginTop: 10 }]}>Add a caption</Text>
-                        <View style={styles.inputfield}>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <TextInput
-                                    multiline
-                                    placeholder="Type here...."
-                                    placeholderTextColor={ColorCode.gray_color}
-                                    style={styles.textInput}
-                                    value={caption}
-                                    onChangeText={(t) => { setCaptionLength(t) }}
-                                />
-                                {/* <Text style={[styles.smalltxt]}>{caption.length + "/140"}</Text> */}
-                            </View>
-                            <View style={styles.line} />
+                    <Text style={[styles.smalltxt, { marginTop: 10 }]}>Caption</Text>
+                    <View style={styles.inputfield}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <TextInput
+                                multiline
+                                // placeholder="Type here...."
+                                placeholderTextColor={ColorCode.gray_color}
+                                style={styles.textInput}
+                                value={caption}
+                                onChangeText={(t) => { setCaptionLength(t) }}
+                            />
+                            {/* <Text style={[styles.smalltxt]}>{caption.length + "/140"}</Text> */}
                         </View>
-
+                        <View style={styles.line} />
                     </View>
-                    <Text style={[styles.smalltxt, { marginTop: 10 }]}>Select an option</Text>
-                    {selectedImage?.uri?.uri ?
+
+                </View>
+                <Text style={[styles.smalltxt, { marginTop: 10 }]}>Select an option</Text>
+                {selectedImage?.uri?.uri ?
+                    <View>
+                        <TouchableOpacity onPress={()=>setSelectedImage(null)}
+                        
+                        style={{ height: 50, width: 50,
+                            position:'absolute',backgroundColor:'white',
+                             zIndex:1,right:20,alignItems:'center',
+                             justifyContent:'center',borderRadius:25}}>
+                          <Image
+                          source={require('../../../assets/images/close_24px.png')}
+                          />
+                        </TouchableOpacity>
                         <Image
                             resizeMethod='scale'
                             resizeMode={Platform.OS === 'ios' ? 'contain' : 'center'}
                             style={{ width: '95%', alignSelf: 'center', borderRadius: 20, height: 130 }}
                             source={selectedImage?.uri}
                         />
-                        :
-                        <View style={{ flexDirection: 'row', paddingHorizontal: 10, padding: 5, justifyContent: 'space-around' }}>
 
-                            <TouchableOpacity
-                                onPress={() => { showAlert("image") }}
-                            >
-                                <Image source={require('../../../assets/images/imagebutton_.png')}
-                                />
-                                <Text style={[styles.smalltxt, { fontSize: 12 }]}>Photo</Text>
-                            </TouchableOpacity>
 
-                            <TouchableOpacity
-                                onPress={() => { showAlert("video") }}
-                            >
-                                <Image source={require('../../../assets/images/video_.png')}
-                                />
-                                <Text style={[styles.smalltxt, { fontSize: 12 }]}>Video</Text>
-                            </TouchableOpacity>
 
-                            {/* <TouchableOpacity >
+                    </View>
+                    :
+                    <View style={{ flexDirection: 'row', paddingHorizontal: 10, padding: 5, justifyContent: 'space-around' }}>
+
+                        <TouchableOpacity
+                            onPress={() => { showAlert("image") }}
+                        >
+                            <Image source={require('../../../assets/images/imagebutton_.png')}
+                            />
+                            <Text style={[styles.smalltxt, { fontSize: 12 }]}>Photo</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress={() => { showAlert("video") }}
+                        >
+                            <Image source={require('../../../assets/images/video_.png')}
+                            />
+                            <Text style={[styles.smalltxt, { fontSize: 12 }]}>Video</Text>
+                        </TouchableOpacity>
+
+                        {/* <TouchableOpacity >
                 <Image source={require('../../../assets/images/group_.png')}
                 />
                 <Text style={[styles.smalltxt, { fontSize: 12 }]}>Event</Text>
@@ -320,40 +353,44 @@ const AddPost = () => {
                 />
                 <Text style={[styles.smalltxt, { fontSize: 12 }]}>QnA</Text>
             </TouchableOpacity> */}
+                    </View>
+                }
+
+
+                <Text style={[styles.smalltxt, { marginTop: 10, fontSize: 18, }]}>Hashtags</Text>
+                <View style={{ paddingHorizontal: 10 }}>
+                    <View style={[styles.inputfield, { justifyContent: 'flex-start' }]}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <TextInput
+                                // placeholder="Type here...."
+                                placeholderTextColor={ColorCode.gray_color}
+                                style={styles.textInput}
+                                value={hashtag}
+                                onChangeText={(t) => { setHashtags(t) }}
+                            />
+
+
+
+
+
                         </View>
-                    }
 
-
-                    <Text style={[styles.smalltxt, { marginTop: 10, fontSize: 18, }]}>Add hashtags</Text>
-                    <View style={{ paddingHorizontal: 10 }}>
-                        <View style={[styles.inputfield, { justifyContent: 'flex-start' }]}>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <TextInput
-                                    placeholder="Type here...."
-                                    placeholderTextColor={ColorCode.gray_color}
-                                    style={styles.textInput}
-                                    value={hashtag}
-                                    onChangeText={(t)=>{setHashtags(t)}}
-                                />
-                                
-
-                                
-
-                                
-                            </View>
-
-                            {hashtag.length > 0&&
-                            <View style={{ flexDirection: 'row',
-                             flexWrap: 'wrap',paddingHorizontal:15 }}>
-                            {hashtag.split(',').map((hashtag, index) => (
-                                <TouchableOpacity key={index} style={{ padding: 5,
-                                 margin: 5, borderWidth: 1, borderRadius: 5 }}>
-                                    <Text>{hashtag.trim()}</Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>}
-                            <View style={{ flexDirection: 'row' }}>
-                                {/* <TouchableOpacity style={{
+                        {hashtag.length > 0 &&
+                            <View style={{
+                                flexDirection: 'row',
+                                flexWrap: 'wrap', paddingHorizontal: 15
+                            }}>
+                                {hashtag.split(',').map((hashtag, index) => (
+                                    <TouchableOpacity key={index} style={{
+                                        padding: 5,
+                                        margin: 5, borderWidth: 1, borderRadius: 5
+                                    }}>
+                                        <Text>{hashtag.trim()}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>}
+                        <View style={{ flexDirection: 'row' }}>
+                            {/* <TouchableOpacity style={{
                                 backgroundColor: ColorCode.blue_Button_Color, width: 100,
                                 alignItems: 'center', justifyContent: 'center', borderRadius: 35, flexDirection: 'row'
                             }}>
@@ -371,30 +408,30 @@ const AddPost = () => {
                                     source={require('../../../assets/images/Vector.png')}
                                 />
                             </TouchableOpacity> */}
-                            </View>
                         </View>
                     </View>
+                </View>
 
-                    <View style={[{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between', paddingHorizontal: 15,
-                        marginTop: 10
-                    }]}>
-                        <OpacityButton name={"Cancel"}
-                            pressButton={() => { canCel() }}
-                            btnTextStyle={{ color: ColorCode.blue_Button_Color }}
-                            button={{
-                                width: '48%', backgroundColor: ColorCode.white_Color,
-                                borderColor: ColorCode.blue_Button_Color, borderWidth: 1
-                            }} />
-                        <OpacityButton
-                            pressButton={() => { addPost() }}
-                            name={"Post"}
-                            btnTextStyle={{ color: ColorCode.yellowText, }}
-                            button={{ width: '48%' }} />
-                    </View>
+                <View style={[{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between', paddingHorizontal: 15,
+                    marginTop: 10
+                }]}>
+                    <OpacityButton name={"Cancel"}
+                        pressButton={() => { canCel() }}
+                        btnTextStyle={{ color: ColorCode.blue_Button_Color }}
+                        button={{
+                            width: '48%', backgroundColor: ColorCode.white_Color,
+                            borderColor: ColorCode.blue_Button_Color, borderWidth: 1
+                        }} />
+                    <OpacityButton
+                        pressButton={() => { addPost() }}
+                        name={"Post"}
+                        btnTextStyle={{ color: ColorCode.yellowText, }}
+                        button={{ width: '48%' }} />
+                </View>
 
-                </ScrollView>
+            </ScrollView>
             {/* </KeyboardAvoidingView> */}
         </SafeAreaView>
 

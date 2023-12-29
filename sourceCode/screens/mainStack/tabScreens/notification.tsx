@@ -25,8 +25,8 @@ const NotificationList = () => {
     const [progress, setProgress] = useState(0);
     const [userData, setUserData] = useState([])
     const { loading } = useSelector<any, any>((store) => store.sliceReducer);
-   
-//    console.log("userData====>",userData,"userData====>")
+
+    //    console.log("userData====>",userData,"userData====>")
     useEffect(() => {
 
         getAllNotification().then((res) => {
@@ -44,7 +44,7 @@ const NotificationList = () => {
         }
         markAsReact(data).then((res) => {
             dispatch(setLoading(false))
-            console.log(res?.data, "resdata========>")
+            // console.log(res?.data, "resdata========>")
             getAllNotification().then((res) => {
                 //  console.log(res.data,"notification=====>")
                 setUserData(res.data)
@@ -54,21 +54,21 @@ const NotificationList = () => {
 
 
 
-    const readAll=()=>{
+    const readAll = () => {
         const newArray = userData.map(({ _id }) => ({ _id }));
         dispatch(setLoading(true))
         const data = {
             "notificationIds":
-            newArray
+                newArray
         }
         markAsReact(data).then((res) => {
             dispatch(setLoading(false))
-            console.log(res?.data, "resdata========>")
+            // console.log(res?.data, "resdata========>")
             getAllNotification().then((res) => {
                 //  console.log(res.data,"notification=====>")
                 setUserData(res.data)
             })
-        }) 
+        })
     }
 
 
@@ -76,7 +76,7 @@ const NotificationList = () => {
         //  console.log(item, "item===============>")
         return (
             <TouchableOpacity style={[styles.listStyle,
-                 item.isRead ? styles.noelivation : styles.cards]}>
+            item.isRead ? styles.noelivation : styles.cards]}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <Text style={styles.boldStyle}>{item?.content}</Text>
                     {item?.isRead === false &&
@@ -102,13 +102,18 @@ const NotificationList = () => {
             />
             {loading && <Loader />}
             <TabHeader myHeading={"Notifications"}
+                go={() => navigation.goBack()}
                 imge={require('../../../assets/images/arrow-left.png')} />
-                <TouchableOpacity 
-                onPress={()=>{readAll()}}
-                style={{position:'absolute',right:20,top:Platform.OS === 'android'?20:80}}>
-                    <Text style={[styles.smalltxt,
-                            { color: ColorCode.blue_Button_Color }]}>Mark All As Read</Text>
-                </TouchableOpacity>
+           {userData.length > 0 &&
+            <TouchableOpacity
+                onPress={() => { readAll() }}
+                style={{ position: 'absolute', right: 20, top: Platform.OS === 'android' ? 20 : 80 }}>
+                <Text style={[styles.smalltxt,
+                { color: ColorCode.blue_Button_Color }]}>Mark All As Read</Text>
+            </TouchableOpacity>
+           } 
+            
+
             {/* <InputText placeholder={"Search"} /> */}
             <View style={[styles.reelsStyle,]}>
                 <FlatList
@@ -116,7 +121,14 @@ const NotificationList = () => {
                     showsVerticalScrollIndicator={false}
                     data={userData}
                     renderItem={renderItem_didNumber}
-                    keyExtractor={(item, index) => index.toString()} />
+                    keyExtractor={(item, index) => index.toString()} 
+                    ListEmptyComponent={<View style={styles.emptyList}>
+                    <Text style={{
+                        color: ColorCode.gray_color, width: '100%',
+                        textAlign: 'center', fontSize: 20, fontWeight: '500'
+                    }}>{'No New Notifications'}</Text>
+                </View>}
+                    />
             </View>
         </SafeAreaView>
 
@@ -184,7 +196,7 @@ const styles = StyleSheet.create({
         minHeight: 40,
         width: '96%',
         marginTop: 8,
-        justifyContent:'center'
+        justifyContent: 'center'
     },
     noelivation: {
         backgroundColor: 'white',
@@ -222,7 +234,13 @@ const styles = StyleSheet.create({
                 elevation: 4,
             },
         }),
-    }
+    },
+    emptyList: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: hp(28)
+    },
 
 })
 

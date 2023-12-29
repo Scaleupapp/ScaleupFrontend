@@ -5,7 +5,7 @@ import ColorCode from '../constants/Styles';
 
 const InputText = (props:any) => {
 
-console.log(props?.value,"props?.Value=====>")
+// console.log(props?.value,"props?.Value=====>")
 
   return (
     <View style={[styles.container,props?.style]}>

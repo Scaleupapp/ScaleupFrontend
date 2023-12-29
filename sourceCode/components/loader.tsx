@@ -16,7 +16,8 @@ const Loader = (props: any) => {
         style={{ flex: 1, alignItems: 'center', justifyContent: 'center',backgroundColor:ColorCode.modalBgColor }}>
            <View style={{flex:1, alignItems: 'center', justifyContent: 'center',backgroundColor:ColorCode.modalBgColor}}>
             <ActivityIndicator
-                color={ColorCode.blue_Button_Color}
+                color={props?.color? props?.color:
+                    ColorCode.blue_Button_Color}
                 size={'large'}
             />
             </View>

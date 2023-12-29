@@ -3,7 +3,7 @@ import {
     TouchableOpacity, View, StatusBar, FlatList, SafeAreaView, TextInput
 } from "react-native"
 import React, { useEffect, useState } from "react"
-import { useNavigation } from "@react-navigation/native";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import ColorCode from "../../../constants/Styles";
 import { TabHeader } from "../../../components";
@@ -24,15 +24,27 @@ const Profile = () => {
     const [showComment, setCommment] = useState(false)
     const [commentArray, setArray] = useState(null)
     const [captionLine, setCaptionLine] = useState(2)
+    const isFocused = useIsFocused();
+    const [profile,setProfileDats]=useState('')
+    const [cacheBuster, setCacheBuster] = useState(0);
+   
     useEffect(() => {
         dispatch(setLoading(true))
         getMyProfile().then((res) => {
+            clearImageCache()
             dispatch(setLoading(false))
             setProfileData((res?.data))
+            // console.log(res?.data?.user?.profilePicture,"res?.data?.user?.profilePicture====>")
+            setProfileDats(res?.data?.user?.profilePicture)
             // console.log("res?.data=====>", res?.data, "res?.data=====>")
         })
-    }, [])
 
+    }, [isFocused])
+
+    const clearImageCache = () => {
+        // Increment the cacheBuster value to force a re-fetch of the image
+        setCacheBuster((prev) => prev + 1);
+      };
     const slicedData = pofileData?.user?.bio?.bioInterests.slice(0, 4);
 
 
@@ -84,20 +96,23 @@ const Profile = () => {
 
 
     const renderItem = ({ item, index }: any) => {
-        // console.log(item, "done====>", item?.isVerified, "item=======>",)
+        //  console.log("done====>", item?.smeVerify, "item=======>",)
         return (
             <View
                 style={[styles.postStyle, styles.iosShadow]}>
                 <TouchableOpacity style={styles.info}
                     onPress={() => { }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        {item?.userId?.profilePicture ?
-                            <Image
-                                resizeMode='cover'
-                                style={styles.profileImg}
-                                source={{ uri: item?.userId?.profilePicture }} />
-                            :
-                            <View style={styles.profileImg} />}
+                    {profile ?
+                                <Image
+                                    resizeMode='cover'
+                                    style={styles.profileImg}
+                                    source={{ uri: `${profile}?${cacheBuster}`}}
+                                /> :
+                                <View style={styles.profileImg}>
+                                    <Text style={[styles.boldStyle, { paddingLeft: 0 }]}>{pofileData?.user?.firstname + " " + pofileData?.user?.lastname?.substring(0, 2).toUpperCase()}</Text>
+                                </View>
+                            }
 
                         <View style={[styles.nameType, { width: '55%' }]}>
                             <Text style={styles.boldStyle}>{item?.username}</Text>
@@ -110,7 +125,7 @@ const Profile = () => {
                         <Text numberOfLines={1} style={[styles.smalltxt,
                         { marginTop: 12, }]}>{moment(item?.postdate).fromNow()}</Text>
 
-                        {item?.smeVerify === "Accepted"  &&
+                        {item?.smeVerify === "Accepted" &&
                             <Image
                                 style={{ alignSelf: 'flex-end', marginRight: 10 }}
                                 source={require('../../../assets/images/security-user.png')}
@@ -140,7 +155,7 @@ const Profile = () => {
                     <Video
                         resizeMode='cover'
                         source={{ uri: item?.contentURL }}
-                        paused={false}
+                        paused={true}
                         style={{ width: '100%', height: 250, backgroundColor: ColorCode.lightGrey, borderRadius: 15, marginVertical: 10 }}
                         repeat={true}
                     >
@@ -207,17 +222,18 @@ const Profile = () => {
                 {item?.verify === "Yes" &&
                     <View style={[styles.info, { height: 30 }]}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Text style={styles.smalltxt} >Verified :</Text>
+                            <Text style={styles.smalltxt} >{item?.smeVerify === "Pending" ?`Verified : Verification Pendind` : "Verified :"}</Text>
 
                             <Image style={{ marginLeft: 10 }}
                                 source={item?.smeVerify === "Accepted" ?
                                     require('../../../assets/images/check_24px.png')
-                                    : require("../../../assets/images/close_24px.png")
+                                    : item?.smeVerify === "Rejected"? require("../../../assets/images/close_24px.png"):null
                                 } />
                         </View>
 
-
-                        <View style={{ flexDirection: 'row' }}>
+                       
+                      {item?.smeVerify != "Pending" &&
+                      <View style={{ flexDirection: 'row' }}>
                             <Text style={styles.smalltxt}>Rating</Text>
                             <Rating
                                 style={{ marginLeft: 10 }}
@@ -228,6 +244,7 @@ const Profile = () => {
                                 readonly
                             />
                         </View>
+                      }  
 
                     </View>}
 
@@ -259,7 +276,7 @@ const Profile = () => {
         dispatch(setProfileDat([]))
         navigation.reset({
             index: 0,
-            routes: [{ name: 'SignIn' }] // Replace 'Home' with the screen you want to reset to
+            routes: [{ name: 'SignIn' }] 
         });
     }
 
@@ -279,6 +296,7 @@ const Profile = () => {
                 animated={true}
                 backgroundColor={ColorCode.white_Color} />
             <TabHeader myHeading={"Profile"}
+                go={() => navigation.goBack()}
                 imge={require('../../../assets/images/arrow-left.png')} />
             <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true}
                 showsVerticalScrollIndicator={false}>
@@ -286,12 +304,14 @@ const Profile = () => {
                     <View style={[styles.info, { paddingHorizontal: 15 }]}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-evenly' }}>
 
-                            {pofileData?.user?.profilePicture ? <Image
-                                resizeMode='cover'
-                                style={styles.profileImg}
-                                source={{ uri: pofileData?.user?.profilePicture }}
-                            /> :
+                            {profile ?
+                                <Image
+                                    resizeMode='cover'
+                                    style={styles.profileImg}
+                                    source={{ uri: `${profile}?${cacheBuster}`}}
+                                /> :
                                 <View style={styles.profileImg}>
+                                    <Text style={[styles.boldStyle, { paddingLeft: 0 }]}>{pofileData?.user?.firstname + " " + pofileData?.user?.lastname?.substring(0, 2).toUpperCase()}</Text>
                                 </View>
                             }
                             <View style={[styles.nameType, { marginLeft: 30 }]}>
@@ -304,7 +324,7 @@ const Profile = () => {
 
 
 
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 60 }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 30 }}>
                                 <TouchableOpacity
                                     style={{ height: 50 }}
                                     onPress={() => { navigation.navigate("Setting") }}>
@@ -314,13 +334,13 @@ const Profile = () => {
                                     />
                                 </TouchableOpacity>
 
-                                <TouchableOpacity
+                                {/* <TouchableOpacity
                                     onPress={() => { logout() }}
                                     style={{ height: 50, }}>
                                     <Image
                                         source={require('../../../assets/images/Logout.png')}
                                     />
-                                </TouchableOpacity>
+                                </TouchableOpacity> */}
                             </View>
 
 

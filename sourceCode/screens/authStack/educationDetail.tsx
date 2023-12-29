@@ -1,6 +1,6 @@
 import {
     Image, Platform, ScrollView, StyleSheet, Text,
-    TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView
+    TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView, Modal
 } from "react-native"
 import React, { useEffect, useState } from "react"
 import { useNavigation } from "@react-navigation/native";
@@ -21,6 +21,8 @@ import {
     MenuTrigger,
 } from 'react-native-popup-menu';
 import Loader from "../../components/loader";
+import CalendarPicker from 'react-native-calendar-picker';
+import moment from "moment";
 const EducationDetail = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
@@ -32,8 +34,8 @@ const EducationDetail = () => {
     const { name } = useSelector<any, any>((store) => store.sliceReducer);
     const { loading } = useSelector<any, any>((store) => store.sliceReducer);
     const { pofileData } = useSelector<any, any>((store) => store.sliceReducer);
-  
-   
+    const [showcalenderPicker, setshowcalenderPicker] = useState(false)
+
     const updateDetail = () => {
         const data = {
             "degree": degree,
@@ -56,7 +58,7 @@ const EducationDetail = () => {
             "degree": degree,
             "fieldOfStudy": field,
             "school": school,
-            "graduationYear": date
+            "graduationYear": moment(date.toString()).format('YYYY-MM-DD')
         }
         dispatch(setLoading(true))
         setAddMoreList(prevData => [...prevData, data]);
@@ -65,13 +67,13 @@ const EducationDetail = () => {
 
         updateEducationDetail(data).then((res) => {
             dispatch(setLoading(false))
-            console.log("res======>", res?.data)
+            // console.log("res======>", res?.data)
             Show_Toast(res?.data?.message)
             setDegee('')
             setSchool('')
             setDate('')
             setField('')
-            console.log(addMoreList, "addMoreList=====>")
+            // console.log(addMoreList, "addMoreList=====>")
         })
     }
 
@@ -132,6 +134,23 @@ const EducationDetail = () => {
     }
 
 
+    useEffect(() => {
+        setDegee(pofileData?.user?.education[0].degree)
+        setSchool(pofileData?.user?.education[0].school)
+        setDate(pofileData?.user?.education[0].graduationYear)
+        setField(pofileData?.user?.education[0].fieldOfStudy)
+    }, [])
+
+
+    const onDateChange = (date: any) => {
+        setDate(date)
+        setshowcalenderPicker(false)
+    }
+    const openCalenderPicker = () => {
+        setshowcalenderPicker(true)
+
+    }
+
     return (
         <SafeAreaView style={styles.main}>
             {loading && <Loader />}
@@ -180,7 +199,7 @@ const EducationDetail = () => {
                         showsHorizontalScrollIndicator={false}
                         horizontal
                         contentContainerStyle={{ justifyContent: 'space-between' }}
-                        data={addMoreList.length > 0 ?addMoreList: pofileData?.user?.education}
+                        data={addMoreList.length > 0 ? addMoreList : pofileData?.user?.education}
                         renderItem={renderItem_didNumber}
                         keyExtractor={(item, index) => index.toString()} />
 
@@ -194,23 +213,42 @@ const EducationDetail = () => {
                         <InputText
 
                             onChange={(text) => { setDegee(text) }}
-                            value={degree != ''? degree : pofileData?.user?.education[0].degree}
+                            value={degree}
                             placeholder={"Degree"} />
                         <InputText
 
                             onChange={(text) => { setSchool(text) }}
-                            value={school != '' ? school : pofileData?.user?.education[0].school}
+                            value={school}
                             placeholder={"School Name"} />
-                        <InputText
+                        {/* <InputText
 
                             onChange={(text) => { setDate(text) }}
-                            value={date != '' ? date : pofileData?.user?.education[0].graduationYear}
+                            value={date}
                             keyboardType={'number-pad'}
-                            placeholder={"Graduation Date"} />
+                            placeholder={"Graduation Date"} /> */}
+
+                        <TouchableOpacity
+                            onPress={() => { openCalenderPicker() }}
+                            style={[styles.calender, { justifyContent: 'space-between' }]}
+                            activeOpacity={1}>
+                            <Text style={{
+                                fontFamily: 'ComicNeue-Bold',
+                                paddingLeft: 10,
+                                color: 'grey'
+                            }}>{date != null ?
+                                moment(date.toString()).format('YYYY-MM-DD ') :
+
+                                "Date of Birth"}</Text>
+                            <Image
+                                style={{ transform: [{ rotate: '90deg' }], marginRight: 10 }}
+                                source={require('../../assets/images/ArrowRight.png')}
+                            />
+                        </TouchableOpacity>
+
                         <InputText
 
                             onChange={(text) => { setField(text) }}
-                            value={field != '' ?field :pofileData?.user?.education[0].fieldOfStudy}
+                            value={field}
                             placeholder={"Field of Study"} />
                     </View>
                 </ScrollView>
@@ -235,6 +273,25 @@ const EducationDetail = () => {
                         name={"Add More"} btnTextStyle={{ color: ColorCode.blue_Button_Color, }}
                         button={{ width: '44%', backgroundColor: ColorCode.white_Color, borderColor: ColorCode.blue_Button_Color, borderWidth: 1 }} />
                 </View>
+
+                {showcalenderPicker &&
+                    <Modal isVisible={showcalenderPicker}
+                        
+                        animationIn={'zoomIn'} animationOut={'zoomOut'} backdropOpacity={0.1}
+                        onBackdropPress={() => setshowcalenderPicker(false)} transparent={true}>
+                        <TouchableOpacity 
+                        activeOpacity={1}
+                        onPress={()=>{setshowcalenderPicker(false)}}
+                        style={{ justifyContent: 'center', alignItems: 'center', flex: 1, }}>
+                            <View style={{ height: hp(45), backgroundColor: 'white', justifyContent: 'center', alignItems: 'center', borderRadius: 10, elevation: 10 }}>
+                                <CalendarPicker width={350}
+                                    todayBackgroundColor={ColorCode.blue_Button_Color}
+                                    todayTextStyle={{ color: ColorCode.white_Color }}
+                                    // minDate={new Date()}
+                                    onDateChange={onDateChange} />
+                            </View>
+                        </TouchableOpacity>
+                    </Modal>}
             </View>
         </SafeAreaView>
 
@@ -329,6 +386,25 @@ const styles = StyleSheet.create({
         marginLeft: 5,
         textAlign: 'left'
     },
+    calender: {
+        height: 50,
+        width: '90%',
+        backgroundColor: ColorCode.white_Color,
+        alignSelf: 'center',
+        borderRadius: hp(8),
+        elevation: 20,
+        shadowColor: ColorCode.white_Color,
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.6,
+        borderColor: '#ddd',
+        borderWidth: 1,
+        paddingLeft: 15,
+        fontWeight: '600',
+        fontSize: 14,
+        color: ColorCode.black_Color,
+        flexDirection: 'row',
+        alignItems: 'center'
+    }
 
 })
 

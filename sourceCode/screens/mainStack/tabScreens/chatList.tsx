@@ -56,6 +56,7 @@ const ChatList = () => {
                 backgroundColor={ColorCode.white_Color}
             />
             <TabHeader myHeading={"Messages"}
+            go={()=>navigation.goBack()}
                 imge={require('../../../assets/images/arrow-left.png')} />
             <InputText placeholder={"Search"} />
             <View style={[styles.reelsStyle,]}>

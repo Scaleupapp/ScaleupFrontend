@@ -1,6 +1,6 @@
 import {
     Image, Platform, ScrollView, StyleSheet, Text,
-    TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView, Button, Alert
+    TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView, Button, Alert, Modal
 } from "react-native"
 import React, { useEffect, useState } from "react"
 import { useNavigation } from "@react-navigation/native";
@@ -24,6 +24,7 @@ import {
     MenuTrigger,
 } from 'react-native-popup-menu';
 import moment from "moment";
+import CalendarPicker from 'react-native-calendar-picker';
 const WorkDetails = () => {
 
     const dispatch = useDispatch();
@@ -38,10 +39,10 @@ const WorkDetails = () => {
     const { loading } = useSelector<any, any>((store) => store.sliceReducer);
     const [addMoreList, setAddMoreList] = useState([])
     const { pofileData } = useSelector<any, any>((store) => store.sliceReducer);
-  
-    
+    const [showcalenderPicker, setshowcalenderPicker] = useState(false)
+    const [type, setType]=useState('')
 
-
+    // console.log(pofileData?.user?.workExperience[0], "pofileData?.user?.workExperience[0]")
 
     const showAlert = () => {
         Alert.alert(
@@ -61,16 +62,16 @@ const WorkDetails = () => {
         check(Platform.select({ ios: PERMISSIONS.IOS.CAMERA, android: PERMISSIONS.ANDROID.CAMERA })).then((result) => {
             if (result === 'denied') {
                 request(Platform.select({ ios: PERMISSIONS.IOS.CAMERA, android: PERMISSIONS.ANDROID.CAMERA })).then((result) => {
-                    console.log('permisson ---------------__---------->', result)
+                    // console.log('permisson ---------------__---------->', result)
                 }).catch((err) => {
-                    console.log('onRequestPermissionCatchError ->', err)
+                    // console.log('onRequestPermissionCatchError ->', err)
                 })
             } else {
-                console.log('updateImage ----------->')
+                // console.log('updateImage ----------->')
                 pickImageByCamera()
             }
         }).catch((err) => {
-            console.log('onCheckPermissionCatchError ->', err)
+            // console.log('onCheckPermissionCatchError ->', err)
         })
     };
 
@@ -83,16 +84,16 @@ const WorkDetails = () => {
             },
         };
         launchCamera(options, (response) => {
-            console.log(response, "response======>")
+            // console.log(response, "response======>")
             if (response?.didCancel) {
                 // props.close()
-                console.log('User cancelled image picker');
+                // console.log('User cancelled image picker');
             } else if (response?.error) {
-                console.log('ImagePicker Error: ', response?.error);
+                // console.log('ImagePicker Error: ', response?.error);
             } else if (response?.customButton) {
-                console.log('User tapped custom button: ', response?.customButton);
+                // console.log('User tapped custom button: ', response?.customButton);
             } else {
-                console.log('else ------>', response?.assets[0])
+                // console.log('else ------>', response?.assets[0])
                 const source = { uri: response?.assets[0] };
                 setSelectedImage(source);
                 // props.close()
@@ -109,14 +110,14 @@ const WorkDetails = () => {
             },
         };
         launchImageLibrary(options, (response) => {
-            console.log(response.assets, "response======>")
+            // console.log(response.assets, "response======>")
             if (response?.didCancel) {
                 // props.close()
-                console.log('User cancelled image picker');
+                // console.log('User cancelled image picker');
             } else if (response?.error) {
-                console.log('ImagePicker Error: ', response?.error);
+                // console.log('ImagePicker Error: ', response?.error);
             } else if (response?.customButton) {
-                console.log('User tapped custom button: ', response.customButton);
+                // console.log('User tapped custom button: ', response.customButton);
             } else {
                 const source = { uri: response?.assets[0] };
                 setSelectedImage(source);
@@ -138,11 +139,11 @@ const WorkDetails = () => {
         formData.append('startDate', start);
         formData.append('endDate', end);
         formData.append('position', position);
-        console.log(formData, "formData============>")
+        // console.log(formData, "formData============>")
         dispatch(setLoading(true))
         addWorkExperience(formData).then((res) => {
             dispatch(setLoading(false))
-            console.log("res======>", res?.data)
+            // console.log("res======>", res?.data)
             Show_Toast(res?.data?.message)
 
             setPosition('')
@@ -178,11 +179,11 @@ const WorkDetails = () => {
         }
 
         setAddMoreList(prevData => [...prevData, datas]);
-        console.log(formData, "formData============>")
+        // console.log(formData, "formData============>")
         dispatch(setLoading(true))
         addWorkExperience(formData).then((res) => {
             dispatch(setLoading(false))
-            console.log("res======>", res?.data)
+            // console.log("res======>", res?.data)
             Show_Toast(res?.data?.message)
             setPosition('')
             setCompany('')
@@ -193,11 +194,6 @@ const WorkDetails = () => {
 
         })
     }
-
-
-
-
-
 
 
     const renderItem_didNumber = ({ item, index }: any) => {
@@ -257,6 +253,32 @@ const WorkDetails = () => {
     }
 
 
+    useEffect(() => {
+        setPosition(pofileData?.user?.workExperience[0]?.position)
+        setCompany(pofileData?.user?.workExperience[0]?.company)
+        setStart(pofileData?.user?.workExperience[0]?.startDate)
+        setEnd(pofileData?.user?.workExperience[0]?.endDate?.toString())
+        setDescription(pofileData?.user?.workExperience[0]?.description)
+        setSelectedImage(null)
+    }, [])
+
+    const onDateChange = (date: any) => {
+        if (type === "Start") {
+            setStart(date)
+        } else {
+            setEnd(date)
+        }
+        setshowcalenderPicker(false)
+    }
+
+
+    const openCalenderPicker = (type) => {
+
+        setType(type)
+
+        setshowcalenderPicker(true)
+
+    }
     return (
         <SafeAreaView style={styles.main}>
             {loading && <Loader />}
@@ -303,7 +325,7 @@ const WorkDetails = () => {
                         showsVerticalScrollIndicator={false}
                         horizontal
                         contentContainerStyle={{ justifyContent: 'space-between' }}
-                        data={addMoreList.length > 0 ?addMoreList: pofileData?.user?.workExperience}
+                        data={addMoreList.length > 0 ? addMoreList : pofileData?.user?.workExperience}
                         renderItem={renderItem_didNumber}
                         keyExtractor={(item, index) => index.toString()} />
 
@@ -323,21 +345,21 @@ const WorkDetails = () => {
                         <InputText
 
                             onChange={(text) => { setPosition(text) }}
-                            value={position != '' ? position : pofileData?.user?.workExperience[0]?.position}
+                            value={position}
                             placeholder={"Position"} />
 
                         <InputText
 
                             onChange={(text) => { setCompany(text) }}
-                            value={company != '' ? company : pofileData?.user?.workExperience[0]?.company}
+                            value={company}
                             placeholder={"Company"} />
 
                         <View style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}>
 
-                            <InputText
+                            {/* <InputText
 
                                 onChange={(text) => { setStart(text) }}
-                                value={start != ''? start :  moment(pofileData?.user?.workExperience[0]?.startDate?.toString())?.format('YYYY-MM-DD ')}
+                                value={start }
                                 keyboardType={'number-pad'}
                                 placeholder={"Start Date"} style={{ width: "40%" }} />
 
@@ -345,37 +367,75 @@ const WorkDetails = () => {
 
                                 keyboardType={'number-pad'}
                                 onChange={(text) => { setEnd(text) }}
-                                value={end != ''? end :  moment(pofileData?.user?.workExperience[0]?.endDate?.toString())?.format('YYYY-MM-DD ')}
-                                placeholder={"End Date"} style={{ width: "40%" }} />
+                                value={end }
+                                placeholder={"End Date"} style={{ width: "40%" }} /> */}
+
+                            <TouchableOpacity
+                                onPress={() => { openCalenderPicker("Start") }}
+                                style={[styles.calender, { justifyContent: 'space-between' }]}
+                                activeOpacity={1}>
+                                <Text style={{
+                                    fontFamily: 'ComicNeue-Bold',
+                                    paddingLeft: 10,
+                                    color: 'grey'
+                                }}>{start != null ?
+                                    moment(start.toString()).format('YYYY-MM-DD ') :
+
+                                    "Start Date"}</Text>
+                                <Image
+                                    style={{ transform: [{ rotate: '90deg' }], marginRight: 10 }}
+                                    source={require('../../assets/images/ArrowRight.png')}
+                                />
+                            </TouchableOpacity>
+
+
+                            <TouchableOpacity
+                            onPress={() => { openCalenderPicker("end") }}
+                            style={[styles.calender, { justifyContent: 'space-between' }]}
+                            activeOpacity={1}>
+                            <Text style={{
+                                fontFamily: 'ComicNeue-Bold',
+                                paddingLeft: 10,
+                                color: 'grey'
+                            }}>{end != null ?
+                                moment(end.toString()).format('YYYY-MM-DD ') :
+
+                                "End Date"}</Text>
+                            <Image
+                                style={{ transform: [{ rotate: '90deg' }], marginRight: 10 }}
+                                source={require('../../assets/images/ArrowRight.png')}
+                            />
+                        </TouchableOpacity>
+
                         </View>
                         <InputText
 
                             onChange={(text) => { setDescription(text) }}
-                            value={description != '' ? description : pofileData?.user?.workExperience[0]?.description}
+                            value={description}
                             placeholder={"Description"} />
 
                         {/* <InputText placeholder={"Skills"} /> */}
                         {
-                        selectedImage?.uri?.uri ?
-                            <Image
-                            resizeMode='center'
-                            style={styles.upload}
-                                source={selectedImage?.uri}/>
+                            selectedImage?.uri?.uri ?
+                                <Image
+                                    resizeMode='center'
+                                    style={styles.upload}
+                                    source={selectedImage?.uri} />
 
-                        :
-                        <TouchableOpacity onPress={() => { showAlert() }}
-                            style={styles.upload}>
-                            <Image
-                                tintColor={'grey'}
-                                source={require('../../assets/images/personalcard.png')}
-                            />
-                            <Text numberOfLines={3}
-                                style={[{
-                                    width: 120, textAlign: 'center',
-                                    fontFamily: 'ComicNeue-Bold'
-                                }]}>{`Upload your \nresume \n(Max Size 20 MB)`}</Text>
-                        </TouchableOpacity>
-}
+                                :
+                                <TouchableOpacity onPress={() => { showAlert() }}
+                                    style={styles.upload}>
+                                    <Image
+                                        tintColor={'grey'}
+                                        source={require('../../assets/images/personalcard.png')}
+                                    />
+                                    <Text numberOfLines={3}
+                                        style={[{
+                                            width: 120, textAlign: 'center',
+                                            fontFamily: 'ComicNeue-Bold'
+                                        }]}>{`Upload your \nresume \n(Max Size 20 MB)`}</Text>
+                                </TouchableOpacity>
+                        }
 
                     </View>
                 </ScrollView>
@@ -404,6 +464,25 @@ const WorkDetails = () => {
                         button={{ width: '44%', backgroundColor: ColorCode.white_Color, borderColor: ColorCode.blue_Button_Color, borderWidth: 1 }} />
                 </View>
             </View>
+
+            {showcalenderPicker &&
+                <Modal isVisible={showcalenderPicker}
+
+                    animationIn={'zoomIn'} animationOut={'zoomOut'} backdropOpacity={0.1}
+                    onBackdropPress={() => setshowcalenderPicker(false)} transparent={true}>
+                    <TouchableOpacity
+                        activeOpacity={1}
+                        onPress={() => { setshowcalenderPicker(false) }}
+                        style={{ justifyContent: 'center', alignItems: 'center', flex: 1, }}>
+                        <View style={{ height: hp(45), backgroundColor: 'white', justifyContent: 'center', alignItems: 'center', borderRadius: 10, elevation: 10 }}>
+                            <CalendarPicker width={350}
+                                todayBackgroundColor={ColorCode.blue_Button_Color}
+                                todayTextStyle={{ color: ColorCode.white_Color }}
+                                // minDate={new Date()}
+                                onDateChange={onDateChange} />
+                        </View>
+                    </TouchableOpacity>
+                </Modal>}
         </SafeAreaView>
 
     )
@@ -507,6 +586,27 @@ const styles = StyleSheet.create({
         fontWeight: '400'
 
     },
+    calender: {
+        height: 50,
+        width: '40%',
+        backgroundColor: ColorCode.white_Color,
+        borderRadius: hp(8),
+        elevation: 20,
+        shadowColor: ColorCode.white_Color,
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.6,
+        borderColor: '#ddd',
+        borderWidth: 1,
+        paddingLeft: 15,
+        fontWeight: '600',
+        fontSize: 14,
+        color: ColorCode.black_Color,
+        flexDirection: 'row',
+        alignItems: 'center',
+       
+        
+    }
+
 
 })
 

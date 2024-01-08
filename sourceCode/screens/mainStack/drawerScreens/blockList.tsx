@@ -70,6 +70,7 @@ const unBlockUesrList=(item)=>{
                 animated={true}
                 backgroundColor={ColorCode.white_Color} />
             <TabHeader myHeading={"Block List"}
+            go={()=>navigation.goBack()}
                 imge={require('../../../assets/images/arrow-left.png')} />
             <InputText placeholder={"Search"} />
             <View style={[styles.reelsStyle,]}>

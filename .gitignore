@@ -3,7 +3,8 @@
 .DS_Store
 
 # Xcode
-#
+#/
+ios/
 build/
 *.pbxuser
 !default.pbxuser
@@ -24,6 +25,7 @@ ios/.xcode.env.local
 
 # Android/IntelliJ
 #
+android/
 build/
 .idea
 .gradle
@@ -33,7 +35,8 @@ local.properties
 .cxx/
 *.keystore
 !debug.keystore
-
+sourceCode/utils/
+sourceCode/naviagtion/
 # node.js
 #
 node_modules/

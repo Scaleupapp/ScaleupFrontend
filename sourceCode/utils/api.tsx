@@ -3,6 +3,7 @@ import { Alert, Platform } from "react-native";
 // import { Show_Toast } from "../customComponent/toast";
 import { Store } from "../redux";
 import { setLoading } from "../redux/reducer";
+import * as Sentry from '@sentry/react-native';
 export const isWeb = Platform.OS === 'web';
 export const apiClient = axios.create({
     headers: {
@@ -26,6 +27,7 @@ apiClient.interceptors.request.use(
     },
     (error) => {
         Promise.reject(error);
+        Sentry.captureException(error);
     }
 );
 
@@ -36,6 +38,7 @@ apiClient.interceptors.response.use(
         return response;
     },
     async (error) => {
+        Sentry.captureException(error);
         Store.dispatch(setLoading(false))
         const { response } = error
          console.log("error---->apimain", response?.data)
@@ -46,7 +49,7 @@ apiClient.interceptors.response.use(
         if(response?.data?.error!= null || "" ){
             Alert.alert(response?.data?.error)
         }
-        
+        Sentry.captureException(error);
         // Show_Toast(error?.response)
         return Promise.reject(error);
     }
@@ -58,6 +61,7 @@ apiClient.interceptors.response.use(
 
 export const apiUploadDataClient = axios.create({
     headers: {
+        'Accept': 'application/json',
         "Content-Type": "multipart/form-data",
     },
 });
@@ -76,6 +80,7 @@ apiUploadDataClient.interceptors.request.use(
     },
     (error) => {
         Promise.reject(error);
+        Sentry.captureException(error);
     }
 );
 
@@ -97,8 +102,10 @@ apiUploadDataClient.interceptors.response.use(
         if(response?.error != null || "" ){
             Alert.alert(response?.data.error)
         }
+        Sentry.captureException(error);
         // Show_Toast(error?.response)
         return Promise.reject(error);
+        
     }
 );
 

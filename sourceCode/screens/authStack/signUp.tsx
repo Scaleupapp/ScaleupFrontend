@@ -81,7 +81,7 @@ const SignUp = () => {
             }
             registerApi(data).then((res) => {
                 dispatch(setLoading(false))
-                console.log(res?.data, "dta=======>")
+                // console.log(res?.data, "dta=======>")
                 Show_Toast(res?.data?.message)
                 navigation.navigate("SignIn", { data })
                 setEmail("")
@@ -106,8 +106,7 @@ const SignUp = () => {
                     contentContainerStyle={{ justifyContent: 'space-between' }}
                     automaticallyAdjustKeyboardInsets={true}
                     keyboardShouldPersistTaps="always"
-                    keyboardDismissMode='interactive'
-                >
+                    keyboardDismissMode='interactive'>
                     <Text style={styles.txt}>{Strings.PleaseAdd}</Text>
                     <View style={{ flexDirection: 'row', marginTop: 20, alignItems: 'center', width: '100%', justifyContent: 'space-between', paddingHorizontal: 20 }}>
                         <View

@@ -69,7 +69,7 @@ const PasswordOtp = (props) => {
                 navigation.navigate("TabNavigator")
               
             }
-         console.log(res?.data,"chvhdvbhdbvjb=====>")
+        //  console.log(res?.data,"chvhdvbhdbvjb=====>")
         })
 
 

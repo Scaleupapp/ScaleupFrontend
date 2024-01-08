@@ -2,8 +2,8 @@ import {
     Image, Platform, ScrollView, StyleSheet, Text,
     TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView, ImageBackground, Dimensions
 } from "react-native"
-import React, { useEffect, useState } from "react"
-import { useNavigation } from "@react-navigation/native";
+import React, { useEffect, useRef, useState } from "react"
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import ColorCode from "../../../constants/Styles";
 import OpacityButton from "../../../components/opacityButton";
@@ -26,6 +26,16 @@ const LearningReels = () => {
     const [post, setPost] = useState([])
     const [showComment, setCommment] = useState(false)
     const [commentArray, setArray] = useState(null)
+    const [paly, setPlay] = useState(false)
+    const videoRefs = useRef(post.map(() => React.createRef()));
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [viewableIndex, setViewableIndex] = useState(null);
+
+    
+
+
+
+
     useEffect(() => {
         dispatch(setLoading(true))
         allPostData().then((res) => {
@@ -35,21 +45,45 @@ const LearningReels = () => {
     }, [])
 
 
+    useEffect(() => {
+        // Pause all videos when no items are in view
+        if (viewableIndex === null) {
+          videoRefs.current.forEach((ref) => {
+            if (ref.current) {
+              ref.current.seek(0); // Rewind the video to the beginning
+              ref.current.pause();
+            }
+          });
+        }
+      }, [viewableIndex]);
+      const handleViewableItemsChanged = ({ viewableItems }) => {
+        if (viewableItems.length > 0) {
+          const index = viewableItems[0].index;
+          setViewableIndex(index);
+        } else {
+          // No viewable items, pause the current video
+          setViewableIndex(null);
+        }
+      };
+
+      const onViewableItemsChanged = useRef(handleViewableItemsChanged);
     const SCREEN_WIDTH = Dimensions.get('window').width;
     const SCREEN_HEIGHT = Dimensions.get('window').height;
     const renderItem_didNumber = ({ item, index }: any) => {
-        //  console.log(item?.contentURL , "itemmmm=======>",item?.contentType == "Video")
+        // console.log(item, "itemmmm=======>")
         return (
             item?.contentType == "Video" &&
             <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT - 70 }}>
 
                 {item?.contentType == "Video" &&
                     <Video
-                        resizeMode='contain'
+                        resizeMode="contain"
+                        ref={videoRefs.current[index]}
+                        paused={viewableIndex !== index}
                         source={{ uri: item?.contentURL }}
-                        paused={false}
                         style={styles.backgroundVideo}
-                        repeat={true}
+
+
                     >
                     </Video>
 
@@ -120,10 +154,10 @@ const LearningReels = () => {
 
                         }
 
-                       
+
                     </View>
-                    <View style={{ flexDirection: 'row', width: '70%',  }}>
-                    {item?.hashtags.map((item) => {
+                    <View style={{ flexDirection: 'row', width: '70%', }}>
+                        {item?.hashtags.map((item) => {
                             // console.log(item,'hastgas=====>')
                             return (
                                 <Text
@@ -134,7 +168,7 @@ const LearningReels = () => {
                             )
                         })
                         }
-                        </View>
+                    </View>
                 </View>
 
             </View>
@@ -205,20 +239,30 @@ const LearningReels = () => {
 
                 />
             }
-            {/* <TabHeader
 
-                myHeading={"Learning Reels"}
-                imge={require('../../../assets/images/arrow-left.png')}
-            /> */}
 
             <View style={[styles.reelsStyle,]}>
-
                 <FlatList
                     scrollEnabled={true}
                     showsVerticalScrollIndicator={false}
                     data={post}
                     renderItem={renderItem_didNumber}
-                    keyExtractor={(item, index) => index.toString()} />
+                    keyExtractor={(item) => item?._id}
+                    horizontal
+                    pagingEnabled
+                    onViewableItemsChanged={onViewableItemsChanged?.current}
+                    viewabilityConfig={{
+                        itemVisiblePercentThreshold: 1,
+                    }}
+                    ListEmptyComponent={<View style={styles.emptyList}>
+
+                        {!loading && <Text style={{
+                            color: ColorCode.gray_color, width: '100%',
+                            textAlign: 'center', fontSize: 20, fontWeight: '500'
+                        }}>{'Sorry , no Content Available that matches your interests. Try adding more areas of interests in the profile page to see relevant content.'}</Text>}
+                    </View>}
+
+                />
 
             </View>
 
@@ -310,6 +354,13 @@ const styles = StyleSheet.create({
         width: '100%',
 
     },
+    emptyList: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: hp(28)
+    },
+
 
 
 

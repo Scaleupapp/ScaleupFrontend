@@ -92,7 +92,9 @@ const Connections = () => {
                 barStyle={'dark-content'}
                 animated={true}
                 backgroundColor={ColorCode.white_Color} />
-            <TabHeader myHeading={"Connections"}
+            <TabHeader 
+            go={()=>navigation.goBack()}
+            myHeading={"Connections"}
                 imge={require('../../../assets/images/arrow-left.png')} />
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20 }}>
                 <OpacityButton

@@ -27,7 +27,7 @@ const OtherProfile = () => {
     const [commentArray, setArray] = useState(null)
     const [button, setButton] = useState(allData?.isFollowing ? "Unfollow" : 'Follow')
 
-    console.log("allData======>", allData, "allData======>")
+    // console.log(allData?.profilePicture,"allData======>", allData, "allData======>")
 
 
     const get = () => {
@@ -200,8 +200,8 @@ const OtherProfile = () => {
                             />
                             :
                             <View style={styles.profileImg}>
-
-                            </View>
+                                    <Text style={[styles.boldStyle, { paddingLeft: 0 }]}>{allData?.usernam?.substring(0, 2)?.toUpperCase()}</Text>
+                                </View>
                         }
                         <View style={[styles.nameType, { marginLeft: 30 }]}>
                             <Text style={styles.boldStyle}>{allData?.username}</Text>

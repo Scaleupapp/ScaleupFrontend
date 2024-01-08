@@ -47,7 +47,7 @@ const GlobalSearch = () => {
     const foloowThisUser = (item) => {
         if (item?.isFollowing) {
             unfollowUser(item?.userId).then((res) => {
-                console.log("res----->", res?.data)
+                // console.log("res----->", res?.data)
                 const data = { "query": text }
                 globalSearch(data).then((res) => {
                     setData(res?.data)
@@ -56,7 +56,7 @@ const GlobalSearch = () => {
             })
         } else {
             followUser(item?.userId).then((res) => {
-                console.log("res----->", res?.data)
+                // console.log("res----->", res?.data)
                 const data = { "query": text }
                 globalSearch(data).then((res) => {
                     setData(res?.data)
@@ -149,6 +149,7 @@ const GlobalSearch = () => {
                 backgroundColor={ColorCode.white_Color}
             />
             <TabHeader myHeading={"Search"}
+            go={()=>navigation.goBack()}
                 imge={require('../../../assets/images/arrow-left.png')} />
             <InputText
                 placeholder={"Search"}
@@ -200,7 +201,14 @@ const GlobalSearch = () => {
                     showsVerticalScrollIndicator={false}
                     data={data}
                     renderItem={renderItem_didNumber}
-                    keyExtractor={(item, index) => index.toString()} />
+                    keyExtractor={(item, index) => index.toString()} 
+                    ListEmptyComponent={<View style={styles.emptyList}>
+                    <Text style={{
+                        color: ColorCode.gray_color, width: '100%',
+                        textAlign: 'center', fontSize: 20, fontWeight: '500'
+                    }}>{'No Search Results'}</Text>
+                </View>}
+                    />
             </View>
 
 
@@ -317,6 +325,12 @@ const styles = StyleSheet.create({
         width: 60,
         marginTop: 10
 
+    },
+    emptyList: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: hp(28)
     },
 
 })

@@ -1,5 +1,5 @@
 export const Validate = (name:any, value:any, signUpPage:any) => {
-    console.log(name, value, signUpPage,"signUpPage=====>")
+    // console.log(name, value, signUpPage,"signUpPage=====>")
     let error = '';
     switch (name) {
       case validationParam.email:

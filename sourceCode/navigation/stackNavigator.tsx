@@ -9,6 +9,9 @@ import BlockList from "../screens/mainStack/drawerScreens/blockList";
 import Setting from "../screens/mainStack/drawerScreens/settingScreen";
 import { NotificationList, OtherProfile, ValidateContent } from "../screens/mainStack/tabScreens";
 import EditProfile from "../screens/mainStack/drawerScreens/editProfile";
+import HelpCenter from "../screens/mainStack/tabScreens/helpCenter";
+import PrivacyPolicy from "../screens/authStack/privacyPolicy";
+import Faqs from "../screens/authStack/faqs";
 
 const Stack = createNativeStackNavigator();
 const StackNavigator = () => {
@@ -40,6 +43,9 @@ const StackNavigator = () => {
       <Stack.Screen name="PasswordOtp" component={PasswordOtp} />
       <Stack.Screen name="ChangePassword" component={ChangePassword} />
       <Stack.Screen name="EditProfile" component={EditProfile} />
+      <Stack.Screen name="HelpCenter" component={HelpCenter} />
+      <Stack.Screen name="Faqs" component={Faqs} />
+      <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
     </Stack.Navigator>
   );
 };

@@ -30,6 +30,7 @@ const EditProfile = () => {
                 animated={true}
                 backgroundColor={ColorCode.white_Color}/>
             <TabHeader myHeading={"Edit Profile"}
+            go={()=>navigation.goBack()}
                 imge={require('../../../assets/images/arrow-left.png')}/>
             <View style={[styles.reelsStyle,]}>
                 {/* <Text style={[styles.smalltxt, { fontSize: 18, color: ColorCode.blue_Button_Color }]}>Account</Text> */}
@@ -38,6 +39,7 @@ const EditProfile = () => {
                     style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <Text style={[styles.smalltxt,]}>Basic Profile</Text>
                     <Image
+                     tintColor={'grey'}
                         source={require('../../../assets/images/ArrowRight.png')}/>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -45,6 +47,7 @@ const EditProfile = () => {
                     style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={[styles.smalltxt,]}>Education</Text>
                     <Image
+                     tintColor={'grey'}
                         source={require('../../../assets/images/ArrowRight.png')}
                     />
                 </TouchableOpacity>
@@ -55,6 +58,7 @@ const EditProfile = () => {
                     style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={[styles.smalltxt,]}>Work Experience</Text>
                     <Image
+                     tintColor={'grey'}
                         source={require('../../../assets/images/ArrowRight.png')}
                     />
                 </TouchableOpacity>
@@ -64,6 +68,7 @@ const EditProfile = () => {
                     style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={[styles.smalltxt,]}>Certifications</Text>
                     <Image
+                     tintColor={'grey'}
                         source={require('../../../assets/images/ArrowRight.png')}
                     />
                 </TouchableOpacity>

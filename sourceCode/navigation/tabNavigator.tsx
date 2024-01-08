@@ -14,12 +14,12 @@ const TabNavigator = () => {
 
   useEffect(() => {
 
-    getMyProfile().then((res)=>{
+    getMyProfile().then((res) => {
       dispatch(setProfileDat(res?.data))
-        // setProfileDat((res?.data))
-        // console.log("res?.data=====>",res?.data,"res?.data=====>")
+      // setProfileDat((res?.data))
+      // console.log("res?.data=====>",res?.data,"res?.data=====>")
     })
-}, [])
+  }, [])
 
 
   return (
@@ -55,7 +55,7 @@ const TabNavigator = () => {
         options={{
           tabBarLabel: 'Learning',
           tabBarActiveTintColor: ColorCode.blue_Button_Color,
-          tabBarLabelStyle: { fontSize: 12, fontWeight: '500', lineHeight: 16 , fontFamily: 'ComicNeue-Bold'},
+          tabBarLabelStyle: { fontSize: 12, fontWeight: '500', lineHeight: 16, fontFamily: 'ComicNeue-Bold' },
           tabBarIcon: ({ color, focused }) => (
             <Image
               source={require("../assets/images/brifecase-timer.png")}
@@ -69,11 +69,11 @@ const TabNavigator = () => {
         options={{
           tabBarLabel: '',
           tabBarActiveTintColor: ColorCode.blue_Button_Color,
-          tabBarLabelStyle: { fontSize: 12, fontWeight: '500', lineHeight: 16 , fontFamily: 'ComicNeue-Bold'},
+          tabBarLabelStyle: { fontSize: 12, fontWeight: '500', lineHeight: 16, fontFamily: 'ComicNeue-Bold' },
           tabBarIcon: ({ color, focused }) => (
             <Image
               source={require("../assets/images/ActionIcons.png")}
-              style={{  height:50, width: 50,position:'absolute',bottom:20}}
+              style={{ height: 50, width: 50, position: 'absolute', bottom: 20 }}
             />
           ),
         }}
@@ -82,7 +82,7 @@ const TabNavigator = () => {
         options={{
           tabBarLabel: 'Search',
           tabBarActiveTintColor: ColorCode.blue_Button_Color,
-          tabBarLabelStyle: { fontSize: 12, fontWeight: '500', lineHeight: 16 , fontFamily: 'ComicNeue-Bold'},
+          tabBarLabelStyle: { fontSize: 12, fontWeight: '500', lineHeight: 16, fontFamily: 'ComicNeue-Bold' },
           tabBarIcon: ({ color, focused }) => (
             <Image
               source={require("../assets/images/Search.png")}
@@ -105,16 +105,18 @@ const TabNavigator = () => {
         }}
         name="ChatList" component={ChatList} /> */}
 
-<Tab.Screen
+      <Tab.Screen
         options={{
           tabBarLabel: 'Profile',
           tabBarActiveTintColor: ColorCode.blue_Button_Color,
           tabBarLabelStyle: { fontSize: 12, fontWeight: '500', lineHeight: 16, fontFamily: 'ComicNeue-Bold' },
           tabBarIcon: ({ color, focused }) => (
             <Image
-            
-              source={focused?require("../assets/images/image_user.png"): 
-                require("../assets/images/image_user_Light.png")}
+
+              source={
+                  require("../assets/images/image_user.png") 
+                //  require("../assets/images/image_user_Light.png")
+              }
               style={{ tintColor: focused ? ColorCode.blue_Button_Color : 'grey', height: 25, width: 25 }}
             />
           ),

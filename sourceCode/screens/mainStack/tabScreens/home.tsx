@@ -27,8 +27,8 @@ const Home = () => {
     const { pofileData, loading } = useSelector<any, any>((store) => store.sliceReducer);
     const [captionLine, setCaptionLine] = useState(2)
     const [refreshing, setRefreshing] = useState(false);
-    const [imageUlr, setImageUrl]=useState(null)
-    const [showImage, setShowImage]=useState(false)
+    const [imageUlr, setImageUrl] = useState(null)
+    const [showImage, setShowImage] = useState(false)
     // console.log("pofileData---->",pofileData,"pofileData---->")
 
     useEffect(() => {
@@ -80,6 +80,7 @@ const Home = () => {
         setRefreshing(true)
         dispatch(setLoading(true))
         getHomePageData().then((res) => {
+            console.log(res?.data,"res?.data?.content=====>")
             setHome(res?.data?.content)
             dispatch(setLoading(false))
             setRefreshing(false)
@@ -173,25 +174,36 @@ const Home = () => {
                     <Image style={{}} source={item?.typeImg} />
                 </View>
                 {item?.contentType == "Video" ?
-                <TouchableOpacity
-                activeOpacity={1}
-                onPress={() => {showFullImage(item) }}>
-                    <Video
-                        resizeMode='cover'
-                        source={{ uri: item?.contentURL }}
-                        paused={true}
-                        style={{
-                            width: '100%', height: 250,
-                            backgroundColor: ColorCode.lightGrey,
-                            borderRadius: 15, marginVertical: 10
-                        }}
-                        repeat={true}>
-                    </Video>
+                    <TouchableOpacity
+                    style={{alignItems:'center'}}
+                        activeOpacity={1}
+                        onPress={() => { showFullImage(item) }}>
+                        <Video
+                            resizeMode='cover'
+                            
+                            source={{ uri: item?.contentURL }}
+                            paused={true}
+                            style={{
+                                width: '100%', height: 250,
+                                backgroundColor: ColorCode.lightGrey,
+                                borderRadius: 15, marginVertical: 10
+                            }}
+                            repeat={true}>
+                        </Video>
+                        <TouchableOpacity 
+                        style={{height:40,width:40,position:'absolute',
+                        top:125,alignItems:'center',justifyContent:'center',borderRadius:25,backgroundColor:ColorCode.blue_Button_Color,borderWidth:1,borderColor:'white'}}
+                        onPress={()=>{showFullImage(item)}}>
+                            <Image
+                            style={{height:12,width:12,tintColor:'white'}}
+                            source={require('../../../assets/images/Polygon1.png')}
+                            />
+                        </TouchableOpacity>
                     </TouchableOpacity>
                     :
                     <TouchableOpacity
                         activeOpacity={1}
-                        onPress={() => {showFullImage(item) }}
+                        onPress={() => { showFullImage(item) }}
                         style={{
                             width: '100%',
                             height: 250,
@@ -292,18 +304,18 @@ const Home = () => {
                         onRefresh={homePageData}
                     />}
                     ListEmptyComponent={
-                       
-                    
-                    <View style={styles.emptyList}>
-                       {!loading&&
-                        <Text style={{
-                            color: ColorCode.gray_color, width: '100%',
-                            textAlign: 'center', fontSize: 20, fontWeight: '500'
-                        }}>{'Your Home Feed is empty right now. Start exploring and following users  from the search page to see their content here!'}</Text>
-                       } 
-                    </View>
-                    
-                }
+
+
+                        <View style={styles.emptyList}>
+                            {!loading &&
+                                <Text style={{
+                                    color: ColorCode.gray_color, width: '100%',
+                                    textAlign: 'center', fontSize: 20, fontWeight: '500'
+                                }}>{'Your Home Feed is empty right now. Start exploring and following users  from the search page to see their content here!'}</Text>
+                            }
+                        </View>
+
+                    }
                 />
             </View>
 
@@ -315,11 +327,10 @@ const Home = () => {
                     post={(t) => { postComment(t) }}
                 />
             }
-            {showImage&&
+            {showImage &&
                 <FullImageModal
-                
                     imageUrl={imageUlr}
-                    close={()=>{setShowImage(false)}}
+                    close={() => { setShowImage(false) }}
                 />
             }
 

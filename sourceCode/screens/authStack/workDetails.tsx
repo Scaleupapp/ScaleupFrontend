@@ -475,6 +475,22 @@ const WorkDetails = () => {
                         onPress={() => { setshowcalenderPicker(false) }}
                         style={{ justifyContent: 'center', alignItems: 'center', flex: 1, }}>
                         <View style={{ height: hp(45), backgroundColor: 'white', justifyContent: 'center', alignItems: 'center', borderRadius: 10, elevation: 10 }}>
+
+                        <TouchableOpacity
+                                activeOpacity={1}
+                                onPress={() => setshowcalenderPicker(false)}
+
+                                style={{
+                                    height: 50, width: 50,
+                                    position: 'absolute', backgroundColor: 'white',
+                                    zIndex: 1, alignItems: 'center',
+                                    justifyContent: 'center', borderRadius: 25,
+                                     left: 0,top:-0
+                                }}>
+                                <Image
+                                    source={require('../../assets/images/close_24px.png')}
+                                />
+                            </TouchableOpacity>
                             <CalendarPicker width={350}
                                 todayBackgroundColor={ColorCode.blue_Button_Color}
                                 todayTextStyle={{ color: ColorCode.white_Color }}

@@ -16,6 +16,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { setLoginUser } from "../../../redux/cookiesReducer";
 import { chageCommentPrivalge } from "../../../utils/apiHelpers";
 import ConfirmDelete from "../../../components/confimDelete";
+import { setProfileDat } from "../../../redux/reducer";
 const Setting = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
@@ -44,7 +45,14 @@ useEffect(()=>{
     },2000)
    
 },[])
-
+const logout = () => {
+    dispatch(setLoginUser({}))
+    dispatch(setProfileDat([]))
+    navigation.reset({
+        index: 0,
+        routes: [{ name: 'SignIn' }] 
+    });
+}
 
 // console.log(comment,"comment=======>")
 
@@ -148,14 +156,23 @@ useEffect(()=>{
                     />
                 </TouchableOpacity>
 
-                {/* <TouchableOpacity onPress={() => {setOpen(true)  }}
+                <TouchableOpacity onPress={() => {setOpen(true)  }}
                     style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={[styles.smalltxt,]}>Delete Account</Text>
                     <Image
                     tintColor={'grey'}
                         source={require('../../../assets/images/ArrowRight.png')}
                     />
-                </TouchableOpacity> */}
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => {logout() }}
+                    style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+                    <Text style={[styles.smalltxt,]}>Logout</Text>
+                    <Image
+                    tintColor={'grey'}
+                        source={require('../../../assets/images/ArrowRight.png')}
+                    />
+                </TouchableOpacity>
+
 
 
                 {/* <TouchableOpacity onPress={()=>{logout()}}

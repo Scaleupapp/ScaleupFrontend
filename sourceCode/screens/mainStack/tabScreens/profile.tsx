@@ -15,6 +15,7 @@ import { setLoginUser } from "../../../redux/cookiesReducer";
 import Loader from "../../../components/loader";
 import { setLoading, setProfileDat } from "../../../redux/reducer";
 import CommentModal from "../../../components/commetModal";
+import FullImageModal from "../../../components/fullImageModal";
 
 const Profile = () => {
     const dispatch = useDispatch();
@@ -27,7 +28,8 @@ const Profile = () => {
     const isFocused = useIsFocused();
     const [profile,setProfileDats]=useState('')
     const [cacheBuster, setCacheBuster] = useState(0);
-   
+    const [imageUlr, setImageUrl] = useState(null)
+    const [showImage, setShowImage] = useState(false)
     useEffect(() => {
         dispatch(setLoading(true))
         getMyProfile().then((res) => {
@@ -40,6 +42,8 @@ const Profile = () => {
         })
 
     }, [isFocused])
+
+     console.log(pofileData?.user?.bio,"pofileData=====>")
 
     const clearImageCache = () => {
         // Increment the cacheBuster value to force a re-fetch of the image
@@ -93,7 +97,10 @@ const Profile = () => {
             </TouchableOpacity>
         )
     }
-
+    const showFullImage = (item) => {
+        setImageUrl(item)
+        setShowImage(!showImage)
+    }
 
     const renderItem = ({ item, index }: any) => {
         //  console.log("done====>", item?.smeVerify, "item=======>",)
@@ -152,7 +159,8 @@ const Profile = () => {
                     <Image style={{}} source={item?.typeImg} />
                 </View>
                 {item?.contentType == "Video" ?
-                    <Video
+                  <TouchableOpacity onPress={()=>{showFullImage(item)}} style={{alignItems:'center'}}>
+                     <Video
                         resizeMode='cover'
                         source={{ uri: item?.contentURL }}
                         paused={true}
@@ -160,6 +168,19 @@ const Profile = () => {
                         repeat={true}
                     >
                     </Video>
+
+                    <TouchableOpacity 
+                        style={{height:40,width:40,position:'absolute',
+                        top:125,alignItems:'center',justifyContent:'center',borderRadius:25,backgroundColor:ColorCode.blue_Button_Color,borderWidth:1,borderColor:'white'}}
+                        onPress={()=>{showFullImage(item)}}>
+                            <Image
+                            style={{height:12,width:12,tintColor:'white'}}
+                            source={require('../../../assets/images/Polygon1.png')}
+                            />
+                        </TouchableOpacity>
+                  </TouchableOpacity>
+                 
+
                     :
                     <Image
                         resizeMode={Platform.OS === "ios" ? 'cover' : 'contain'}
@@ -222,7 +243,7 @@ const Profile = () => {
                 {item?.verify === "Yes" &&
                     <View style={[styles.info, { height: 30 }]}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Text style={styles.smalltxt} >{item?.smeVerify === "Pending" ?`Verified : Verification Pendind` : "Verified :"}</Text>
+                            <Text style={styles.smalltxt} >{item?.smeVerify === "Pending" ?`Verified : Verification Pending` : "Verified :"}</Text>
 
                             <Image style={{ marginLeft: 10 }}
                                 source={item?.smeVerify === "Accepted" ?
@@ -411,14 +432,22 @@ const Profile = () => {
                 </View>
                 <View style={[styles.reelsStyle,]}>
                     <FlatList
+                    
                         scrollEnabled
                         showsVerticalScrollIndicator={false}
                         data={pofileData?.userContent}
                         renderItem={renderItem}
-                        inverted
+                        
                         keyExtractor={(item, index) => index.toString()} />
                 </View>
             </ScrollView>
+
+            {showImage &&
+                <FullImageModal
+                    imageUrl={imageUlr}
+                    close={() => { setShowImage(false) }}
+                />
+            }
         </SafeAreaView>
 
     )

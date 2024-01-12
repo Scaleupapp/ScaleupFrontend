@@ -152,6 +152,7 @@ const AddPost = () => {
     const addPost = () => {
 
         // console.log(hashtag, "hashtag---->", typeof hashtag)
+        const type = myType === "image" ? "Image" : "Video"
         var dta = ''
         myType === "image" ? dta = "image/png" : 'video/mp4'
         const formData = new FormData();
@@ -162,7 +163,7 @@ const AddPost = () => {
         formData.append('heading', myHeading);
         formData.append('verify', enable ? "Yes" : "No");
         formData.append('relatedTopics', myTopic);
-        formData.append('contentType', myType);
+        formData.append('contentType', type);
         dispatch(setLoading(true))
         contentCreate(formData).then((res) => {
             // console.log(res.data, "res=====>")

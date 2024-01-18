@@ -1,3 +1,4 @@
+//@ts-nocheck
 export { default as Home } from './home';
 export { default as LearningReels } from './learningReels'; 
 export { default as GlobalSearch } from './globalSearch';

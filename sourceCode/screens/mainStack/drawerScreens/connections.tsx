@@ -1,3 +1,4 @@
+//@ts-nocheck
 import {
     Image, StyleSheet, Text,
     TouchableOpacity, View,

@@ -1,3 +1,4 @@
+//@ts-nocheck
 import {
     Image, Platform, ScrollView, StyleSheet, Text,
     TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView, Switch
@@ -137,14 +138,7 @@ const logout = () => {
                 </TouchableOpacity>
 
 
-                <TouchableOpacity onPress={() => { navigation.navigate("BlockList") }}
-                    style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
-                    <Text style={[styles.smalltxt,]}>Blocked User</Text>
-                    <Image
-                     tintColor={'grey'}
-                        source={require('../../../assets/images/ArrowRight.png')}
-                    />
-                </TouchableOpacity>
+
 
 
                 <TouchableOpacity onPress={() => {navigation.navigate("HelpCenter") }}
@@ -152,23 +146,6 @@ const logout = () => {
                     <Text style={[styles.smalltxt,]}>Help Center</Text>
                     <Image
                      tintColor={'grey'}
-                        source={require('../../../assets/images/ArrowRight.png')}
-                    />
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => {setOpen(true)  }}
-                    style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
-                    <Text style={[styles.smalltxt,]}>Delete Account</Text>
-                    <Image
-                    tintColor={'grey'}
-                        source={require('../../../assets/images/ArrowRight.png')}
-                    />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => {logout() }}
-                    style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
-                    <Text style={[styles.smalltxt,]}>Logout</Text>
-                    <Image
-                    tintColor={'grey'}
                         source={require('../../../assets/images/ArrowRight.png')}
                     />
                 </TouchableOpacity>

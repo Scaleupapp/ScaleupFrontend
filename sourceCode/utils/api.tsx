@@ -1,3 +1,4 @@
+//@ts-nocheck
 import axios from "axios";
 import { Alert, Platform } from "react-native";
 // import { Show_Toast } from "../customComponent/toast";

@@ -1,3 +1,4 @@
+//@ts-nocheck
 import {
     Image,StyleSheet, Text,
      TouchableOpacity, View, StatusBar, SafeAreaView,
@@ -45,7 +46,16 @@ const HelpCenter = () => {
             <View style={[styles.reelsStyle,]}>
                 {/* <Text style={[styles.smalltxt, { fontSize: 18, color: ColorCode.blue_Button_Color }]}>Account</Text> */}
                 
-               
+                <TouchableOpacity onPress={() => { navigation.navigate("BlockList") }}
+                    style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+                    <Text style={[styles.smalltxt,]}>Blocked User</Text>
+                    <Image
+                     tintColor={'grey'}
+                        source={require('../../../assets/images/ArrowRight.png')}
+                    />
+                </TouchableOpacity>
+
+
                 <TouchableOpacity onPress={() => {setOpen(true)  }}
                     style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={[styles.smalltxt,]}>Delete Account</Text>

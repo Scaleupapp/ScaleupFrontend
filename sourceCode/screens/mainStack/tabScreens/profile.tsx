@@ -1,3 +1,4 @@
+//@ts-nocheck
 import {
     Image, Platform, ScrollView, StyleSheet, Text,
     TouchableOpacity, View, StatusBar, FlatList, SafeAreaView, TextInput
@@ -20,7 +21,7 @@ import FullImageModal from "../../../components/fullImageModal";
 const Profile = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
-    const [pofileData, setProfileData] = useState([])
+    const [pofileData, setProfileData] = useState({ user: {}, pagination: {} });
     const { loading } = useSelector<any, any>((store) => store.sliceReducer);
     const [showComment, setCommment] = useState(false)
     const [commentArray, setArray] = useState(null)
@@ -159,25 +160,40 @@ const Profile = () => {
                     <Image style={{}} source={item?.typeImg} />
                 </View>
                 {item?.contentType == "Video" ?
-                  <TouchableOpacity onPress={()=>{showFullImage(item)}} style={{alignItems:'center'}}>
+                  <TouchableOpacity 
+                 // onPress={()=>{showFullImage(item)}} 
+                  style={{alignItems:'center'}}>
                      <Video
                         resizeMode='cover'
                         source={{ uri: item?.contentURL }}
                         paused={true}
                         style={{ width: '100%', height: 250, backgroundColor: ColorCode.lightGrey, borderRadius: 15, marginVertical: 10 }}
                         repeat={true}
+                        controls={true}
                     >
                     </Video>
 
-                    <TouchableOpacity 
-                        style={{height:40,width:40,position:'absolute',
-                        top:125,alignItems:'center',justifyContent:'center',borderRadius:25,backgroundColor:ColorCode.blue_Button_Color,borderWidth:1,borderColor:'white'}}
-                        onPress={()=>{showFullImage(item)}}>
+                    <View
+                            style={{
+                                position: 'absolute',
+                                top: -10, // Shifted to the top
+                                right: 9, // Shifted to the right
+                                //left: 90,
+                                width: 20,
+                                height: 20,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: 25,
+                                backgroundColor: ColorCode.blue_Button_Color,
+                                borderWidth: 1,
+                                borderColor: 'white',
+                            }}
+                            >
                             <Image
-                            style={{height:12,width:12,tintColor:'white'}}
-                            source={require('../../../assets/images/Polygon1.png')}
+                                style={{ height: 12, width: 12, tintColor: 'white' }}
+                                source={require('../../../assets/images/Polygon1.png')}
                             />
-                        </TouchableOpacity>
+                            </View>
                   </TouchableOpacity>
                  
 
@@ -337,8 +353,7 @@ const Profile = () => {
                             }
                             <View style={[styles.nameType, { marginLeft: 30 }]}>
                                 <Text style={styles.boldStyle}>{pofileData?.user?.firstname + " " + pofileData?.user?.lastname}</Text>
-                                <Text numberOfLines={1}
-                                    style={styles.smalltxt}>{pofileData?.user?.workExperience[0]?.description}</Text>
+                               
                                 <Text style={styles.smalltxt}>{pofileData?.user?.email}</Text>
 
                             </View>
@@ -389,7 +404,7 @@ const Profile = () => {
                             showsVerticalScrollIndicator={false}
                             horizontal
                             contentContainerStyle={{ justifyContent: 'space-between' }}
-                            data={slicedData}
+                            data={ pofileData?.user?.bio?.bioInterests}
                             renderItem={renderItem_didNumber}
                             keyExtractor={(item, index) => index.toString()} />
                     </View>
@@ -401,7 +416,7 @@ const Profile = () => {
                                 resizeMode='contain'
                                 style={{ marginLeft: 10 }}
                                 source={require('../../../assets/images/Posts_.png')} />
-                            <Text style={[styles.smalltxt, { color: ColorCode.black_Color }]}>{pofileData?.userContent?.length}</Text>
+                            <Text style={[styles.smalltxt, { color: ColorCode.black_Color }]}>{pofileData?.pagination.totalItems}</Text>
                             <Text style={[styles.smalltxt,]}>Posts</Text>
                         </View>
                         <TouchableOpacity
@@ -427,8 +442,10 @@ const Profile = () => {
                     </View>
                 </View>
                 <View style={{ flexDirection: 'row', marginTop: 20, paddingHorizontal: 10 }}>
-                    <Text style={[styles.smalltxt, { fontSize: 18, color: ColorCode.black_Color }]}>Badge :</Text>
-                    <Text style={[styles.smalltxt, { fontSize: 16, }]}>{pofileData?.user?.badges}</Text>
+                <Text style={[styles.smalltxt, { fontSize: 18, color: ColorCode.black_Color }]}>Badge :</Text>
+                <Text style={[styles.smalltxt, { fontSize: 16, }]}>
+                    {pofileData?.user?.role === 'Subject Matter Expert' ? pofileData?.user?.role : pofileData?.user?.badges}
+                </Text>
                 </View>
                 <View style={[styles.reelsStyle,]}>
                     <FlatList

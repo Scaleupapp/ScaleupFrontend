@@ -1,5 +1,6 @@
+//@ts-nocheck
 import {
-    Image, Platform, ScrollView, StyleSheet, Text,
+    Image, Platform, ScrollView, StyleSheet, Text, AppState,
     TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView, Alert, BackHandler, RefreshControl
 } from "react-native"
 import React, { useEffect, useState } from "react"
@@ -22,18 +23,35 @@ const Home = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
     const [home, setHome] = useState([])
+    const [hasMore, setHasMore] = useState(true);
     const [showComment, setCommment] = useState(false)
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
     const [commentArray, setArray] = useState(null)
     const { pofileData, loading } = useSelector<any, any>((store) => store.sliceReducer);
     const [captionLine, setCaptionLine] = useState(2)
     const [refreshing, setRefreshing] = useState(false);
     const [imageUlr, setImageUrl] = useState(null)
     const [showImage, setShowImage] = useState(false)
+    
     // console.log("pofileData---->",pofileData,"pofileData---->")
 
+    const loadMorePosts = () => {
+        if (hasMore) {
+            setPage(prevPage => {
+                const newPage = prevPage + 1;
+                console.log("Loading more posts, Page:", newPage);
+                homePageData(newPage, pageSize); // Fetch new data with the updated page
+                return newPage;
+            });
+        }
+    }       
+      
+
     useEffect(() => {
-        homePageData()
-    }, [])
+        setPage(1); // Reset page number to 1
+        homePageData(1, pageSize); // Load first page
+    }, []);
 
 
     useEffect(() => {
@@ -76,7 +94,7 @@ const Home = () => {
         setCommment(true)
     }
 
-    const homePageData = () => {
+/*const homePageData = () => {
         setRefreshing(true)
         dispatch(setLoading(true))
         getHomePageData().then((res) => {
@@ -86,7 +104,29 @@ const Home = () => {
             setRefreshing(false)
         })
     }
+*/
 
+const homePageData = (page, pageSize) => {
+    console.log("Fetching data for Page:", page); 
+    setRefreshing(true);
+    dispatch(setLoading(true));
+    getHomePageData(page, pageSize).then((res) => {
+            if(res?.data?.content.length > 0){
+                // Append new posts to the existing ones
+                setHome(prevPosts => [...prevPosts, ...res.data.content]);
+            } else {
+                // No more posts to load
+                setHasMore(false);
+            }
+            dispatch(setLoading(false));
+            setRefreshing(false);
+        })
+        .catch((error) => {
+            // Handle any errors here
+            dispatch(setLoading(false));
+            setRefreshing(false);
+        });
+}
     const likeThisPost = (item) => {
         if (item?.likes.includes(pofileData?.user?._id)) {
             sendUnLikeRequest(item?._id).then((res) => {
@@ -177,7 +217,8 @@ const Home = () => {
                     <TouchableOpacity
                     style={{alignItems:'center'}}
                         activeOpacity={1}
-                        onPress={() => { showFullImage(item) }}>
+                       // onPress={() => { showFullImage(item) }}
+                        >
                         <Video
                             resizeMode='cover'
                             
@@ -188,17 +229,32 @@ const Home = () => {
                                 backgroundColor: ColorCode.lightGrey,
                                 borderRadius: 15, marginVertical: 10
                             }}
-                            repeat={true}>
+                            repeat={true}
+                            controls={true}
+                            
+                            >
                         </Video>
-                        <TouchableOpacity 
-                        style={{height:40,width:40,position:'absolute',
-                        top:125,alignItems:'center',justifyContent:'center',borderRadius:25,backgroundColor:ColorCode.blue_Button_Color,borderWidth:1,borderColor:'white'}}
-                        onPress={()=>{showFullImage(item)}}>
+                        <View
+                            style={{
+                                position: 'absolute',
+                                top: -10, // Shifted to the top
+                                right: 9, // Shifted to the right
+                                //left: 90,
+                                width: 20,
+                                height: 20,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: 25,
+                                backgroundColor: ColorCode.blue_Button_Color,
+                                borderWidth: 1,
+                                borderColor: 'white',
+                            }}
+                            >
                             <Image
-                            style={{height:12,width:12,tintColor:'white'}}
-                            source={require('../../../assets/images/Polygon1.png')}
+                                style={{ height: 12, width: 12, tintColor: 'white' }}
+                                source={require('../../../assets/images/Polygon1.png')}
                             />
-                        </TouchableOpacity>
+                            </View>
                     </TouchableOpacity>
                     :
                     <TouchableOpacity
@@ -299,6 +355,8 @@ const Home = () => {
                     data={home}
                     renderItem={renderItem_didNumber}
                     keyExtractor={(item, index) => index.toString()}
+                    onEndReached={loadMorePosts}
+                    onEndReachedThreshold={0.5} // Adjust as needed
                     refreshControl={<RefreshControl
                         refreshing={refreshing}
                         onRefresh={homePageData}

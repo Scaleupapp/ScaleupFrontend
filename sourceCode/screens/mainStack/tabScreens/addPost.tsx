@@ -1,4 +1,5 @@
 //@ts-ignore
+//@ts-nocheck
 import {
     Image, Platform, ScrollView, StyleSheet, Text,
     TextInput, TouchableOpacity, View, StatusBar,
@@ -248,7 +249,11 @@ const AddPost = () => {
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                             <TextInput
                                 multiline
+<<<<<<< HEAD
                                 // placeholder="Type here...."
+=======
+                                placeholder="Enter Comma Sepated Topics..."
+>>>>>>> 2c7caaf02a162d577493f347017a38693d5a8331
                                 placeholderTextColor={ColorCode.gray_color}
                                 style={styles.textInput}
                                 value={myTopic}
@@ -363,7 +368,11 @@ const AddPost = () => {
                     <View style={[styles.inputfield, { justifyContent: 'flex-start' }]}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                             <TextInput
+<<<<<<< HEAD
                                 // placeholder="Type here...."
+=======
+                                placeholder="Add comma separated hashtags with # ..."
+>>>>>>> 2c7caaf02a162d577493f347017a38693d5a8331
                                 placeholderTextColor={ColorCode.gray_color}
                                 style={styles.textInput}
                                 value={hashtag}

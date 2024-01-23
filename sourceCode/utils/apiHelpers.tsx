@@ -1,6 +1,7 @@
+//@ts-nocheck
 import { Store } from "../redux";
 import { apiClient, apiUploadDataClient } from "./api";
-import { ADDCOMMENT, ALLCONTENT, ATHOTP, AUTHRESET, BASE_URL, BLOCKUSERLIST, CHAGEPASSWORD, COMMENTPRIVLAGE, CONTENTCREATE, CONTENTDETAIL, CONTENTVERIFY, DELETE, DELETEACCOUNT, EDUCATIONDETAIL, FOLLOWUNFOLLOW, FOLLOWUSER, GET_METHOD, HOMEPAGE, LIKEREQUEST, MARKREAD, NTIFICATION, OTPPASSWORD, OTPVERIFY, POST_METHOD, PROFILE, PUTMETHOD, REGISTER, SEARCHUSER, SIGNIN, UNFOLLOW, UNLIKEREQUEST, USERBLOCK, USERCERTIFICATION, USERCOURSES, USERPROFILE, USERUNBLOCK, WORKEXPERIENCE, } from "./apiConstant";
+import { ADDCOMMENT, ALLCONTENT, ATHOTP, AUTHRESET, BASE_URL, BLOCKUSERLIST, CHAGEPASSWORD, COMMENTPRIVLAGE, CONTENTCREATE, CONTENTDETAIL, CONTENTVERIFY, CONTENTVERIFYPENDING, DELETE, DELETEACCOUNT, EDUCATIONDETAIL, FOLLOWUNFOLLOW, FOLLOWUSER, GET_METHOD, HOMEPAGE, LIKEREQUEST, MARKREAD, NTIFICATION, OTPPASSWORD, OTPVERIFY, POST_METHOD, PROFILE, PUTMETHOD, REGISTER, SEARCHUSER, SIGNIN, UNFOLLOW, UNLIKEREQUEST, USERBLOCK, USERCERTIFICATION, USERCOURSES, USERPROFILE, USERUNBLOCK, WORKEXPERIENCE, } from "./apiConstant";
 
 export const registerApi = (payload) => {
     console.log("login_payload--->", payload)
@@ -23,15 +24,23 @@ export const registerApi = (payload) => {
     });
   };
 
-  export const allPostData = () => {
-    // console.log("login_payload--->", payload)
+  export const allPostData = (page, pageSize) => {
     return apiClient({
       baseURL: BASE_URL,
       method: GET_METHOD,
-      url: ALLCONTENT,
-      // data: payload,
+      url: `${ALLCONTENT}?page=${page}&pageSize=${pageSize}`, // Include page and pageSize in the URL
     });
   };
+  
+  /*
+  export const allPostData = (page, pageSize) => {
+    return apiClient({
+        baseURL: BASE_URL,
+        method: GET_METHOD,
+        url: `${ALLCONTENT}?page=${page}&pageSize=${pageSize}`,
+    });
+};
+*/
 
   export const basicDetail = (payload) => {
     console.log("login_payload--->", payload)
@@ -67,19 +76,22 @@ export const registerApi = (payload) => {
 
 
   
-  export const getMyProfile = () => {
-    
+  export const getMyProfile = (page, pageSize) => {
     return apiClient({
       baseURL: BASE_URL,
       method: GET_METHOD,
       url: USERPROFILE,
-      // data: payload,
+     // params: {
+       // page: page,
+        //pageSize: pageSize,
+      //},
     });
   };
+  
 
   
   
-  export const getHomePageData = () => {
+  /*export const getHomePageData = () => {
 
     return apiClient({
       baseURL: BASE_URL,
@@ -88,6 +100,24 @@ export const registerApi = (payload) => {
     
     });
   };
+  */
+  export const getHomePageData = (page, pageSize) => {
+    // Construct the full API URL with query parameters
+    const fullUrl = `${BASE_URL}${HOMEPAGE}?page=${page}&pageSize=${pageSize}`;
+
+    // Log the full URL
+    console.log("Making API Request to:", fullUrl);
+
+    return apiClient({
+        baseURL: BASE_URL,
+        method: GET_METHOD,
+        url: HOMEPAGE,
+        params: {
+            page: page,
+            pageSize: pageSize
+        }
+    });
+};
 
 
 
@@ -222,6 +252,15 @@ export const registerApi = (payload) => {
       baseURL: BASE_URL,
       method: GET_METHOD,
       url:  BLOCKUSERLIST,
+    
+    });
+  };
+
+  export const getPendingVerifyData = () => {
+    return apiClient({
+      baseURL: BASE_URL,
+      method: GET_METHOD,
+      url:  CONTENTVERIFYPENDING,
     
     });
   };

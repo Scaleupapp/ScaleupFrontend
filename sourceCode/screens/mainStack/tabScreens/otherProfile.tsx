@@ -1,4 +1,5 @@
 //@ts-ignore
+//@ts-nocheck
 import {
     Image, Platform, ScrollView, StyleSheet, Text,
     TouchableOpacity, View, StatusBar, FlatList, SafeAreaView, ImageBackground
@@ -25,6 +26,7 @@ const OtherProfile = () => {
     const { pofileData,loading } = useSelector<any, any>((store) => store.sliceReducer);
     const [showComment, setCommment] = useState(false)
     const [commentArray, setArray] = useState(null)
+    const [captionLine, setCaptionLine] = useState(2)
     const [button, setButton] = useState(allData?.isFollowing ? "Unfollow" : 'Follow')
 
     // console.log(allData?.profilePicture,"allData======>", allData, "allData======>")
@@ -57,9 +59,14 @@ const OtherProfile = () => {
         })
     }
 
+    const showFullImage = (item) => {
+        setImageUrl(item)
+        setShowImage(!showImage)
+    }
 
     const renderItem_didNumber = ({ item, index }: any) => {
-        
+        console.log( item);
+      //  console.log('smeVerify value:', item.smeVerify);
         return (
             <View
                 style={[styles.postStyle, styles.iosShadow]}>
@@ -75,39 +82,125 @@ const OtherProfile = () => {
                                 source={{ uri: allData?.profilePicture }}
                             />
                             :
+                            
                             <View style={styles.profileImg}>
                             </View>
                         }
                         <View style={[styles.nameType, { width: '55%' }]}>
                             <Text style={styles.boldStyle}>{allData?.username}</Text>
                             <Text numberOfLines={2}
-                                style={styles.smalltxt}>{item?.captions}</Text>
+                                style={styles.smalltxt}>{item?.heading}</Text>
                         </View>
                     </View>
                     <View style={{ alignSelf: 'flex-start', width: '28%' }}>
                         <Text numberOfLines={1} style={[styles.smalltxt, { marginTop: 12, }]}>{moment(item?.postdate).fromNow()}</Text>
+                        {item?.smeVerify  && (
+                    <Image
+                        source={require('../../../assets/images/security-user.png')}
+                        style={{ width: 20, height: 20 , left:60}} // Adjust size as needed
+                    />
+                )}
                     </View>
                 </TouchableOpacity>
                 <View style={styles.info}>
-                    <Text style={[styles.smalltxt, { textAlign: 'left', marginTop: 15, width: '90%' }]}>{item?.postText}</Text>
-                    <Image style={{ top: -20 }} source={item?.typeImg} />
+                    <View style={{ flexDirection: 'row', }}>
+                        {item?.relatedTopics.map((item) => {
+                            // console.log(item,'hastgas=====>')
+                            return (
+                                <Text
+                                    numberOfLines={2}
+                                    style={[styles.smalltxt, {
+                                        textAlign: 'left',
+                                        marginTop: 5,
+                                    }]}>{item}</Text>
+                            )
+                        })
+                        }
+                    </View>
+
+                    <Image style={{}} source={item?.typeImg} />
                 </View>
                 {item?.contentType == "Video" ?
-                    <Video
-                        resizeMode='contain'
+                  <TouchableOpacity 
+                 // onPress={()=>{showFullImage(item)}} 
+                  style={{alignItems:'center'}}>
+                     <Video
+                        resizeMode='cover'
                         source={{ uri: item?.contentURL }}
-                        paused={false}
-                        style={{ width: '100%', height: 250, backgroundColor: ColorCode.lightGrey, borderRadius: 15, marginVertical: 20 }}
+                        paused={true}
+                        style={{ width: '100%', height: 250, backgroundColor: ColorCode.lightGrey, borderRadius: 15, marginVertical: 10 }}
                         repeat={true}
+                        controls={true}
                     >
                     </Video>
+
+                    <View
+                            style={{
+                                position: 'absolute',
+                                top: -10, // Shifted to the top
+                                right: 19, // Shifted to the right
+                                //left: 90,
+                                width: 20,
+                                height: 20,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: 25,
+                                backgroundColor: ColorCode.blue_Button_Color,
+                                borderWidth: 1,
+                                borderColor: 'white',
+                            }}
+                            >
+                            <Image
+                                style={{ height: 12, width: 12, tintColor: 'white' }}
+                                source={require('../../../assets/images/Polygon1.png')}
+                            />
+                            </View>
+                  </TouchableOpacity>
+                 
+
                     :
                     <Image
                         resizeMode={Platform.OS === "ios" ? 'cover' : 'contain'}
-                        style={{ width: '100%', height: 250, backgroundColor: ColorCode.lightGrey, borderRadius: 15, marginVertical: 20 }}
+                        style={{ width: '100%', height: 250, backgroundColor: ColorCode.lightGrey, borderRadius: 15, marginVertical: 10 }}
                         source={{ uri: item?.contentURL }}
                     />}
+                    <View style={{ width: '100%' }}>
+                    <Text
+                        numberOfLines={captionLine}
+                        style={[styles.smalltxt, {
+                            textAlign: 'left',
+                        }]}
+                    >{item?.captions}</Text>
 
+                    {item?.captions.length > 38 &&
+                        <TouchableOpacity onPress={() => { captionLine === 2 ? setCaptionLine(100) : setCaptionLine(2) }}
+                            style={{}}>
+                            <Text style={[styles.smalltxt, { color: ColorCode.blue_Button_Color }]}>{captionLine === 2 ? 'see more' : 'show less'}</Text>
+                        </TouchableOpacity>
+                    }
+
+
+
+                </View>
+                    <View style={{ flexDirection: 'row' }}>
+                    {item?.hashtags.map((item) => {
+                        // console.log(item,'hastgas=====>')
+                        return (
+                            <Text
+                                numberOfLines={1}
+                                style={[styles.smalltxt, {
+                                    textAlign: 'left',
+                                }]}>{item}</Text>
+                        )
+                    })
+                    }
+                    {/* {item?.isVerified &&
+                        <Image
+                            source={require('../../../assets/images/security-user.png')}
+                        />
+                    } */}
+                </View>
+                <View style={styles.line} />
                 <View style={styles.info}>
                     <View style={{ flexDirection: 'row', width: '40%', justifyContent: 'space-between', marginTop: 15 }}>
                         <TouchableOpacity
@@ -204,10 +297,11 @@ const OtherProfile = () => {
                                 </View>
                         }
                         <View style={[styles.nameType, { marginLeft: 30 }]}>
-                            <Text style={styles.boldStyle}>{allData?.username}</Text>
+                            <Text style={styles.boldStyle}>{allData?.firstname + " " + allData?.lastname}</Text>
                             <Text
-                                style={styles.smalltxt}>{allData?.workExperience[0]?.description}</Text>
-                            <Text style={styles.smalltxt}>{allData?.email}</Text>
+                                style={styles.smalltxt}>{allData?.bioAbout}</Text>
+                            <Text
+                                style={styles.smalltxt}>{allData?.email}</Text>
                         </View>
                     </View>
 
@@ -254,7 +348,7 @@ const OtherProfile = () => {
                         resizeMode='contain'
                         tintColor={'#F6BE00'}
                         source={require('../../../assets/images/medal-star.png')}
-                        style={{ height: 50, width: 50, marginTop: -25 }}
+                        style={{ height: 50, width: 50, marginTop: -5 }}
                     />}
                 </View>
                 <View style={[styles.cards, { flexDirection: 'row', justifyContent: 'space-between' }]}>

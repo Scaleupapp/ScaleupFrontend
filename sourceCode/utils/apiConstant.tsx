@@ -35,3 +35,4 @@ export const COMMENTPRIVLAGE="users/updateCommentPrivileges";
 export const DELETEACCOUNT ="auth/delete-account";
 export const USERCOURSES="users/courses";
 export const USERCERTIFICATION="users/certifications"
+export const CONTENTVERIFYPENDING="content/pending-verification"

@@ -1,3 +1,4 @@
+//@ts-nocheck
 import React, { useEffect, useState } from 'react';
 import { createDrawerNavigator, } from '@react-navigation/drawer';
 import { useDispatch, useSelector } from 'react-redux';

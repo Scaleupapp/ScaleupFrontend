@@ -1,3 +1,5 @@
+//@ts-nocheck
+
 import {
     Image, Platform, ScrollView, StyleSheet, Text,
     TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView

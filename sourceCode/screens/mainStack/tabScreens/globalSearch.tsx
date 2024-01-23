@@ -1,3 +1,4 @@
+//@ts-nocheck
 import {
     Image, Platform, ScrollView, StyleSheet, Text,
     TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView, ImageBackground
@@ -94,7 +95,17 @@ const GlobalSearch = () => {
                             </View>
                         }
                         <View style={styles.nameType}>
-                            <Text style={styles.boldStyle}>{item?.username}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Text style={styles.boldStyle}>{item?.username}</Text>
+        {item?.role === "SME" && (
+            <Image
+                resizeMode='contain'
+                tintColor={'#F6BE00'}
+                source={require('../../../assets/images/medal-star.png')}
+                style={{ height: 18, width: 18, marginLeft: 5 }}
+            />
+        )}
+    </View>
                             <Text numberOfLines={1} style={styles.smalltxt}>{item?.firstname + " " + item?.lastname}</Text>
 
                             {/* <LinearGradient

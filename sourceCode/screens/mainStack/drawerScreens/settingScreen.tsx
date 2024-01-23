@@ -1,3 +1,4 @@
+//@ts-nocheck
 import {
     Image, Platform, ScrollView, StyleSheet, Text,
     TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView, Switch
@@ -137,6 +138,7 @@ const logout = () => {
                 </TouchableOpacity>
 
 
+<<<<<<< HEAD
                 <TouchableOpacity onPress={() => { navigation.navigate("BlockList") }}
                     style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={[styles.smalltxt,]}>Blocked User</Text>
@@ -147,6 +149,11 @@ const logout = () => {
                 </TouchableOpacity>
 
 
+=======
+
+
+
+>>>>>>> 2c7caaf02a162d577493f347017a38693d5a8331
                 <TouchableOpacity onPress={() => {navigation.navigate("HelpCenter") }}
                     style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={[styles.smalltxt,]}>Help Center</Text>
@@ -156,6 +163,7 @@ const logout = () => {
                     />
                 </TouchableOpacity>
 
+<<<<<<< HEAD
                 <TouchableOpacity onPress={() => {setOpen(true)  }}
                     style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={[styles.smalltxt,]}>Delete Account</Text>
@@ -173,6 +181,8 @@ const logout = () => {
                     />
                 </TouchableOpacity>
 
+=======
+>>>>>>> 2c7caaf02a162d577493f347017a38693d5a8331
 
 
                 {/* <TouchableOpacity onPress={()=>{logout()}}

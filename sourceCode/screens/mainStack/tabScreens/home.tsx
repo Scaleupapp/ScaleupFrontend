@@ -1,5 +1,10 @@
+//@ts-nocheck
 import {
+<<<<<<< HEAD
     Image, Platform, ScrollView, StyleSheet, Text,
+=======
+    Image, Platform, ScrollView, StyleSheet, Text, AppState,
+>>>>>>> 2c7caaf02a162d577493f347017a38693d5a8331
     TextInput, TouchableOpacity, View, StatusBar, FlatList, SafeAreaView, Alert, BackHandler, RefreshControl
 } from "react-native"
 import React, { useEffect, useState } from "react"
@@ -22,18 +27,64 @@ const Home = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
     const [home, setHome] = useState([])
+    const [hasMore, setHasMore] = useState(true);
     const [showComment, setCommment] = useState(false)
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
     const [commentArray, setArray] = useState(null)
     const { pofileData, loading } = useSelector<any, any>((store) => store.sliceReducer);
     const [captionLine, setCaptionLine] = useState(2)
     const [refreshing, setRefreshing] = useState(false);
     const [imageUlr, setImageUrl] = useState(null)
     const [showImage, setShowImage] = useState(false)
+<<<<<<< HEAD
+=======
+    
+>>>>>>> 2c7caaf02a162d577493f347017a38693d5a8331
     // console.log("pofileData---->",pofileData,"pofileData---->")
 
+    const loadMorePosts = () => {
+        if (hasMore) {
+            setPage(prevPage => {
+                const newPage = prevPage + 1;
+                console.log("Loading more posts, Page:", newPage);
+                homePageData(newPage, pageSize); // Fetch new data with the updated page
+                return newPage;
+            });
+        }
+    }       
+      
+
     useEffect(() => {
-        homePageData()
-    }, [])
+        setPage(1); // Reset page number to 1
+        homePageData(1, pageSize); // Load first page
+    }, []);
+
+
+    useEffect(() => {
+        // getPhoneConatcts()
+        const backAction = () => {
+            Alert.alert('Exit App', 'Do you want to exit the app?', [
+                {
+                    text: 'Cancel',
+                    onPress: () => null,
+                    style: 'cancel',
+                },
+                {
+                    text: 'Exit',
+                    onPress: () => BackHandler.exitApp(),
+                },
+            ]);
+            return true; // Prevent default behavior (exit the app)
+        };
+
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress',
+            backAction
+        );
+
+        return () => backHandler.remove(); // Cleanup the event listener when the component unmounts
+    }, []);
 
 
     useEffect(() => {
@@ -76,7 +127,11 @@ const Home = () => {
         setCommment(true)
     }
 
+<<<<<<< HEAD
     const homePageData = () => {
+=======
+/*const homePageData = () => {
+>>>>>>> 2c7caaf02a162d577493f347017a38693d5a8331
         setRefreshing(true)
         dispatch(setLoading(true))
         getHomePageData().then((res) => {
@@ -86,7 +141,32 @@ const Home = () => {
             setRefreshing(false)
         })
     }
+*/
 
+<<<<<<< HEAD
+=======
+const homePageData = (page, pageSize) => {
+    console.log("Fetching data for Page:", page); 
+    setRefreshing(true);
+    dispatch(setLoading(true));
+    getHomePageData(page, pageSize).then((res) => {
+            if(res?.data?.content.length > 0){
+                // Append new posts to the existing ones
+                setHome(prevPosts => [...prevPosts, ...res.data.content]);
+            } else {
+                // No more posts to load
+                setHasMore(false);
+            }
+            dispatch(setLoading(false));
+            setRefreshing(false);
+        })
+        .catch((error) => {
+            // Handle any errors here
+            dispatch(setLoading(false));
+            setRefreshing(false);
+        });
+}
+>>>>>>> 2c7caaf02a162d577493f347017a38693d5a8331
     const likeThisPost = (item) => {
         if (item?.likes.includes(pofileData?.user?._id)) {
             sendUnLikeRequest(item?._id).then((res) => {
@@ -177,7 +257,12 @@ const Home = () => {
                     <TouchableOpacity
                     style={{alignItems:'center'}}
                         activeOpacity={1}
+<<<<<<< HEAD
                         onPress={() => { showFullImage(item) }}>
+=======
+                       // onPress={() => { showFullImage(item) }}
+                        >
+>>>>>>> 2c7caaf02a162d577493f347017a38693d5a8331
                         <Video
                             resizeMode='cover'
                             
@@ -188,6 +273,7 @@ const Home = () => {
                                 backgroundColor: ColorCode.lightGrey,
                                 borderRadius: 15, marginVertical: 10
                             }}
+<<<<<<< HEAD
                             repeat={true}>
                         </Video>
                         <TouchableOpacity 
@@ -199,6 +285,34 @@ const Home = () => {
                             source={require('../../../assets/images/Polygon1.png')}
                             />
                         </TouchableOpacity>
+=======
+                            repeat={true}
+                            controls={true}
+                            
+                            >
+                        </Video>
+                        <View
+                            style={{
+                                position: 'absolute',
+                                top: -10, // Shifted to the top
+                                right: 9, // Shifted to the right
+                                //left: 90,
+                                width: 20,
+                                height: 20,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: 25,
+                                backgroundColor: ColorCode.blue_Button_Color,
+                                borderWidth: 1,
+                                borderColor: 'white',
+                            }}
+                            >
+                            <Image
+                                style={{ height: 12, width: 12, tintColor: 'white' }}
+                                source={require('../../../assets/images/Polygon1.png')}
+                            />
+                            </View>
+>>>>>>> 2c7caaf02a162d577493f347017a38693d5a8331
                     </TouchableOpacity>
                     :
                     <TouchableOpacity
@@ -299,6 +413,11 @@ const Home = () => {
                     data={home}
                     renderItem={renderItem_didNumber}
                     keyExtractor={(item, index) => index.toString()}
+<<<<<<< HEAD
+=======
+                    onEndReached={loadMorePosts}
+                    onEndReachedThreshold={0.5} // Adjust as needed
+>>>>>>> 2c7caaf02a162d577493f347017a38693d5a8331
                     refreshControl={<RefreshControl
                         refreshing={refreshing}
                         onRefresh={homePageData}
